@@ -53,7 +53,8 @@ function dark() {
       for (var t = 0; t < i; t++) c[t] = new y, c[t].reset();
       u()
     }(), function t() {
-      document.getElementsByTagName('html')[0].getAttribute('data-theme') == 'dark' && u(), window.requestAnimationFrame(t)
+      u();
+      window.requestAnimationFrame(t);
     }()
   }
   dark()
