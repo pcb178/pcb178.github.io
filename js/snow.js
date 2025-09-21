@@ -34,7 +34,10 @@
     Snowflake.prototype.draw = function () {
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+ctx.fillStyle = isDark
+  ? `rgba(255, 255, 255, ${this.alpha})`
+  : `rgba(100, 100, 100, ${this.alpha})`; // 白天用灰色雪花
       ctx.fill();
     };
   
