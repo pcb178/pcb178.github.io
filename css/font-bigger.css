@@ -1,0 +1,29 @@
+/* 全站字体统一放大 */
+html {
+    font-size: 18px; /* 默认是 16px，你可以改成 18、20、22 试试 */
+  }
+  
+  body {
+    font-size: 1rem; /* 基于 html 的字体大小 */
+  }
+  
+  /* 文章正文 */
+  .post-content {
+    font-size: 1.1rem;
+    line-height: 1.8;
+  }
+  
+  /* 侧边栏 */
+  aside {
+    font-size: 1rem;
+  }
+  
+  /* 导航栏 */
+  nav {
+    font-size: 1.05rem;
+  }
+  
+  /* 底部 */
+  .footer {
+    font-size: 1rem;
+  }

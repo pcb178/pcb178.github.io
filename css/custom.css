@@ -1,7 +1,37 @@
-.aplayer.aplayer-fixed.aplayer-narrow .aplayer-body {
-    left: -66px !important;
-  }
-  
-  .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body:hover {
-    left: 0 !important;
-  }
+/* ================= 侧边栏时钟重写 ================= */
+#clock {
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  text-align: center !important;
+  padding: 10px 8px !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(6px) !important;
+  max-width: 100% !important;
+  word-break: break-all !important;
+  white-space: normal !important;
+  box-sizing: border-box !important;
+}
+
+/* 隐藏风力 undefined（万能） */
+#clock [class*="wind"] {
+  display: none !important;
+}
+
+/* 每一项间距 */
+#clock .clock-item {
+  margin: 4px 0 !important;
+}
+
+/* 时间数字加大 */
+#clock .clock-time {
+  font-size: 18px !important;
+  font-weight: bold !important;
+  letter-spacing: 1px !important;
+}
+
+/* 日期缩小 */
+#clock .clock-date {
+  font-size: 12px !important;
+  opacity: 0.9 !important;
+}
