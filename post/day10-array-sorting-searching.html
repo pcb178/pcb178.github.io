@@ -1,0 +1,379 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Day10 补 数组排序与查找 | java悍匪</title><meta name="author" content="pcb"><meta name="copyright" content="pcb"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="系统学习常见的数组排序算法（冒泡、选择、插入、快速）的原理与实现；掌握线性查找与二分查找的区别及适用场景；理解 Arrays 工具类的常用方法，提升对数组操作的综合能力。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Day10 补 数组排序与查找">
+<meta property="og:url" content="https://pcb178.site/post/day10-array-sorting-searching.html">
+<meta property="og:site_name" content="java悍匪">
+<meta property="og:description" content="系统学习常见的数组排序算法（冒泡、选择、插入、快速）的原理与实现；掌握线性查找与二分查找的区别及适用场景；理解 Arrays 工具类的常用方法，提升对数组操作的综合能力。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pcb178.site/img/avatar.jpg">
+<meta property="article:published_time" content="2025-09-23T02:00:11.000Z">
+<meta property="article:modified_time" content="2025-09-23T07:48:06.667Z">
+<meta property="article:author" content="pcb">
+<meta property="article:tag" content="数组排序">
+<meta property="article:tag" content="冒泡排序">
+<meta property="article:tag" content="选择排序">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pcb178.site/img/avatar.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Day10 补 数组排序与查找",
+  "url": "https://pcb178.site/post/day10-array-sorting-searching.html",
+  "image": "https://pcb178.site/img/avatar.jpg",
+  "datePublished": "2025-09-23T02:00:11.000Z",
+  "dateModified": "2025-09-23T07:48:06.667Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "pcb",
+      "url": "https://pcb178.site"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://pcb178.site/post/day10-array-sorting-searching.html"><link rel="preconnect"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="/pluginsSrc/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: '/pluginsSrc/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Day10 补 数组排序与查找',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><link rel="stylesheet" href="/css/universe.css"><link rel="stylesheet" href="/css/banner-fullscreen.css"><link rel="stylesheet" href="/css/font-bigger.css"><!-- hexo injector head_end start --><link rel="stylesheet" href="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.css" /><!-- hexo injector head_end end --><meta name="generator" content="Hexo 7.3.0"></head><body><div id="web_bg" style="background: &lt;%= theme.custom_images.banner %&gt;;"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">11</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">30</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 导航</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间线</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-fish"></i><span> 摸鱼</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/moyu/"><i class="fa-fw fas fa-gamepad"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/tools/"><i class="fa-fw fas fa-tools"></i><span> 工具</span></a></li><li><a class="site-page child" href="/demo/"><i class="fa-fw fas fa-anchor"></i><span> 动画</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: &lt;%= theme.custom_images.banner %&gt;;"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">java悍匪</span></a><a class="nav-page-title" href="/"><span class="site-name">Day10 补 数组排序与查找</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 导航</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间线</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-fish"></i><span> 摸鱼</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/moyu/"><i class="fa-fw fas fa-gamepad"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/tools/"><i class="fa-fw fas fa-tools"></i><span> 工具</span></a></li><li><a class="site-page child" href="/demo/"><i class="fa-fw fas fa-anchor"></i><span> 动画</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Day10 补 数组排序与查找</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-09-23T02:00:11.000Z" title="发表于 2025-09-23 10:00:11">2025-09-23</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-09-23T07:48:06.667Z" title="更新于 2025-09-23 15:48:06">2025-09-23</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Java%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">Java学习笔记</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">2k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>7分钟</span></span><span class="post-meta-separator">|</span><span class="leancloud_visitors" id="/post/day10-array-sorting-searching.html" data-flag-title="Day10 补 数组排序与查找"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span class="leancloud-visitors-count"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>系统学习常见的数组排序算法（冒泡、选择、插入、快速）的原理与实现；掌握线性查找与二分查找的区别及适用场景；理解 Arrays 工具类的常用方法，提升对数组操作的综合能力。</p>
+<span id="more"></span>
+
+
+<h1 id="数组的排序"><a href="#数组的排序" class="headerlink" title="数组的排序"></a>数组的排序</h1><h3 id="常见的排序算法分类"><a href="#常见的排序算法分类" class="headerlink" title="常见的排序算法分类"></a>常见的排序算法分类</h3><blockquote>
+<ul>
+<li>交换排序（冒泡排序、快速排序）</li>
+<li>选择排序（选择排序、堆排序）</li>
+<li>插入排序（插入排序、希尔排序）</li>
+<li>归并排序 </li>
+<li>桶排序、 计数排序、基数排序</li>
+</ul>
+</blockquote>
+<h2 id="1-冒泡排序"><a href="#1-冒泡排序" class="headerlink" title="1.冒泡排序"></a>1.冒泡排序</h2><blockquote>
+<p>口诀：<br>		N个数字来排序<br>		两两相比小靠前<br>		外层循环N-1<br>		内层循环N-1-i</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">	</span><br><span class="line">		<span class="type">int</span>[] arr = &#123;<span class="number">18</span>,<span class="number">32</span>,<span class="number">81</span>,<span class="number">63</span>,<span class="number">20</span>,<span class="number">9</span>&#125;;</span><br><span class="line">	</span><br><span class="line">		<span class="keyword">for</span>(<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>;i&lt;arr.length-<span class="number">1</span>;i++)&#123;  <span class="comment">//遍历</span></span><br><span class="line">			<span class="keyword">for</span> (<span class="type">int</span> <span class="variable">j</span> <span class="operator">=</span> <span class="number">0</span>; j &lt; arr.length-<span class="number">1</span>-i; j++) &#123;</span><br><span class="line">				<span class="keyword">if</span>(arr[j] &gt; arr[j+<span class="number">1</span>])&#123;</span><br><span class="line">					<span class="type">int</span> <span class="variable">temp</span> <span class="operator">=</span> arr[j];</span><br><span class="line">					arr[j] = arr[j+<span class="number">1</span>];</span><br><span class="line">					arr[j+<span class="number">1</span>] = temp;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">for</span> (<span class="type">int</span> element : arr) &#123;</span><br><span class="line">			System.out.print(element + <span class="string">&quot; &quot;</span>);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-1-优化代码"><a href="#1-1-优化代码" class="headerlink" title="1.1 优化代码"></a>1.1 优化代码</h3><blockquote>
+<p><strong>为什么需要优化？</strong></p>
+<p>针对不同的数列，需要循环的轮数是有不同的。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line"></span><br><span class="line">		<span class="type">int</span>[] arr = &#123;<span class="number">18</span>,<span class="number">32</span>,<span class="number">81</span>,<span class="number">63</span>,<span class="number">20</span>,<span class="number">9</span>&#125;;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">for</span>(<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>;i&lt;arr.length-<span class="number">1</span>;i++)&#123;  <span class="comment">//遍历</span></span><br><span class="line">			<span class="comment">//默认排好了</span></span><br><span class="line">			<span class="type">boolean</span> <span class="variable">isSort</span> <span class="operator">=</span> <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">			<span class="keyword">for</span> (<span class="type">int</span> <span class="variable">j</span> <span class="operator">=</span> <span class="number">0</span>; j &lt; arr.length-<span class="number">1</span>-i; j++) &#123;</span><br><span class="line">				<span class="keyword">if</span>(arr[j] &gt; arr[j+<span class="number">1</span>])&#123;</span><br><span class="line">					isSort = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">                     <span class="comment">//通过两个变量加减实现两个变量的交换</span></span><br><span class="line">                    <span class="comment">//缺点：当两个变量相加超出int取值范围，会损失精度</span></span><br><span class="line"></span><br><span class="line">					<span class="type">int</span> <span class="variable">temp</span> <span class="operator">=</span> arr[j];</span><br><span class="line">					arr[j] = arr[j+<span class="number">1</span>];</span><br><span class="line">					arr[j+<span class="number">1</span>] = temp;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">//排好了跳出循环</span></span><br><span class="line">			<span class="keyword">if</span>(isSort)&#123;</span><br><span class="line">				<span class="keyword">break</span>;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		System.out.println(Arrays.toString(arr));</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-选择排序"><a href="#2-选择排序" class="headerlink" title="2.选择排序"></a>2.选择排序</h2><blockquote>
+<p>选择排序将数组分成已排序区间和未排序区间。初始已排序区间为空。每次从未排序区间中选出最小的元素放到已排序区间的末尾，直到未排序区间为空。</p>
+<p>选择排序每次选取最小（最大）的放在已排序集合的后面。选择最小就是升序，选择最大就是降序</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test01</span> &#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">		</span><br><span class="line">		<span class="type">int</span>[] arr = &#123;<span class="number">5</span>, <span class="number">8</span>, <span class="number">6</span>, <span class="number">3</span>, <span class="number">9</span>, <span class="number">2</span>, <span class="number">1</span>, <span class="number">7</span>&#125;;</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; arr.length; i++) &#123;</span><br><span class="line">			</span><br><span class="line">			<span class="comment">//最小值下标。初始默认假设第一个数字就是最小数字</span></span><br><span class="line">			<span class="type">int</span> <span class="variable">minIndex</span> <span class="operator">=</span> i;</span><br><span class="line">			<span class="keyword">for</span> (<span class="type">int</span> <span class="variable">j</span> <span class="operator">=</span> i+<span class="number">1</span>; j &lt; arr.length; j++) &#123;</span><br><span class="line">				<span class="comment">//如果找到更小的数字</span></span><br><span class="line">				<span class="keyword">if</span>(arr[minIndex] &gt; arr[j])&#123;</span><br><span class="line">					<span class="comment">//将minIndex变量的值修改为新的最小数字的下标</span></span><br><span class="line">					minIndex = j;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">			</span><br><span class="line">			<span class="keyword">if</span>(minIndex != i)&#123;</span><br><span class="line">				<span class="type">int</span> temp=arr[minIndex];</span><br><span class="line">				arr[minIndex]=arr[i];</span><br><span class="line">				arr[i]=temp;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		System.out.println(Arrays.toString(arr));</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-1-选择排序小结"><a href="#2-1-选择排序小结" class="headerlink" title="2.1 选择排序小结"></a>2.1 选择排序小结</h3><blockquote>
+<p>选择排序是一种简单的排序算法，适用于数据量较小的情况，因为根据时间复杂度分析，数据量越大，选择排序所花费的时间按照平方倍数增长，会非常慢。 </p>
+<p>但是选择排序也有它的优势，选择排序的优势就是思维逻辑简单。</p>
+<p>选择排序还有个特点，就是不论数组的顺序是排好序或者是乱序的，选择排序都需要花费一样的时间来计算。比如，利用选择排序对数组{1,2,3,4,5}和数组{3,1,4,2,5}排序所花费的时间是一样的。</p>
+</blockquote>
+<h2 id="3-插入排序"><a href="#3-插入排序" class="headerlink" title="3.插入排序"></a>3.插入排序</h2><blockquote>
+<p>插入排序将数组数据分成已排序区间和未排序区间。</p>
+<p>初始已排序区间只有一个元素，即数组第一个元素。从未排序区间取出一个元素插入到已排序区间，新插入的元素要与已排序区间的数据一一比较大小，直到该元素找到合适的位置。陆续从未排序区间取出数据插入到已排序区间，直到未排序区间为空。</p>
+<p>实际操作过程中，未排序区间的第一个元素与已排序区间的最后一个元素比较大小，如果大于最后一个数据则不换位置，直接加到已排序区间的末尾。如果数据小于已排序区间的最后一个数据，则需要换位，并且该数据要与已排序区间前面的数据一一比较大小，直到找到合适的位置。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test01</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">		</span><br><span class="line">		<span class="type">int</span>[] arr = &#123;<span class="number">5</span>, <span class="number">2</span>, <span class="number">4</span>, <span class="number">6</span>, <span class="number">1</span>, <span class="number">3</span>&#125;;</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; arr.length; i++) &#123;</span><br><span class="line">			<span class="keyword">for</span> (<span class="type">int</span> <span class="variable">j</span> <span class="operator">=</span> i; j &gt; <span class="number">0</span>; j--) &#123; <span class="comment">//重要</span></span><br><span class="line">				<span class="keyword">if</span>(arr[j-<span class="number">1</span>] &gt; arr[j])&#123;</span><br><span class="line">                    <span class="comment">//做交换</span></span><br><span class="line">					<span class="type">int</span> temp=arr[j-<span class="number">1</span>];</span><br><span class="line">					arr[j-<span class="number">1</span>]=arr[j];</span><br><span class="line">					arr[j]=temp;</span><br><span class="line">				&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">					<span class="keyword">break</span>;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		System.out.println(Arrays.toString(arr));</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>代码中的第二个for循环是重点，第二个for循环是只比较当前数据左边的值，如果比左边的值小则交换位置，否则位置不变。</p>
+</blockquote>
+<h3 id="3-1-插入排序小结"><a href="#3-1-插入排序小结" class="headerlink" title="3.1 插入排序小结"></a>3.1 插入排序小结</h3><blockquote>
+<p>插入排序适合如下类型的数组: </p>
+<ol>
+<li>数组中的每一个元素距离其最终的位置都不远。比如{1,0,2,3,4,5}，这个数组中0最终位置 应该是第一个位置，0此时的位置距离第一个位置不远。 </li>
+<li>一个有序的大数组中融入一个小数组。比如有序大数组{1,2,3,4,5,6}，融入一个小数组 {0,1}。</li>
+<li>数组中只有几个元素的位置不正确。 上述这三种情况的数组适合使用插入排序算法。打过麻将的同学可以想想，打麻将过程中不停地摸牌、打牌、整理牌的过程是不是就是一次插入排序呢! 排序是算法的基础，排序的用途很多。</li>
+<li>插入排序和打牌差不多</li>
+</ol>
+</blockquote>
+<h2 id="4-快速排序"><a href="#4-快速排序" class="headerlink" title="4.快速排序"></a>4.快速排序</h2><blockquote>
+<p>快速排序是对冒泡排序的一种改进。通过元素之间的比较和交换位置来达到排序的目的。</p>
+</blockquote>
+<blockquote>
+<p>快速排序一般基于递归实现。其步骤是这样的：</p>
+<ol>
+<li><p>选定一个合适的值（理想情况中值最好，但实现中一般使用数组第一个值），称为“基准元素”。</p>
+</li>
+<li><p>基于基准元素，将数组分为两部分，较小的分在左边，较大的分在右边。</p>
+</li>
+<li><p>第一轮下来，这个基准元素的位置一定在最终位置上。</p>
+</li>
+<li><p>对两个子数组分别重复上述过程，直到每个数组只有一个元素。</p>
+</li>
+<li><p>排序完成。</p>
+</li>
+</ol>
+<p>总结：快速排序，其实就是给基准元素找其正确索引位置的过程。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test02</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line"></span><br><span class="line">		<span class="comment">//快速排序</span></span><br><span class="line"></span><br><span class="line">		<span class="type">int</span>[] arr = <span class="keyword">new</span> <span class="title class_">int</span>[]&#123;<span class="number">4</span>, <span class="number">7</span>, <span class="number">3</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">2</span>, <span class="number">8</span>, <span class="number">1</span>&#125;;</span><br><span class="line"></span><br><span class="line">		quickSort(arr, <span class="number">0</span>, arr.length-<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">		System.out.println(Arrays.toString(arr));</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">quickSort</span><span class="params">(<span class="type">int</span>[] arr, <span class="type">int</span> left, <span class="type">int</span> right)</span>&#123;</span><br><span class="line">		<span class="comment">//如果左边索引大于右边索引，是不合法的，直接使用return结束这个方法</span></span><br><span class="line">		<span class="keyword">if</span>(left &gt;= right)&#123;</span><br><span class="line">			<span class="keyword">return</span>;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 取第1个位置(也可以选择随机位置)的元素作为基准元素</span></span><br><span class="line">		<span class="type">int</span> <span class="variable">base</span> <span class="operator">=</span> arr[left];</span><br><span class="line"></span><br><span class="line">		<span class="comment">//定义变量i，指向最左边</span></span><br><span class="line">		<span class="type">int</span> i=left;</span><br><span class="line">		<span class="comment">//定义变量j，指向最右边</span></span><br><span class="line">		<span class="type">int</span> j=right;</span><br><span class="line"></span><br><span class="line">		<span class="comment">//i和j不相遇时，进行检索</span></span><br><span class="line">		<span class="keyword">while</span> (i != j) &#123;</span><br><span class="line">			<span class="comment">//向由j从右往左检索比基准数小的，如果比基准数小的就停下</span></span><br><span class="line">			<span class="comment">//如果比基准数大的或相等，就继续检索</span></span><br><span class="line">			<span class="keyword">while</span> (arr[j]&gt;= base &amp;&amp; i&lt;j) &#123;</span><br><span class="line">				j--;<span class="comment">//j从右往左移动</span></span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">while</span> (arr[i] &lt;=base &amp;&amp; i&lt;j)&#123;</span><br><span class="line">				i++;</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			<span class="comment">//交换i和j的位置</span></span><br><span class="line">			<span class="type">int</span> <span class="variable">tmp</span> <span class="operator">=</span> arr[i];</span><br><span class="line">			arr[i] = arr[j];</span><br><span class="line">			arr[j] = tmp;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">//i和j相遇了</span></span><br><span class="line">		<span class="comment">//当i和j相等时，就交换基准数和相遇位置的元素</span></span><br><span class="line">		arr[left] = arr[i];</span><br><span class="line">		arr[i] = base;</span><br><span class="line"></span><br><span class="line">		<span class="comment">//基准数到这里就变成了，左边的数字比它小，右边的数字比它大</span></span><br><span class="line">		<span class="comment">//排基准数左边</span></span><br><span class="line">		quickSort(arr,left,i-<span class="number">1</span>);</span><br><span class="line">		<span class="comment">//排基准数右边</span></span><br><span class="line">		quickSort(arr,i+<span class="number">1</span>,right);</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://pcb178.site">pcb</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://pcb178.site/post/day10-array-sorting-searching.html">https://pcb178.site/post/day10-array-sorting-searching.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://pcb178.site" target="_blank">java悍匪</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%95%B0%E7%BB%84%E6%8E%92%E5%BA%8F/">数组排序</a><a class="post-meta__tags" href="/tags/%E5%86%92%E6%B3%A1%E6%8E%92%E5%BA%8F/">冒泡排序</a><a class="post-meta__tags" href="/tags/%E9%80%89%E6%8B%A9%E6%8E%92%E5%BA%8F/">选择排序</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="/pluginsSrc/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="/pluginsSrc/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/post/day10-array-deep-dive-2d-array.html" title="Day09 一维数组"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Day09 一维数组</div></div><div class="info-2"><div class="info-item-1">深入学习一维数组的复制、扩容与删除操作，掌握其核心实现逻辑；理解二维数组的概念与内存结构，掌握动态与不规则二维数组的创建与遍历方法；区分深拷贝与浅拷贝的本质差异，为后续数据结构学习打下坚实基础。   day101.一维数组的深入1.1 数组排序 – 冒泡排序 口诀： N个数字来排序两两相比小靠前外层循环N-1内层循环N-1-i  12345678910111213141516171819public static void main(String[] args) &#123;			int[] arr = &#123;18,32,81,63,20,9&#125;;			for(int i = 0;i&lt;arr.length-1;i++)&#123;  //遍历			for (int j = 0; j &lt; arr.length-1-i; j++) &#123;				if(arr[j] &gt; arr[j+1])&#123;					int temp = arr[j];					arr[j] = arr[j+1];					arr[j+1] = temp;				&#12...</div></div></div></a></nav><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">pcb</div><div class="author-info-description"><span style="background:linear-gradient(45deg,#f59,#fb0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:bold;">干饭！干饭！</span></div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">11</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">30</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fa-solid fa-bowl-rice"></i><span>冲呀干饭人</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content"><div style="text-align: center; font-size: 14px; line-height: 1.6;">
+<img src="/img/card1.gif" width="120" style="vertical-align: middle; margin: 6px 0; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.15);">
+<br>
+<strong style="background:linear-gradient(45deg,#ff9a9e,#fad0c4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:16px;">干饭时间到！</strong>
+<br>
+<span style="color: #ff6b6b; font-size: 12px;">今日份快乐：一碗热腾腾的猪脚饭~</span>
+</div>
+</div></div><div class="xpand" style="height:200px;"><canvas class="illo" width="800" height="800" style="max-width: 200px; max-height: 200px; touch-action: none; width: 640px; height: 640px;"></canvas></div><script src="https://fastly.jsdelivr.net/gh/xiaopengand/blogCdn@latest/xzxr/twopeople1.js"></script><script src="https://fastly.jsdelivr.net/gh/xiaopengand/blogCdn@latest/xzxr/zdog.dist.js"></script><script id="rendered-js" src="https://fastly.jsdelivr.net/gh/xiaopengand/blogCdn@latest/xzxr/twopeople.js"></script><style>.card-widget.card-announcement {
+  margin: 0;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+canvas {
+  display: block;
+  margin: 0 auto;
+  cursor: move;
+}</style><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E7%9A%84%E6%8E%92%E5%BA%8F"><span class="toc-number">1.</span> <span class="toc-text">数组的排序</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E7%9A%84%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95%E5%88%86%E7%B1%BB"><span class="toc-number">1.0.1.</span> <span class="toc-text">常见的排序算法分类</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E5%86%92%E6%B3%A1%E6%8E%92%E5%BA%8F"><span class="toc-number">1.1.</span> <span class="toc-text">1.冒泡排序</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E4%BC%98%E5%8C%96%E4%BB%A3%E7%A0%81"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.1 优化代码</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E9%80%89%E6%8B%A9%E6%8E%92%E5%BA%8F"><span class="toc-number">1.2.</span> <span class="toc-text">2.选择排序</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E9%80%89%E6%8B%A9%E6%8E%92%E5%BA%8F%E5%B0%8F%E7%BB%93"><span class="toc-number">1.2.1.</span> <span class="toc-text">2.1 选择排序小结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E6%8F%92%E5%85%A5%E6%8E%92%E5%BA%8F"><span class="toc-number">1.3.</span> <span class="toc-text">3.插入排序</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E6%8F%92%E5%85%A5%E6%8E%92%E5%BA%8F%E5%B0%8F%E7%BB%93"><span class="toc-number">1.3.1.</span> <span class="toc-text">3.1 插入排序小结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F"><span class="toc-number">1.4.</span> <span class="toc-text">4.快速排序</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day10-array-sorting-searching.html" title="Day10 补 数组排序与查找">Day10 补 数组排序与查找</a><time datetime="2025-09-23T02:00:11.000Z" title="发表于 2025-09-23 10:00:11">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day10-array-deep-dive-2d-array.html" title="Day09 一维数组">Day09 一维数组</a><time datetime="2025-09-23T02:00:10.000Z" title="发表于 2025-09-23 10:00:10">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day09-one-dimensional-array.html" title="Day09 一维数组">Day09 一维数组</a><time datetime="2025-09-23T02:00:09.000Z" title="发表于 2025-09-23 10:00:09">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day08-method-overloading-calendar.html" title="Day08 方法重载，递归，万年历实现">Day08 方法重载，递归，万年历实现</a><time datetime="2025-09-23T02:00:08.000Z" title="发表于 2025-09-23 10:00:08">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day07-break-continue-return-method.html" title="Day07 break、continue、return 与方法入门">Day07 break、continue、return 与方法入门</a><time datetime="2025-09-23T02:00:07.000Z" title="发表于 2025-09-23 10:00:07">2025-09-23</time></div></div></div></div></div></div></main><footer id="footer" style="background: &lt;%= theme.custom_images.banner %&gt;;"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 By pcb</span></div><div class="footer_custom_text">true</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const initValine = (el, path) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyValine = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const valineConfig = {
+      el: '#vcomment',
+      appId: '',
+      appKey: '',
+      avatar: 'retro',
+      serverURLs: '',
+      emojiMaps: "",
+      visitor: true,
+      ...option,
+      path: isShuoshuo ? path : (option && option.path) || window.location.pathname
+    }
+
+    new Valine(valineConfig)
+  }
+
+  const loadValine = async (el, path) => {
+    if (typeof Valine === 'function') {
+      initValine(el, path)
+    } else {
+      await btf.getScript('/pluginsSrc/valine/dist/Valine.min.js')
+      initValine(el, path)
+    }
+  }
+
+  if (isShuoshuo) {
+    'Valine' === 'Valine'
+      ? window.shuoshuoComment = { loadComment: loadValine }
+      : window.loadOtherComment = loadValine
+    return
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script></div><div class="aplayer no-destroy" data-id="5183531430" data-server="netease" data-type="playlist" data-fixed="true" data-mini="true" data-listFolded="false" data-order="random" data-preload="none" data-autoplay="false" muted></div><canvas id="universe"></canvas><script defer src="/js/universe.js"></script><script src="/js/daily-swap.js"></script><div class="sticky_layout">
+  <div id="clock"></div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.js';
+    document.body.appendChild(s);
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const clock = document.querySelector('#clock');
+    if (!clock) return;
+
+    // 1. 隐藏任何包含“undefined”的元素
+    clock.querySelectorAll('*').forEach(el => {
+      if (el.textContent.includes('undefined')) {
+        el.style.display = 'none';
+      }
+    });
+
+    // 2. 强制样式压缩
+    clock.style.cssText += `
+      max-width: 100% !important;
+      white-space: normal !important;
+      word-break: break-all !important;
+      font-size: 14px !important;
+      line-height: 1.5 !important;
+      padding: 10px 8px !important;
+      background: rgba(255,255,255,.75) !important;
+      border-radius: 12px !important;
+      backdrop-filter: blur(6px) !important;
+      box-sizing: border-box !important;
+    `;
+  });
+</script>
+<canvas class="fireworks" mobile="true"></canvas><script src="/pluginsSrc/butterfly-extsrc/dist/fireworks.min.js"></script><script defer="defer" id="fluttering_ribbon" mobile="true" src="/pluginsSrc/butterfly-extsrc/dist/canvas-fluttering-ribbon.min.js"></script><script src="/pluginsSrc/butterfly-extsrc/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><link rel="stylesheet" href="/pluginsSrc/aplayer/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="/pluginsSrc/aplayer/dist/APlayer.min.js"></script><script src="/pluginsSrc/butterfly-extsrc/metingjs/dist/Meting.min.js"></script></div><!-- hexo injector body_end start --><script data-pjax>
+  function butterfly_clock_anzhiyu_injector_config(){
+    var parent_div_git = document.getElementsByClassName('sticky_layout')[0];
+    var item_html = '<div class="card-widget card-clock"><div class="card-glass"><div class="card-background"><div class="card-content"><div id="hexo_electric_clock"><img class="entered loading" id="card-clock-loading" src="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/loading.gif" style="height: 120px; width: 100%;" data-ll-status="loading"/></div></div></div></div></div>';
+    console.log('已挂载butterfly_clock_anzhiyu')
+    if(parent_div_git) {
+      parent_div_git.insertAdjacentHTML("afterbegin",item_html)
+    }
+  }
+  var elist = 'undefined'.split(',');
+  var cpage = location.pathname;
+  var epage = 'all';
+  var qweather_key = 'b16a1fa0e63c46a4b8f28abfb06ae3fe';
+  var gaud_map_key = 'e2b04289e870b005374ee030148d64fd&s=rsv3';
+  var baidu_ak_key = 'undefined';
+  var flag = 0;
+  var clock_rectangle = '104.07,30.57';
+  var clock_default_rectangle_enable = 'true';
+
+  for (var i=0;i<elist.length;i++){
+    if (cpage.includes(elist[i])){
+      flag++;
+    }
+  }
+
+  if ((epage ==='all')&&(flag == 0)){
+    butterfly_clock_anzhiyu_injector_config();
+  }
+  else if (epage === cpage){
+    butterfly_clock_anzhiyu_injector_config();
+  }
+  </script><script src="https://widget.qweather.net/simple/static/js/he-simple-common.js?v=2.0"></script><script data-pjax src="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.js"></script><!-- hexo injector body_end end --><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body></html>
