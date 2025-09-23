@@ -1,0 +1,13 @@
+/* 让 footer 背景透明，继承页面背景 */
+footer {
+    background: transparent !important;
+    border-top: none !important;
+    box-shadow: none !important;
+  }
+  
+  /* 让 footer 内容居中，避免白色块 */
+  #footer-wrap {
+    background: transparent !important;
+    padding: 20px 0;
+    color: #fff !important; /* 根据你背景图调整文字颜色 */
+  }

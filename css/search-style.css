@@ -1,0 +1,57 @@
+/* 搜索框美化 */
+.local-search-input {
+    width: 100%;
+    max-width: 400px;
+    padding: 10px 16px;
+    border-radius: 24px;
+    border: 1px solid #ccc;
+    outline: none;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .local-search-input:focus {
+    border-color: #49b1f5;
+    box-shadow: 0 2px 12px rgba(73, 177, 245, 0.4);
+  }
+  
+  /* 搜索结果区域 */
+  .local-search-result {
+    margin-top: 20px;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  
+  /* 每篇结果卡片 */
+  .local-search-result li {
+    list-style: none;
+    margin-bottom: 12px;
+    padding: 12px 16px;
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #eee;
+    transition: all 0.3s ease;
+  }
+  
+  .local-search-result li:hover {
+    border-color: #49b1f5;
+    box-shadow: 0 4px 12px rgba(73, 177, 245, 0.2);
+  }
+  
+  /* 标题 */
+  .local-search-result li a {
+    font-weight: bold;
+    color: #333;
+    text-decoration: none;
+  }
+  
+  .local-search-result li a:hover {
+    color: #49b1f5;
+  }
+  
+  /* 高亮关键词 */
+  .local-search-result .search-keyword {
+    color: #ff4d4f;
+    font-weight: bold;
+  }
