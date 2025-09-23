@@ -1,0 +1,446 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Day03 运算符，Scanner | java悍匪</title><meta name="author" content="pcb"><meta name="copyright" content="pcb"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="深入学习 Java 中的各类运算符，包括算术、自增自减、赋值与关系运算符，掌握其使用规则与常见陷阱；同时学习如何使用 Scanner 类实现键盘数据录入，为后续程序交互打下基础">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Day03 运算符，Scanner">
+<meta property="og:url" content="https://pcb178.site/post/day03-operators-scanner.html">
+<meta property="og:site_name" content="java悍匪">
+<meta property="og:description" content="深入学习 Java 中的各类运算符，包括算术、自增自减、赋值与关系运算符，掌握其使用规则与常见陷阱；同时学习如何使用 Scanner 类实现键盘数据录入，为后续程序交互打下基础">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pcb178.site/img/avatar.jpg">
+<meta property="article:published_time" content="2025-09-23T02:00:03.000Z">
+<meta property="article:modified_time" content="2025-09-23T02:46:30.628Z">
+<meta property="article:author" content="pcb">
+<meta property="article:tag" content="运算符">
+<meta property="article:tag" content="Scanner">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pcb178.site/img/avatar.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Day03 运算符，Scanner",
+  "url": "https://pcb178.site/post/day03-operators-scanner.html",
+  "image": "https://pcb178.site/img/avatar.jpg",
+  "datePublished": "2025-09-23T02:00:03.000Z",
+  "dateModified": "2025-09-23T02:46:30.628Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "pcb",
+      "url": "https://pcb178.site"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://pcb178.site/post/day03-operators-scanner.html"><link rel="preconnect"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="/pluginsSrc/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: '/pluginsSrc/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Day03 运算符，Scanner',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><link rel="stylesheet" href="/css/universe.css"><link rel="stylesheet" href="/css/banner-fullscreen.css"><link rel="stylesheet" href="/css/font-bigger.css"><!-- hexo injector head_end start --><link rel="stylesheet" href="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.css" /><!-- hexo injector head_end end --><meta name="generator" content="Hexo 7.3.0"></head><body><div id="web_bg" style="background: &lt;%= theme.custom_images.banner %&gt;;"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">3</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">7</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 导航</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间线</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-fish"></i><span> 摸鱼</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/moyu/"><i class="fa-fw fas fa-gamepad"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/tools/"><i class="fa-fw fas fa-tools"></i><span> 工具</span></a></li><li><a class="site-page child" href="/demo/"><i class="fa-fw fas fa-anchor"></i><span> 动画</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: &lt;%= theme.custom_images.banner %&gt;;"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">java悍匪</span></a><a class="nav-page-title" href="/"><span class="site-name">Day03 运算符，Scanner</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 导航</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间线</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-fish"></i><span> 摸鱼</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/moyu/"><i class="fa-fw fas fa-gamepad"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/tools/"><i class="fa-fw fas fa-tools"></i><span> 工具</span></a></li><li><a class="site-page child" href="/demo/"><i class="fa-fw fas fa-anchor"></i><span> 动画</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Day03 运算符，Scanner</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-09-23T02:00:03.000Z" title="发表于 2025-09-23 10:00:03">2025-09-23</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-09-23T02:46:30.628Z" title="更新于 2025-09-23 10:46:30">2025-09-23</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Java%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">Java学习笔记</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">1.9k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>7分钟</span></span><span class="post-meta-separator">|</span><span class="leancloud_visitors" id="/post/day03-operators-scanner.html" data-flag-title="Day03 运算符，Scanner"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span class="leancloud-visitors-count"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>深入学习 Java 中的各类运算符，包括算术、自增自减、赋值与关系运算符，掌握其使用规则与常见陷阱；同时学习如何使用 Scanner 类实现键盘数据录入，为后续程序交互打下基础</p>
+<span id="more"></span>
+<h1 id="day03"><a href="#day03" class="headerlink" title="day03"></a>day03</h1><h2 id="1-算术运算符的使用"><a href="#1-算术运算符的使用" class="headerlink" title="1.算术运算符的使用"></a>1.算术运算符的使用</h2><blockquote>
+<h5 id="运算符：-就是对常量或者变量进行操作的符号。比如："><a href="#运算符：-就是对常量或者变量进行操作的符号。比如：" class="headerlink" title="运算符： 就是对常量或者变量进行操作的符号。比如： +  -  * &#x2F;"></a>运算符： 就是对常量或者变量进行操作的符号。比如： +  -  * &#x2F;</h5><h5 id="表达式：-用运算符把常量或者变量连接起来的，符合Java语法的式子就是表达式。"><a href="#表达式：-用运算符把常量或者变量连接起来的，符合Java语法的式子就是表达式。" class="headerlink" title="表达式： 用运算符把常量或者变量连接起来的，符合Java语法的式子就是表达式。"></a>表达式： 用运算符把常量或者变量连接起来的，符合Java语法的式子就是表达式。</h5></blockquote>
+<blockquote>
+<h5 id="分类：-–"><a href="#分类：-–" class="headerlink" title="分类：+   -   *   &#x2F;   %  ++  –"></a>分类：+   -   *   &#x2F;   %  ++  –</h5></blockquote>
+<blockquote>
+<p>运算特点：</p>
+<p>+   -   * :跟小学数学中一模一样没有任何区别.</p>
+<p>&#x2F;：</p>
+<p>1.整数相除结果只能得到整除，如果结果想要是小数，必须要有小数参数。</p>
+<p>2.小数直接参与运算，得到的结果有可能是不精确的。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//案例：</span></span><br><span class="line">    </span><br><span class="line">System.out.println( <span class="number">10</span> / <span class="number">3</span>);<span class="comment">//3</span></span><br><span class="line"></span><br><span class="line">System.out.println(<span class="number">10.0</span> / <span class="number">3</span>);<span class="comment">//3.3333333333333335</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>%：取模、取余。 他做的也是除法运算，只不过获取的是余数而已。<br> 可以利用取模来判断一个数是奇数还是偶数</p>
+</blockquote>
+<blockquote>
+<p>取模运算，结果的符号和被除数符号一致</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//案例：</span></span><br><span class="line"></span><br><span class="line">System.out.println(<span class="number">10</span> % <span class="number">2</span>);<span class="comment">//0</span></span><br><span class="line"></span><br><span class="line">System.out.println(<span class="number">10</span> % <span class="number">3</span>);<span class="comment">//1</span></span><br></pre></td></tr></table></figure>
+
+
+<h3 id="1-1-自增自减运算符"><a href="#1-1-自增自减运算符" class="headerlink" title="1.1 自增自减运算符"></a>1.1 自增自减运算符</h3><blockquote>
+<p><strong>分类：</strong></p>
+<p>++:自增1   </p>
+<p>–:自减1</p>
+<p>放在变量的前面，我们叫做先++。 比如：++a</p>
+<p>放在变量的后面，我们叫做后++。 比如：a++</p>
+<p><strong>使用方式：</strong></p>
+<p>++a：先自增1，再使用;    a++:先使用，再自增1</p>
+<p>–b：先自减1，再使用;    b–:先使用，再自减1</p>
+</blockquote>
+<blockquote>
+<p>注意：想x++，先获取x的值，自增一，然后再把值赋给x，三步，中间任何一步执行时都可能被其他线程访问或者修改。所以不是线程安全的</p>
+</blockquote>
+<h2 id="2-算术运算符的深入"><a href="#2-算术运算符的深入" class="headerlink" title="2.算术运算符的深入"></a>2.算术运算符的深入</h2><blockquote>
+<p>符号：+、-、*、&#x2F;、%、++、–		</p>
+</blockquote>
+<blockquote>
+<p>特殊点1：byte类型做运算，会先向上转型成int类型</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">   <span class="comment">//注意1：向上转型使用最高位补位（补到高位）+：全0则0</span></span><br><span class="line"><span class="comment">//注意2：向下转型从高位开始舍弃</span></span><br><span class="line"><span class="type">byte</span> <span class="variable">b1</span> <span class="operator">=</span> <span class="number">10</span>;</span><br><span class="line"><span class="type">byte</span> <span class="variable">b2</span> <span class="operator">=</span> <span class="number">20</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//b1 - byte：0000,1010  1个字节，8位</span></span><br><span class="line"><span class="comment">//		int：0000,0000,0000,0000,0000,0000,0000,1010  4个字节，32位</span></span><br><span class="line"><span class="comment">//b2 - byte：0001,0100</span></span><br><span class="line"><span class="comment">//		int：0000,0000,0000,0000,0000,0000,0001,0100</span></span><br><span class="line"><span class="comment">//结果 -int：0000,0000,0000,0000,0000,0000,0001,1110</span></span><br><span class="line"><span class="comment">//	 (byte)：0001,1110</span></span><br><span class="line"></span><br><span class="line"><span class="type">byte</span> <span class="variable">result</span> <span class="operator">=</span> (<span class="type">byte</span>)(b1 + b2);</span><br><span class="line">System.out.println(result);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>特殊点2：short类型做运算，会先向上转型成int类型 </p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">short</span> <span class="variable">s1</span> <span class="operator">=</span> <span class="number">10</span>;</span><br><span class="line"><span class="type">short</span> <span class="variable">s2</span> <span class="operator">=</span> <span class="number">20</span>;</span><br><span class="line"><span class="comment">//s1 - short：0000,0000,0000,1010   </span></span><br><span class="line"><span class="comment">//       int：0000,0000,0000,0000,0000,0000,0000,1010</span></span><br><span class="line"><span class="comment">//s2 - short：0000,0000,0001,0100</span></span><br><span class="line"><span class="comment">//		 int：0000,0000,0000,0000,0000,0000,0001,0100</span></span><br><span class="line"><span class="comment">//结果 - int：0000,0000,0000,0000,0000,0000,0001,1110</span></span><br><span class="line"><span class="comment">//	 (short)：0000,0000,0001,1110    +：全0则0</span></span><br><span class="line"></span><br><span class="line"><span class="type">short</span> <span class="variable">result</span> <span class="operator">=</span> (<span class="type">short</span>)(s1 + s2);</span><br><span class="line">System.out.println(result);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>特殊点3：除了byte和short类型做运算会向上转型成int，其余的类型会按照取值范围大的类型进行转型（系统每次取32位，byte，short不够就补）</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">byte</span> <span class="variable">b</span> <span class="operator">=</span> <span class="number">10</span>;</span><br><span class="line"><span class="type">short</span> <span class="variable">s</span> <span class="operator">=</span> <span class="number">10</span>;</span><br><span class="line"><span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">10</span>;</span><br><span class="line"><span class="type">long</span> <span class="variable">l</span> <span class="operator">=</span> <span class="number">10</span>;</span><br><span class="line"><span class="type">float</span> <span class="variable">f</span> <span class="operator">=</span> <span class="number">10</span>;</span><br><span class="line"><span class="type">double</span> <span class="variable">d</span> <span class="operator">=</span> <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line">System.out.println(b + b);<span class="comment">//结果的类型：int</span></span><br><span class="line">System.out.println(s + s);<span class="comment">//结果的类型：int</span></span><br><span class="line">System.out.println(b + s);<span class="comment">//结果的类型：int</span></span><br><span class="line">System.out.println(b + i);<span class="comment">//结果的类型：int</span></span><br><span class="line">System.out.println(b + l);<span class="comment">//结果的类型：long</span></span><br><span class="line">System.out.println(i + l);<span class="comment">//结果的类型：long</span></span><br><span class="line">System.out.println(i + f);<span class="comment">//结果的类型：float</span></span><br><span class="line">System.out.println(l + d);<span class="comment">//结果的类型：double</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>特殊点4：char类型可以做算数运算，获取的是字符的Unicode码</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">char</span> <span class="variable">c</span> <span class="operator">=</span> <span class="string">&#x27;a&#x27;</span>;<span class="comment">//Unicode - 97</span></span><br><span class="line"><span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> c+<span class="number">1</span>;</span><br><span class="line">System.out.println(i);<span class="comment">//98</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>特殊点5：小数做运算可能损失精度，后续会学习大数值的运算类（BigDecimal），去解决小数运算损失精度问题</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">double</span> <span class="variable">d1</span> <span class="operator">=</span> <span class="number">0.5</span>;</span><br><span class="line"><span class="type">double</span> <span class="variable">d2</span> <span class="operator">=</span> <span class="number">0.4</span>;</span><br><span class="line">System.out.println(d1 - d2);<span class="comment">//0.099999999999998</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>特殊点6：++a;和b++;效果都是一样的，分号表示执行语句的结果，不管先加还是后加都给我加</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="variable">a</span> <span class="operator">=</span> <span class="number">10</span>;</span><br><span class="line">++a;</span><br><span class="line">System.out.println(a);<span class="comment">//11</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="variable">b</span> <span class="operator">=</span> <span class="number">10</span>;</span><br><span class="line">b++;</span><br><span class="line">System.out.println(b);<span class="comment">//11</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>特殊点7：++num底层实现 –&gt;byte,short独有的</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">byte</span> <span class="variable">num</span> <span class="operator">=</span> <span class="number">10</span>;</span><br><span class="line"><span class="comment">//底层实现：num = (byte)(num + 1); //先运行右边</span></span><br><span class="line">++num;</span><br><span class="line">System.out.println(num);<span class="comment">//11</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>经典面试题一：输出结果为？</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">   <span class="type">int</span> <span class="variable">a</span> <span class="operator">=</span> <span class="number">8</span>;</span><br><span class="line"><span class="type">int</span> <span class="variable">b</span> <span class="operator">=</span> (a++)+(++a)+(a*<span class="number">10</span>);</span><br><span class="line"><span class="comment">//a = 10</span></span><br><span class="line"><span class="comment">//b = 8 + 10 + 10*10</span></span><br><span class="line">System.out.println(b);<span class="comment">//118	</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>经典面试题二：输出结果为？</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">  <span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span>  <span class="number">0</span>;   </span><br><span class="line"></span><br><span class="line"><span class="comment">//底层实现：</span></span><br><span class="line"><span class="comment">//i = (int)(i+1);</span></span><br><span class="line"><span class="comment">//i = i;</span></span><br><span class="line">i = ++i; </span><br><span class="line">System.out.println(i);<span class="comment">//1</span></span><br></pre></td></tr></table></figure>
+
+</blockquote>
+<blockquote>
+<p>经典面试题三：输出结果为？</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">    <span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>;   </span><br><span class="line"></span><br><span class="line"><span class="comment">//底层实现：</span></span><br><span class="line">          <span class="comment">//会开辟两个空间：一个temp原始值，和一个自加的值</span></span><br><span class="line"><span class="comment">//int temp = i;//temp记录了i最初的值 - 0</span></span><br><span class="line"><span class="comment">//i = (int)(i+1);//i -- 1</span></span><br><span class="line"><span class="comment">//i = temp;//i = 0</span></span><br><span class="line">i = i++; </span><br><span class="line">System.out.println(i);<span class="comment">//0</span></span><br></pre></td></tr></table></figure></blockquote>
+<h2 id="3-赋值运算符"><a href="#3-赋值运算符" class="headerlink" title="3.赋值运算符"></a>3.赋值运算符</h2><blockquote>
+<p>分类：** &#x3D;、+&#x3D;、-&#x3D;、*&#x3D;、&#x2F;&#x3D;、%&#x3D;</p>
+<p><strong>运算规则：</strong></p>
+<p>就是把左边跟右边进行运算，把最终的结果赋值给左边，对右边没有任何影响。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//案例：</span></span><br><span class="line"></span><br><span class="line">a += b;   <span class="comment">//把左边和右边相加，再把最终的结果赋值给左边，对右边没有任何影响    // 相当于 a = a + b;</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>经典面试题一：输出结果为？</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">   <span class="type">int</span> a,b;<span class="comment">//一次性声明多个变量 </span></span><br><span class="line">a = b = <span class="number">100</span>;<span class="comment">//将100赋值给变量b，再将变量b赋值给变量a</span></span><br><span class="line">System.out.println(a);<span class="comment">//100</span></span><br><span class="line">System.out.println(b);<span class="comment">//100</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>经典面试题二：下面的两种写法结果分别是？</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">   <span class="type">short</span> <span class="variable">s</span> <span class="operator">=</span> <span class="number">1</span>; </span><br><span class="line">s = s+<span class="number">1</span>;<span class="comment">//s+1的结果为int类型，如果直接赋值给short类型的变量s就会报错！！！</span></span><br><span class="line"></span><br><span class="line"><span class="type">short</span> s=<span class="number">1</span>; </span><br><span class="line">s += <span class="number">1</span>;</span><br><span class="line">	</span><br><span class="line">赋值规则：</span><br><span class="line">			 s   += <span class="number">1</span>				 s  = (<span class="type">short</span>)((s)   +   (<span class="number">1</span>))</span><br><span class="line">	复合赋值 E1 op= E2等价于简单赋值 E1 = (T)((E1) op 	(E2))，其中T是E1的类型。	</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意：&#x3D;为赋值号，将赋值号右边的值赋值给左边的变量</p>
+</blockquote>
+<h2 id="4-关系运算符"><a href="#4-关系运算符" class="headerlink" title="4.关系运算符"></a>4.关系运算符</h2><blockquote>
+<p>又叫比较运算符，其实就是拿着左边跟右边进行了判断而已。</p>
+</blockquote>
+<blockquote>
+<p><strong>分类：</strong></p>
+<p>&#x3D;&#x3D;   就是判断左边跟右边是否相等，如果成立就是true，如果不成立就是false </p>
+<p>!&#x3D;  就是判断左边跟右边是否不相等，如果成立就是true，如果不成立就是false </p>
+</blockquote>
+<blockquote>
+<p><strong>注意点：</strong></p>
+<p>关系运算符最终的结果一定是布尔类型的。要么是true，要么是false</p>
+<p>在写&#x3D;&#x3D;的时候，千万不要写成&#x3D;</p>
+</blockquote>
+<blockquote>
+<p>经典面试题一：输出结果为？</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="variable">x</span> <span class="operator">=</span> <span class="number">10</span>;</span><br><span class="line"><span class="type">int</span> <span class="variable">y</span> <span class="operator">=</span> <span class="number">10</span>;</span><br><span class="line"><span class="type">boolean</span> <span class="variable">flag</span> <span class="operator">=</span> (x == y);</span><br><span class="line">System.out.println(flag);<span class="comment">//true</span></span><br><span class="line">flag = (x = y);<span class="comment">//报错 -- boolean不能与其他类型兼容</span></span><br><span class="line">System.out.println(flag);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>经典面试题二：输出结果为？</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">boolean</span> <span class="variable">b1</span> <span class="operator">=</span> <span class="literal">true</span>;</span><br><span class="line"><span class="type">boolean</span> <span class="variable">b2</span> <span class="operator">=</span> <span class="literal">false</span>;</span><br><span class="line"><span class="type">boolean</span> <span class="variable">b3</span> <span class="operator">=</span> (b1 == b2);</span><br><span class="line">System.out.println(b3);<span class="comment">//false</span></span><br><span class="line"><span class="type">boolean</span> <span class="variable">b4</span> <span class="operator">=</span> (b1 = b2);</span><br><span class="line">System.out.println(b4);<span class="comment">//false</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意：<br>	1.&#x3D;&#x3D;判断两个值是否相等<br>	2.!&#x3D;判断两个值是否不相等<br>	3.!&#x3D;里的感叹号是英文符号<br>	4.关系运算符的结果都是boolean</p>
+</blockquote>
+<h2 id="5-键盘录入Scanner"><a href="#5-键盘录入Scanner" class="headerlink" title="5.键盘录入Scanner"></a>5.键盘录入Scanner</h2><blockquote>
+<p>知识点：Scanner类<br>理解：Java给我们提供的专门用于在控制台(黑窗口&#x2F;cmd)输入数据的类</p>
+</blockquote>
+<blockquote>
+<h5 id="使用步骤："><a href="#使用步骤：" class="headerlink" title="使用步骤："></a>使用步骤：</h5><p>导包：其实就是表示先找到Scanner这个类在哪。 import java.util.Scanner;</p>
+<p>创建对象：其实就表示申明一下，我准备开始用Scanner这个类了。</p>
+<p>接收数据：也是真正干活的代码。</p>
+</blockquote>
+<blockquote>
+<p>注：字符串  &#x3D;&gt;  next()		</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">	步骤：</span><br><span class="line">		<span class="number">1.</span>创建Scanner类的对象 -- <span class="type">Scanner</span> <span class="variable">scan</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Scanner</span>(System.in);</span><br><span class="line">		<span class="number">2.</span>导包 - <span class="keyword">import</span> java.util.Scanner;</span><br><span class="line">		<span class="number">3.</span>调用功能（输入<span class="type">int</span>值、<span class="type">double</span>值、字符串值）</span><br><span class="line">            </span><br><span class="line"><span class="comment">//导包，其实就是先找到Scanner这个类在哪</span></span><br><span class="line"><span class="keyword">import</span> java.util.Scanner;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//创建Scanner类的对象,其实就是申明一下，我准备开始用Scanner这个类了。</span></span><br><span class="line">	<span class="type">Scanner</span> <span class="variable">scan</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Scanner</span>(System.in);</span><br><span class="line">	</span><br><span class="line">	System.out.println(<span class="string">&quot;请输入int类型的数据：&quot;</span>);</span><br><span class="line">	<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> scan.nextInt();<span class="comment">//接收数据，当程序运行之后，我们在键盘输入的数据就会被变量i给接收了</span></span><br><span class="line">	</span><br><span class="line">	System.out.println(<span class="string">&quot;请输入double类型的数据：&quot;</span>);</span><br><span class="line">	<span class="type">double</span> <span class="variable">d</span> <span class="operator">=</span> scan.nextDouble();</span><br><span class="line">	</span><br><span class="line">	System.out.println(<span class="string">&quot;请输入字符串类型的数据：&quot;</span>);</span><br><span class="line">	<span class="type">String</span> <span class="variable">str</span> <span class="operator">=</span> scan.next();</span><br><span class="line">	</span><br><span class="line">	System.out.println(i);</span><br><span class="line">	System.out.println(d);</span><br><span class="line">	System.out.println(str);</span><br><span class="line">	</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://pcb178.site">pcb</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://pcb178.site/post/day03-operators-scanner.html">https://pcb178.site/post/day03-operators-scanner.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://pcb178.site" target="_blank">java悍匪</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E8%BF%90%E7%AE%97%E7%AC%A6/">运算符</a><a class="post-meta__tags" href="/tags/Scanner/">Scanner</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="/pluginsSrc/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="/pluginsSrc/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/post/day02-ide-variable-datatype.html" title="Day02 IDE，变量，基本数据类型"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Day02 IDE，变量，基本数据类型</div></div><div class="info-2"><div class="info-item-1">学习 Java 中的 Hello 程序扩展、编码规范，了解 IDE 工具作用，掌握变量定义与使用规则，深入理解基本数据类型及类型转型机制，打好 Java 基础。  Day021.Hello程序的扩展1.1 代码详解12345678910111213//公有的类，叫做Hellopublic class Hello&#123;	//公有的静态的无返回值的方法，叫做main（这种固定写法的方法叫做主方法）	public static void main(String[] args)&#123;				//打印语句(&quot;内容&quot;);		System.out.println(&quot;HelloWorld...1&quot;);		System.out.println(&quot;HelloWorld...2&quot;);		System.out.println(&quot;HelloWorld...3&quot;);	&#125;&#125;  public - 公有的	class - 类		Hello - 类名static - 静态的	void - 无返回值的	ma...</div></div></div></a></nav><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">pcb</div><div class="author-info-description"><span style="background:linear-gradient(45deg,#f59,#fb0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:bold;">干饭！干饭！</span></div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">3</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">7</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fa-solid fa-bowl-rice"></i><span>冲呀干饭人</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content"><div style="text-align: center; font-size: 14px; line-height: 1.6;">
+<img src="/img/card1.gif" width="120" style="vertical-align: middle; margin: 6px 0; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.15);">
+<br>
+<strong style="background:linear-gradient(45deg,#ff9a9e,#fad0c4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:16px;">干饭时间到！</strong>
+<br>
+<span style="color: #ff6b6b; font-size: 12px;">今日份快乐：一碗热腾腾的猪脚饭~</span>
+</div>
+</div></div><div class="xpand" style="height:200px;"><canvas class="illo" width="800" height="800" style="max-width: 200px; max-height: 200px; touch-action: none; width: 640px; height: 640px;"></canvas></div><script src="https://fastly.jsdelivr.net/gh/xiaopengand/blogCdn@latest/xzxr/twopeople1.js"></script><script src="https://fastly.jsdelivr.net/gh/xiaopengand/blogCdn@latest/xzxr/zdog.dist.js"></script><script id="rendered-js" src="https://fastly.jsdelivr.net/gh/xiaopengand/blogCdn@latest/xzxr/twopeople.js"></script><style>.card-widget.card-announcement {
+  margin: 0;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+canvas {
+  display: block;
+  margin: 0 auto;
+  cursor: move;
+}</style><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#day03"><span class="toc-number">1.</span> <span class="toc-text">day03</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E7%AE%97%E6%9C%AF%E8%BF%90%E7%AE%97%E7%AC%A6%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="toc-number">1.1.</span> <span class="toc-text">1.算术运算符的使用</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%BF%90%E7%AE%97%E7%AC%A6%EF%BC%9A-%E5%B0%B1%E6%98%AF%E5%AF%B9%E5%B8%B8%E9%87%8F%E6%88%96%E8%80%85%E5%8F%98%E9%87%8F%E8%BF%9B%E8%A1%8C%E6%93%8D%E4%BD%9C%E7%9A%84%E7%AC%A6%E5%8F%B7%E3%80%82%E6%AF%94%E5%A6%82%EF%BC%9A"><span class="toc-number">1.1.0.0.1.</span> <span class="toc-text">运算符： 就是对常量或者变量进行操作的符号。比如： +  -  * &#x2F;</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%A1%A8%E8%BE%BE%E5%BC%8F%EF%BC%9A-%E7%94%A8%E8%BF%90%E7%AE%97%E7%AC%A6%E6%8A%8A%E5%B8%B8%E9%87%8F%E6%88%96%E8%80%85%E5%8F%98%E9%87%8F%E8%BF%9E%E6%8E%A5%E8%B5%B7%E6%9D%A5%E7%9A%84%EF%BC%8C%E7%AC%A6%E5%90%88Java%E8%AF%AD%E6%B3%95%E7%9A%84%E5%BC%8F%E5%AD%90%E5%B0%B1%E6%98%AF%E8%A1%A8%E8%BE%BE%E5%BC%8F%E3%80%82"><span class="toc-number">1.1.0.0.2.</span> <span class="toc-text">表达式： 用运算符把常量或者变量连接起来的，符合Java语法的式子就是表达式。</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%88%86%E7%B1%BB%EF%BC%9A-%E2%80%93"><span class="toc-number">1.1.0.0.3.</span> <span class="toc-text">分类：+   -   *   &#x2F;   %  ++  –</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E8%87%AA%E5%A2%9E%E8%87%AA%E5%87%8F%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.1 自增自减运算符</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E7%AE%97%E6%9C%AF%E8%BF%90%E7%AE%97%E7%AC%A6%E7%9A%84%E6%B7%B1%E5%85%A5"><span class="toc-number">1.2.</span> <span class="toc-text">2.算术运算符的深入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E8%B5%8B%E5%80%BC%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="toc-number">1.3.</span> <span class="toc-text">3.赋值运算符</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E5%85%B3%E7%B3%BB%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="toc-number">1.4.</span> <span class="toc-text">4.关系运算符</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E9%94%AE%E7%9B%98%E5%BD%95%E5%85%A5Scanner"><span class="toc-number">1.5.</span> <span class="toc-text">5.键盘录入Scanner</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E6%AD%A5%E9%AA%A4%EF%BC%9A"><span class="toc-number">1.5.0.0.1.</span> <span class="toc-text">使用步骤：</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day03-operators-scanner.html" title="Day03 运算符，Scanner">Day03 运算符，Scanner</a><time datetime="2025-09-23T02:00:03.000Z" title="发表于 2025-09-23 10:00:03">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day02-ide-variable-datatype.html" title="Day02 IDE，变量，基本数据类型">Day02 IDE，变量，基本数据类型</a><time datetime="2025-09-23T02:00:02.000Z" title="发表于 2025-09-23 10:00:02">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day01-setup-hello-world.html" title="Day01 搭建环境，编写 Hello World">Day01 搭建环境，编写 Hello World</a><time datetime="2025-09-23T02:00:01.000Z" title="发表于 2025-09-23 10:00:01">2025-09-23</time></div></div></div></div></div></div></main><footer id="footer" style="background: &lt;%= theme.custom_images.banner %&gt;;"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 By pcb</span></div><div class="footer_custom_text">true</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const initValine = (el, path) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyValine = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const valineConfig = {
+      el: '#vcomment',
+      appId: '',
+      appKey: '',
+      avatar: 'retro',
+      serverURLs: '',
+      emojiMaps: "",
+      visitor: true,
+      ...option,
+      path: isShuoshuo ? path : (option && option.path) || window.location.pathname
+    }
+
+    new Valine(valineConfig)
+  }
+
+  const loadValine = async (el, path) => {
+    if (typeof Valine === 'function') {
+      initValine(el, path)
+    } else {
+      await btf.getScript('/pluginsSrc/valine/dist/Valine.min.js')
+      initValine(el, path)
+    }
+  }
+
+  if (isShuoshuo) {
+    'Valine' === 'Valine'
+      ? window.shuoshuoComment = { loadComment: loadValine }
+      : window.loadOtherComment = loadValine
+    return
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script></div><div class="aplayer no-destroy" data-id="5183531430" data-server="netease" data-type="playlist" data-fixed="true" data-mini="true" data-listFolded="false" data-order="random" data-preload="none" data-autoplay="false" muted></div><canvas id="universe"></canvas><script defer src="/js/universe.js"></script><script src="/js/daily-swap.js"></script><div class="sticky_layout">
+  <div id="clock"></div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.js';
+    document.body.appendChild(s);
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const clock = document.querySelector('#clock');
+    if (!clock) return;
+
+    // 1. 隐藏任何包含“undefined”的元素
+    clock.querySelectorAll('*').forEach(el => {
+      if (el.textContent.includes('undefined')) {
+        el.style.display = 'none';
+      }
+    });
+
+    // 2. 强制样式压缩
+    clock.style.cssText += `
+      max-width: 100% !important;
+      white-space: normal !important;
+      word-break: break-all !important;
+      font-size: 14px !important;
+      line-height: 1.5 !important;
+      padding: 10px 8px !important;
+      background: rgba(255,255,255,.75) !important;
+      border-radius: 12px !important;
+      backdrop-filter: blur(6px) !important;
+      box-sizing: border-box !important;
+    `;
+  });
+</script>
+<canvas class="fireworks" mobile="true"></canvas><script src="/pluginsSrc/butterfly-extsrc/dist/fireworks.min.js"></script><script defer="defer" id="fluttering_ribbon" mobile="true" src="/pluginsSrc/butterfly-extsrc/dist/canvas-fluttering-ribbon.min.js"></script><script src="/pluginsSrc/butterfly-extsrc/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><link rel="stylesheet" href="/pluginsSrc/aplayer/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="/pluginsSrc/aplayer/dist/APlayer.min.js"></script><script src="/pluginsSrc/butterfly-extsrc/metingjs/dist/Meting.min.js"></script></div><!-- hexo injector body_end start --><script data-pjax>
+  function butterfly_clock_anzhiyu_injector_config(){
+    var parent_div_git = document.getElementsByClassName('sticky_layout')[0];
+    var item_html = '<div class="card-widget card-clock"><div class="card-glass"><div class="card-background"><div class="card-content"><div id="hexo_electric_clock"><img class="entered loading" id="card-clock-loading" src="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/loading.gif" style="height: 120px; width: 100%;" data-ll-status="loading"/></div></div></div></div></div>';
+    console.log('已挂载butterfly_clock_anzhiyu')
+    if(parent_div_git) {
+      parent_div_git.insertAdjacentHTML("afterbegin",item_html)
+    }
+  }
+  var elist = 'undefined'.split(',');
+  var cpage = location.pathname;
+  var epage = 'all';
+  var qweather_key = 'b16a1fa0e63c46a4b8f28abfb06ae3fe';
+  var gaud_map_key = 'e2b04289e870b005374ee030148d64fd&s=rsv3';
+  var baidu_ak_key = 'undefined';
+  var flag = 0;
+  var clock_rectangle = '104.07,30.57';
+  var clock_default_rectangle_enable = 'true';
+
+  for (var i=0;i<elist.length;i++){
+    if (cpage.includes(elist[i])){
+      flag++;
+    }
+  }
+
+  if ((epage ==='all')&&(flag == 0)){
+    butterfly_clock_anzhiyu_injector_config();
+  }
+  else if (epage === cpage){
+    butterfly_clock_anzhiyu_injector_config();
+  }
+  </script><script src="https://widget.qweather.net/simple/static/js/he-simple-common.js?v=2.0"></script><script data-pjax src="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.js"></script><!-- hexo injector body_end end --><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body></html>
