@@ -1,0 +1,427 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Day13 补 深入类加载机制及底层 | java悍匪</title><meta name="author" content="pcb"><meta name="copyright" content="pcb"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="深入剖析 Java 类加载机制的完整生命周期，包括加载、连接（验证、准备、解析）、初始化、使用、卸载；理解类加载器的分类（启动、扩展、应用）及其层次关系；掌握双亲委派模型的工作原理、优势与安全性保障，从 JVM 底层视角理解 Java 程序的运行机制。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Day13 补 深入类加载机制及底层">
+<meta property="og:url" content="https://pcb178.site/post/day13-class-loading-mechanism.html">
+<meta property="og:site_name" content="java悍匪">
+<meta property="og:description" content="深入剖析 Java 类加载机制的完整生命周期，包括加载、连接（验证、准备、解析）、初始化、使用、卸载；理解类加载器的分类（启动、扩展、应用）及其层次关系；掌握双亲委派模型的工作原理、优势与安全性保障，从 JVM 底层视角理解 Java 程序的运行机制。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pcb178.site/img/avatar.jpg">
+<meta property="article:published_time" content="2025-09-23T02:00:14.000Z">
+<meta property="article:modified_time" content="2025-09-23T08:23:21.916Z">
+<meta property="article:author" content="pcb">
+<meta property="article:tag" content="类加载机制">
+<meta property="article:tag" content="类加载器">
+<meta property="article:tag" content="双亲委派模型">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pcb178.site/img/avatar.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Day13 补 深入类加载机制及底层",
+  "url": "https://pcb178.site/post/day13-class-loading-mechanism.html",
+  "image": "https://pcb178.site/img/avatar.jpg",
+  "datePublished": "2025-09-23T02:00:14.000Z",
+  "dateModified": "2025-09-23T08:23:21.916Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "pcb",
+      "url": "https://pcb178.site"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://pcb178.site/post/day13-class-loading-mechanism.html"><link rel="preconnect"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="/pluginsSrc/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: '/pluginsSrc/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Day13 补 深入类加载机制及底层',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><link rel="stylesheet" href="/css/universe.css"><link rel="stylesheet" href="/css/banner-fullscreen.css"><link rel="stylesheet" href="/css/font-bigger.css"><!-- hexo injector head_end start --><link rel="stylesheet" href="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.css" /><!-- hexo injector head_end end --><meta name="generator" content="Hexo 7.3.0"></head><body><div id="web_bg" style="background: &lt;%= theme.custom_images.banner %&gt;;"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">16</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">44</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 导航</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间线</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-fish"></i><span> 摸鱼</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/moyu/"><i class="fa-fw fas fa-gamepad"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/tools/"><i class="fa-fw fas fa-tools"></i><span> 工具</span></a></li><li><a class="site-page child" href="/demo/"><i class="fa-fw fas fa-anchor"></i><span> 动画</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: &lt;%= theme.custom_images.banner %&gt;;"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">java悍匪</span></a><a class="nav-page-title" href="/"><span class="site-name">Day13 补 深入类加载机制及底层</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 导航</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间线</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-fish"></i><span> 摸鱼</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/moyu/"><i class="fa-fw fas fa-gamepad"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/tools/"><i class="fa-fw fas fa-tools"></i><span> 工具</span></a></li><li><a class="site-page child" href="/demo/"><i class="fa-fw fas fa-anchor"></i><span> 动画</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Day13 补 深入类加载机制及底层</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-09-23T02:00:14.000Z" title="发表于 2025-09-23 10:00:14">2025-09-23</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-09-23T08:23:21.916Z" title="更新于 2025-09-23 16:23:21">2025-09-23</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Java%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">Java学习笔记</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">2.3k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>7分钟</span></span><span class="post-meta-separator">|</span><span class="leancloud_visitors" id="/post/day13-class-loading-mechanism.html" data-flag-title="Day13 补 深入类加载机制及底层"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span class="leancloud-visitors-count"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>深入剖析 Java 类加载机制的完整生命周期，包括加载、连接（验证、准备、解析）、初始化、使用、卸载；理解类加载器的分类（启动、扩展、应用）及其层次关系；掌握双亲委派模型的工作原理、优势与安全性保障，从 JVM 底层视角理解 Java 程序的运行机制。</p>
+<span id="more"></span>
+
+<h1 id="Day13-补-深入类加载机制"><a href="#Day13-补-深入类加载机制" class="headerlink" title="Day13 补 深入类加载机制"></a>Day13 补 深入类加载机制</h1><blockquote>
+<p>类加载机制内存图：</p>
+</blockquote>
+<p><img src="/img/java-notes/day13/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6%E5%86%85%E5%AD%98%E5%9B%BE.png" alt="类加载机制内存图"></p>
+<blockquote>
+<p>理解：</p>
+</blockquote>
+<blockquote>
+<p>Java万物皆对象！！！！！ </p>
+</blockquote>
+<blockquote>
+<h5 id="一个class文件，对于Java来说，都是一个对象，而这个对象就是-class对象"><a href="#一个class文件，对于Java来说，都是一个对象，而这个对象就是-class对象" class="headerlink" title="一个class文件，对于Java来说，都是一个对象，而这个对象就是 class对象"></a>一个class文件，对于Java来说，都是一个对象，而这个对象就是 class对象</h5></blockquote>
+<blockquote>
+<p>class文件是什么？ </p>
+<h5 id="class文件包含了该类的所有的信息"><a href="#class文件包含了该类的所有的信息" class="headerlink" title="class文件包含了该类的所有的信息"></a>class文件包含了该类的所有的信息</h5><p>eg： 一个类有几个成员属性 一个类有几个静态属性？ 一个类有几个构造方法属性 一个类有几个成员方法 等这些信息</p>
+</blockquote>
+<blockquote>
+<p>class对象是什么？？？？ </p>
+<p>class对象是class文件的访问入口 </p>
+<p>理解：JVM无法直接访问class文件，是通过class对象找到对应的class文件，才能获取该类的信息</p>
+</blockquote>
+<h2 id="1-初识类加载过程"><a href="#1-初识类加载过程" class="headerlink" title="1.初识类加载过程"></a>1.初识类加载过程</h2><blockquote>
+<p>使用某个类时，如果该类的class文件没有加载到内存时，则系统会通过以下三个步骤来对该类进行初始化：</p>
+<p>1.类的加载   →	2.类的连接	→	3.类的初始化</p>
+<p>类的加载：将class文件读入方法区，并在堆中创建一个Class的对象，此过程由类加载器完成</p>
+<p>类的连接：将类中的数据加载到各个内存区域中</p>
+<p>类的初始化：JVM负责对类进行初始化</p>
+</blockquote>
+<h2 id="2-深入类加载过程"><a href="#2-深入类加载过程" class="headerlink" title="2.深入类加载过程"></a>2.深入类加载过程</h2><blockquote>
+<p>类的完整生命周期 ：加载、连接(验证、准备、解析)、初始化、使用、卸载</p>
+</blockquote>
+<blockquote>
+<p>加载：省略</p>
+</blockquote>
+<blockquote>
+<p>连接</p>
+<p>1.验证：省略</p>
+<h5 id="2-准备-重要"><a href="#2-准备-重要" class="headerlink" title="2.准备 - 重要"></a>2.准备 - 重要</h5><p>准备阶段主要为类变量(static)分配内存并设置初始值。这些内存都在方法区分配。在这个阶段我们只需要注意两点就好了，类变量和初始值两个关键词： </p>
+<p>1.类变量(static)：会分配内存，但不会对应的分配值，其次实例变量不会分配空间，因为实例变量主要随着对象的实例化一块分配到java堆内存中</p>
+<p>2.初始值：这里的初始值指的是数据类型默认值，而不是代码中被显示赋予的值 </p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">A</span> &#123;</span><br><span class="line">	<span class="comment">//static -- 静态属性</span></span><br><span class="line">    </span><br><span class="line">	<span class="comment">//类加载机制 - 准备阶段</span></span><br><span class="line">	<span class="comment">//1.将静态属性在静态区中开辟空间 -- int num;</span></span><br><span class="line">	<span class="comment">//2.向静态属性赋系统默认值 -- int num = 0;</span></span><br><span class="line">	</span><br><span class="line">	<span class="comment">//类加载机制 - 初始化阶段</span></span><br><span class="line">	<span class="comment">//把程序中的数据赋值给静态属性 -- int num = 100;</span></span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="type">int</span> <span class="variable">num</span> <span class="operator">=</span> <span class="number">100</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">B</span> &#123;</span><br><span class="line">	<span class="comment">//static final -- 静态常量</span></span><br><span class="line">    </span><br><span class="line">	<span class="comment">//类加载机制 - 准备阶段</span></span><br><span class="line">	<span class="comment">//1.将静态属性在静态区中开辟空间 -- int num;</span></span><br><span class="line">	<span class="comment">//2.向静态属性赋值 -- int num = 100;</span></span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">num</span> <span class="operator">=</span> <span class="number">100</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 常量只能赋值一次，就没有赋默认值这个操作，直接赋值</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>3.解析：主要是虚拟机将常量池中的符号引用转化为直接引用的过程 </p>
+</blockquote>
+<blockquote>
+<p>初始化：这是类加载机制的最后一步，在这个阶段，java程序代码才开始真正执行。在准备阶段已经为类变量赋过一次值。在初始化阶端，程序员可以根据自己的需求来赋值了。一句话描述这个阶段就是执行类构造器clinit()方法的过程</p>
+</blockquote>
+<blockquote>
+<p>只有当对类的主动使用的时候才会导致类的初始化，类的主动使用包括以下六种：</p>
+<p>1.创建类的实例，也就是new的方式</p>
+<p>2.访问某个类或接口的静态变量，或者对该静态变量赋值</p>
+<p>3.调用类的静态方法</p>
+<p>4.反射</p>
+<p>5.初始化某个类的子类，则其父类也会被初始化</p>
+<p>6.Java虚拟机启动时被标明为启动类的类，直接使用 java.exe命令来运行某个主类</p>
+</blockquote>
+<blockquote>
+<p>使用： 当 JVM 完成初始化阶段之后，JVM 便开始从入口方法开始执行用户的程序代码</p>
+</blockquote>
+<blockquote>
+<p>卸载： 当用户程序代码执行完毕后，JVM 便开始销毁创建的 Class 对象，最后负责运行的 JVM 也退出内存 </p>
+</blockquote>
+<blockquote>
+<h5 id="JVM何时启动和退出？"><a href="#JVM何时启动和退出？" class="headerlink" title="JVM何时启动和退出？"></a>JVM何时启动和退出？</h5><p>1.运行带有main方法的类时，JVM启动并加载字节码文件</p>
+<p>2.程序正常运行结束</p>
+<p>3.抛出没有捕获的异常时</p>
+<p>4.System.exit()强制退出</p>
+</blockquote>
+<h2 id="3-类加载器分类"><a href="#3-类加载器分类" class="headerlink" title="3.类加载器分类"></a>3.类加载器分类</h2><blockquote>
+<p>1.启动类加载器(Bootstrap ClassLoader)： 最顶层的类加载器，JVM的一部分，负责加载Java核心类库</p>
+<p>2.扩展类加载器(Extension ClassLoader)：负责加载Java的扩展类库，位于JRE的lib&#x2F;ext目录下的jar包</p>
+<p>3.应用程序类加载器(Application ClassLoader)：负责加载应用程序的类，是Java程序中默认的类加载器</p>
+</blockquote>
+<blockquote>
+<h5 id="类加载器之间的层次关系"><a href="#类加载器之间的层次关系" class="headerlink" title="类加载器之间的层次关系"></a>类加载器之间的层次关系</h5><p>启动类加载器	&gt;	扩展类加载器	&gt;	应用程序类加载器	&gt;	自定义类加载器</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ClassLoaderTest</span> &#123;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">		</span><br><span class="line">		<span class="type">Thread</span> <span class="variable">thread</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>();</span><br><span class="line">		</span><br><span class="line">		<span class="type">ClassLoader</span> <span class="variable">appClassLoader</span> <span class="operator">=</span> thread.getContextClassLoader();</span><br><span class="line">		<span class="type">ClassLoader</span> <span class="variable">extClassLoader</span> <span class="operator">=</span> appClassLoader.getParent();</span><br><span class="line">		<span class="type">ClassLoader</span> <span class="variable">booClassLoader</span> <span class="operator">=</span> extClassLoader.getParent();</span><br><span class="line">		</span><br><span class="line">        <span class="comment">//sun.misc.Launcher$AppClassLoader@73d16e93</span></span><br><span class="line">		System.out.println(<span class="string">&quot;应用程序类加载器：&quot;</span> + appClassLoader);</span><br><span class="line">        <span class="comment">//sun.misc.Launcher$ExtClassLoader@15db9742</span></span><br><span class="line">		System.out.println(<span class="string">&quot;扩展类加载：&quot;</span> + extClassLoader);</span><br><span class="line">        <span class="comment">//null</span></span><br><span class="line">		System.out.println(<span class="string">&quot;启动类加载器：&quot;</span> + booClassLoader);</span><br><span class="line">        <span class="comment">/*</span></span><br><span class="line"><span class="comment">			没有获取到ExtClassLoader的父Loader，原因是Bootstrap Loader（引导类加载器）是用C语			   言实现的，找不到一个确定的返回父Loader的方式，于是就返回null。</span></span><br><span class="line"><span class="comment">		*/</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-双亲委派模型"><a href="#4-双亲委派模型" class="headerlink" title="4.双亲委派模型"></a>4.双亲委派模型</h2><blockquote>
+<h5 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h5><p>类加载器之间的这种层次关系叫做双亲委派模型<br>双亲委派模型要求除了顶层的启动类加载器(Bootstrap ClassLoader)外，其余的类加载器都应当有自己的父类加载器。这里的类加载器之间的父子关系一般不是以继承关系实现的，而是用组合实现的</p>
+</blockquote>
+<blockquote>
+<h5 id="工作过程"><a href="#工作过程" class="headerlink" title="工作过程"></a>工作过程</h5><p>一个类加载器接受到类加载请求，他自己不会去加载这个请求，而是将这个类加载请求委派给父类加载器，这样一层一层传送，直到到达启动类加载器<br>只有当父类加载器无法加载这个请求时，子加载器才会尝试自己去加载。</p>
+</blockquote>
+<blockquote>
+<h5 id="好处"><a href="#好处" class="headerlink" title="好处"></a>好处</h5><p>使得 Java 类随着它的类加载器一起具有一种带有优先级的层次关系，从而使得基础类得到统一</p>
+<p> 双亲委派模型很好的解决了各个类加载器加载基础类的统一性问题。即越基础的类由越上层的加载器进行加载</p>
+</blockquote>
+<blockquote>
+<h5 id="双亲委派原则"><a href="#双亲委派原则" class="headerlink" title="双亲委派原则"></a>双亲委派原则</h5><p>1.可以避免重复加载，父类已经加载了，子类就不需要再次加载</p>
+<p>2.更加安全，很好的解决了各个类加载器的基础类的统一问题，如果不使用该种方式，那么用户可以随意定义类加载器来加载核心api，会带来相关隐患</p>
+</blockquote>
+<blockquote>
+<h5 id="类加载器"><a href="#类加载器" class="headerlink" title="类加载器"></a>类加载器</h5><p>类加载器的主要作用就是加载.class 文件到 JVM 中(在内存中生成一个代表该类的 Class 对象)</p>
+<p>类的完整生命周期 ：加载、连接（验证、准备、解析）、初始化、使用、卸载</p>
+<p>加载：通过类的全限定名,查找此类字节码文件,利用字节码文件创建Class对象</p>
+<p>验证：确保Class文件符合当前虚拟机的要求,不会危害到虚拟机自身安全</p>
+<p>准备：进行内存分配,为static修饰的类变量分配内存,并设置初始值(0或null)，不包含final修饰的静态变量,因为final变量在编译时分配.</p>
+<p>解析：将常量池中的符号引用替换为直接引用的过程.直接引用为直接指向目标的指针或者相对偏移量等</p>
+<p>初始化：执行静态代码块以及静态变量的赋值.先初始化父类,再初始化当前类</p>
+</blockquote>
+<p><img src="/img/java-notes/day13/a1.png" alt="类加载机制内存图"></p>
+<blockquote>
+<h5 id="双亲委派机制"><a href="#双亲委派机制" class="headerlink" title="双亲委派机制"></a>双亲委派机制</h5><p>定义：当一个类加载器收到了类加载的请求的时候，他不会直接去加载指定的类，而是把这个请求委托给自己的父加载器去加载，只有父加载器无法加载这个类的时候，才会由当前这个加载器来负责类的加载。</p>
+<p>双亲委派机制的意义：</p>
+<p>1.通过委派的方式，可以避免类的重复加载，当父加载器已经加载过某一个类时，子加载器就不会再重新加载这个类</p>
+<p>2.通过双亲委派的方式，还保证了安全性</p>
+<p>为什么要使用?</p>
+<p>1.防止内存中出现多份同样的字节码</p>
+<p>2.这样可以保证系统库优先加载，即便是自己重写，也总是使用Java系统提供的System，自己写的System类根本没有机会得到加载，从而保证安全性</p>
+</blockquote>
+<blockquote>
+<p>优点:</p>
+<p>1.避免类的重复加载</p>
+<p>2.避免Java的核心API被篡改</p>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://pcb178.site">pcb</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://pcb178.site/post/day13-class-loading-mechanism.html">https://pcb178.site/post/day13-class-loading-mechanism.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://pcb178.site" target="_blank">java悍匪</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/">类加载机制</a><a class="post-meta__tags" href="/tags/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8/">类加载器</a><a class="post-meta__tags" href="/tags/%E5%8F%8C%E4%BA%B2%E5%A7%94%E6%B4%BE%E6%A8%A1%E5%9E%8B/">双亲委派模型</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="/pluginsSrc/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="/pluginsSrc/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/post/day13-encapsulation-static-private-this.html" title="Day13 封装、static、private、this 关键字"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Day13 封装、static、private、this 关键字</div></div><div class="info-2"><div class="info-item-1">深入掌握 Java 面向对象核心概念，理解 private 关键字的私有化作用与封装思想；学习 static 关键字修饰属性、方法、代码块的使用场景与生命周期；掌握 this 关键字在构造方法、成员方法中的应用；了解分包的意义与命名规范，提升代码组织能力。   Day131. private – 私有化 理解：private是访问修饰符的一种，访问修饰符规定了访问权限.    作用： 1.private修饰属性：该属性只能在类的内部使用 2.private修饰方法：该方法只能在类的内部使用	   应用场景：不让外界访问的属性和方法就用private修饰  123456789101112public class A &#123;	private String str = &quot;好好学习&quot;;		private void method01()&#123;		System.out.println(&quot;aaabbbccc -- &quot; + str);	&#125;		public void method02()&#123;		method01();	&#125...</div></div></div></a><a class="pagination-related" href="/post/day12-constructor-java-bean.html" title="Day12 一维数组"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Day12 一维数组</div></div><div class="info-2"><div class="info-item-1">深入掌握 Java 中构造方法的概念、作用与使用规则；理解 this 关键字的含义与应用场景；学习标准 JavaBean 类的制作规范，包括私有化成员变量、提供 getter&#x2F;setter 方法、编写无参与全参构造方法等，为后续面向对象编程打下坚实基础。    Day12 需求：创建人类的对象，并操作对象   分析： 人类 - Person 属性：name、sex、age 方法：eat、sleep   场景：创建多个对象，去操作对象  12345678910111213141516171819202122232425//测试类：该类中有main方法，测试我们写好的代码public class Test01 &#123;public static void main(String[] args) &#123;				Person p1 = new Person();		Person p2 = new Person();				p1.name = &quot;巴得伟&quot;;		p1.sex = &#x27;男&#x27;;		p1.age = 23;				p2.na...</div></div></div></a></nav><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">pcb</div><div class="author-info-description"><span style="background:linear-gradient(45deg,#f59,#fb0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:bold;">干饭！干饭！</span></div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">16</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">44</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fa-solid fa-bowl-rice"></i><span>冲呀干饭人</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content"><div style="text-align: center; font-size: 14px; line-height: 1.6;">
+<img src="/img/card1.gif" width="120" style="vertical-align: middle; margin: 6px 0; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.15);">
+<br>
+<strong style="background:linear-gradient(45deg,#ff9a9e,#fad0c4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:16px;">干饭时间到！</strong>
+<br>
+<span style="color: #ff6b6b; font-size: 12px;">今日份快乐：一碗热腾腾的猪脚饭~</span>
+</div>
+</div></div><div class="xpand" style="height:200px;"><canvas class="illo" width="800" height="800" style="max-width: 200px; max-height: 200px; touch-action: none; width: 640px; height: 640px;"></canvas></div><script src="https://fastly.jsdelivr.net/gh/xiaopengand/blogCdn@latest/xzxr/twopeople1.js"></script><script src="https://fastly.jsdelivr.net/gh/xiaopengand/blogCdn@latest/xzxr/zdog.dist.js"></script><script id="rendered-js" src="https://fastly.jsdelivr.net/gh/xiaopengand/blogCdn@latest/xzxr/twopeople.js"></script><style>.card-widget.card-announcement {
+  margin: 0;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+canvas {
+  display: block;
+  margin: 0 auto;
+  cursor: move;
+}</style><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Day13-%E8%A1%A5-%E6%B7%B1%E5%85%A5%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6"><span class="toc-number">1.</span> <span class="toc-text">Day13 补 深入类加载机制</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%B8%80%E4%B8%AAclass%E6%96%87%E4%BB%B6%EF%BC%8C%E5%AF%B9%E4%BA%8EJava%E6%9D%A5%E8%AF%B4%EF%BC%8C%E9%83%BD%E6%98%AF%E4%B8%80%E4%B8%AA%E5%AF%B9%E8%B1%A1%EF%BC%8C%E8%80%8C%E8%BF%99%E4%B8%AA%E5%AF%B9%E8%B1%A1%E5%B0%B1%E6%98%AF-class%E5%AF%B9%E8%B1%A1"><span class="toc-number">1.0.0.0.1.</span> <span class="toc-text">一个class文件，对于Java来说，都是一个对象，而这个对象就是 class对象</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#class%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E4%BA%86%E8%AF%A5%E7%B1%BB%E7%9A%84%E6%89%80%E6%9C%89%E7%9A%84%E4%BF%A1%E6%81%AF"><span class="toc-number">1.0.0.0.2.</span> <span class="toc-text">class文件包含了该类的所有的信息</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E5%88%9D%E8%AF%86%E7%B1%BB%E5%8A%A0%E8%BD%BD%E8%BF%87%E7%A8%8B"><span class="toc-number">1.1.</span> <span class="toc-text">1.初识类加载过程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E6%B7%B1%E5%85%A5%E7%B1%BB%E5%8A%A0%E8%BD%BD%E8%BF%87%E7%A8%8B"><span class="toc-number">1.2.</span> <span class="toc-text">2.深入类加载过程</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#2-%E5%87%86%E5%A4%87-%E9%87%8D%E8%A6%81"><span class="toc-number">1.2.0.0.1.</span> <span class="toc-text">2.准备 - 重要</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#JVM%E4%BD%95%E6%97%B6%E5%90%AF%E5%8A%A8%E5%92%8C%E9%80%80%E5%87%BA%EF%BC%9F"><span class="toc-number">1.2.0.0.2.</span> <span class="toc-text">JVM何时启动和退出？</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8%E5%88%86%E7%B1%BB"><span class="toc-number">1.3.</span> <span class="toc-text">3.类加载器分类</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8%E4%B9%8B%E9%97%B4%E7%9A%84%E5%B1%82%E6%AC%A1%E5%85%B3%E7%B3%BB"><span class="toc-number">1.3.0.0.1.</span> <span class="toc-text">类加载器之间的层次关系</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E5%8F%8C%E4%BA%B2%E5%A7%94%E6%B4%BE%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.4.</span> <span class="toc-text">4.双亲委派模型</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%A6%82%E5%BF%B5"><span class="toc-number">1.4.0.0.1.</span> <span class="toc-text">概念</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E8%BF%87%E7%A8%8B"><span class="toc-number">1.4.0.0.2.</span> <span class="toc-text">工作过程</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%A5%BD%E5%A4%84"><span class="toc-number">1.4.0.0.3.</span> <span class="toc-text">好处</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%8F%8C%E4%BA%B2%E5%A7%94%E6%B4%BE%E5%8E%9F%E5%88%99"><span class="toc-number">1.4.0.0.4.</span> <span class="toc-text">双亲委派原则</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8"><span class="toc-number">1.4.0.0.5.</span> <span class="toc-text">类加载器</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%8F%8C%E4%BA%B2%E5%A7%94%E6%B4%BE%E6%9C%BA%E5%88%B6"><span class="toc-number">1.4.0.0.6.</span> <span class="toc-text">双亲委派机制</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day14-inheritance-super-override.html" title="Day14 继承、super()、this()、方法重写">Day14 继承、super()、this()、方法重写</a><time datetime="2025-09-23T02:00:16.000Z" title="发表于 2025-09-23 10:00:16">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day13-encapsulation-static-private-this.html" title="Day13 封装、static、private、this 关键字">Day13 封装、static、private、this 关键字</a><time datetime="2025-09-23T02:00:15.000Z" title="发表于 2025-09-23 10:00:15">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day13-class-loading-mechanism.html" title="Day13 补 深入类加载机制及底层">Day13 补 深入类加载机制及底层</a><time datetime="2025-09-23T02:00:14.000Z" title="发表于 2025-09-23 10:00:14">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day12-constructor-java-bean.html" title="Day12 一维数组">Day12 一维数组</a><time datetime="2025-09-23T02:00:13.000Z" title="发表于 2025-09-23 10:00:13">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day11-intro-to-oop.html" title="Day11 初识面向对象">Day11 初识面向对象</a><time datetime="2025-09-23T02:00:12.000Z" title="发表于 2025-09-23 10:00:12">2025-09-23</time></div></div></div></div></div></div></main><footer id="footer" style="background: &lt;%= theme.custom_images.banner %&gt;;"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 By pcb</span></div><div class="footer_custom_text">true</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const initValine = (el, path) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyValine = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const valineConfig = {
+      el: '#vcomment',
+      appId: '',
+      appKey: '',
+      avatar: 'retro',
+      serverURLs: '',
+      emojiMaps: "",
+      visitor: true,
+      ...option,
+      path: isShuoshuo ? path : (option && option.path) || window.location.pathname
+    }
+
+    new Valine(valineConfig)
+  }
+
+  const loadValine = async (el, path) => {
+    if (typeof Valine === 'function') {
+      initValine(el, path)
+    } else {
+      await btf.getScript('/pluginsSrc/valine/dist/Valine.min.js')
+      initValine(el, path)
+    }
+  }
+
+  if (isShuoshuo) {
+    'Valine' === 'Valine'
+      ? window.shuoshuoComment = { loadComment: loadValine }
+      : window.loadOtherComment = loadValine
+    return
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script></div><div class="aplayer no-destroy" data-id="5183531430" data-server="netease" data-type="playlist" data-fixed="true" data-mini="true" data-listFolded="false" data-order="random" data-preload="none" data-autoplay="false" muted></div><canvas id="universe"></canvas><script defer src="/js/universe.js"></script><script src="/js/daily-swap.js"></script><div class="sticky_layout">
+  <div id="clock"></div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.js';
+    document.body.appendChild(s);
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const clock = document.querySelector('#clock');
+    if (!clock) return;
+
+    // 1. 隐藏任何包含“undefined”的元素
+    clock.querySelectorAll('*').forEach(el => {
+      if (el.textContent.includes('undefined')) {
+        el.style.display = 'none';
+      }
+    });
+
+    // 2. 强制样式压缩
+    clock.style.cssText += `
+      max-width: 100% !important;
+      white-space: normal !important;
+      word-break: break-all !important;
+      font-size: 14px !important;
+      line-height: 1.5 !important;
+      padding: 10px 8px !important;
+      background: rgba(255,255,255,.75) !important;
+      border-radius: 12px !important;
+      backdrop-filter: blur(6px) !important;
+      box-sizing: border-box !important;
+    `;
+  });
+</script>
+<canvas class="fireworks" mobile="true"></canvas><script src="/pluginsSrc/butterfly-extsrc/dist/fireworks.min.js"></script><script defer="defer" id="fluttering_ribbon" mobile="true" src="/pluginsSrc/butterfly-extsrc/dist/canvas-fluttering-ribbon.min.js"></script><script src="/pluginsSrc/butterfly-extsrc/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><link rel="stylesheet" href="/pluginsSrc/aplayer/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="/pluginsSrc/aplayer/dist/APlayer.min.js"></script><script src="/pluginsSrc/butterfly-extsrc/metingjs/dist/Meting.min.js"></script></div><!-- hexo injector body_end start --><script data-pjax>
+  function butterfly_clock_anzhiyu_injector_config(){
+    var parent_div_git = document.getElementsByClassName('sticky_layout')[0];
+    var item_html = '<div class="card-widget card-clock"><div class="card-glass"><div class="card-background"><div class="card-content"><div id="hexo_electric_clock"><img class="entered loading" id="card-clock-loading" src="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/loading.gif" style="height: 120px; width: 100%;" data-ll-status="loading"/></div></div></div></div></div>';
+    console.log('已挂载butterfly_clock_anzhiyu')
+    if(parent_div_git) {
+      parent_div_git.insertAdjacentHTML("afterbegin",item_html)
+    }
+  }
+  var elist = 'undefined'.split(',');
+  var cpage = location.pathname;
+  var epage = 'all';
+  var qweather_key = 'b16a1fa0e63c46a4b8f28abfb06ae3fe';
+  var gaud_map_key = 'e2b04289e870b005374ee030148d64fd&s=rsv3';
+  var baidu_ak_key = 'undefined';
+  var flag = 0;
+  var clock_rectangle = '104.07,30.57';
+  var clock_default_rectangle_enable = 'true';
+
+  for (var i=0;i<elist.length;i++){
+    if (cpage.includes(elist[i])){
+      flag++;
+    }
+  }
+
+  if ((epage ==='all')&&(flag == 0)){
+    butterfly_clock_anzhiyu_injector_config();
+  }
+  else if (epage === cpage){
+    butterfly_clock_anzhiyu_injector_config();
+  }
+  </script><script src="https://widget.qweather.net/simple/static/js/he-simple-common.js?v=2.0"></script><script data-pjax src="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.js"></script><!-- hexo injector body_end end --><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body></html>

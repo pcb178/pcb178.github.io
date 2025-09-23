@@ -1,0 +1,478 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Day14 继承、super()、this()、方法重写 | java悍匪</title><meta name="author" content="pcb"><meta name="copyright" content="pcb"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="深入掌握 Java 面向对象核心概念，理解 private 关键字的私有化作用与封装思想；学习 static 关键字修饰属性、方法、代码块的使用场景与生命周期；掌握 this 关键字在构造方法、成员方法中的应用；了解分包的意义与命名规范，提升代码组织能力。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Day14 继承、super()、this()、方法重写">
+<meta property="og:url" content="https://pcb178.site/post/day14-inheritance-super-override.html">
+<meta property="og:site_name" content="java悍匪">
+<meta property="og:description" content="深入掌握 Java 面向对象核心概念，理解 private 关键字的私有化作用与封装思想；学习 static 关键字修饰属性、方法、代码块的使用场景与生命周期；掌握 this 关键字在构造方法、成员方法中的应用；了解分包的意义与命名规范，提升代码组织能力。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pcb178.site/img/avatar.jpg">
+<meta property="article:published_time" content="2025-09-23T02:00:16.000Z">
+<meta property="article:modified_time" content="2025-09-23T08:23:19.116Z">
+<meta property="article:author" content="pcb">
+<meta property="article:tag" content="继承">
+<meta property="article:tag" content="super">
+<meta property="article:tag" content="方法重写">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pcb178.site/img/avatar.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Day14 继承、super()、this()、方法重写",
+  "url": "https://pcb178.site/post/day14-inheritance-super-override.html",
+  "image": "https://pcb178.site/img/avatar.jpg",
+  "datePublished": "2025-09-23T02:00:16.000Z",
+  "dateModified": "2025-09-23T08:23:19.116Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "pcb",
+      "url": "https://pcb178.site"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://pcb178.site/post/day14-inheritance-super-override.html"><link rel="preconnect"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="/pluginsSrc/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: '/pluginsSrc/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Day14 继承、super()、this()、方法重写',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><link rel="stylesheet" href="/css/universe.css"><link rel="stylesheet" href="/css/banner-fullscreen.css"><link rel="stylesheet" href="/css/font-bigger.css"><!-- hexo injector head_end start --><link rel="stylesheet" href="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.css" /><!-- hexo injector head_end end --><meta name="generator" content="Hexo 7.3.0"></head><body><div id="web_bg" style="background: &lt;%= theme.custom_images.banner %&gt;;"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">16</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">44</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 导航</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间线</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-fish"></i><span> 摸鱼</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/moyu/"><i class="fa-fw fas fa-gamepad"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/tools/"><i class="fa-fw fas fa-tools"></i><span> 工具</span></a></li><li><a class="site-page child" href="/demo/"><i class="fa-fw fas fa-anchor"></i><span> 动画</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: &lt;%= theme.custom_images.banner %&gt;;"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">java悍匪</span></a><a class="nav-page-title" href="/"><span class="site-name">Day14 继承、super()、this()、方法重写</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 导航</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间线</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-fish"></i><span> 摸鱼</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/moyu/"><i class="fa-fw fas fa-gamepad"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/tools/"><i class="fa-fw fas fa-tools"></i><span> 工具</span></a></li><li><a class="site-page child" href="/demo/"><i class="fa-fw fas fa-anchor"></i><span> 动画</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Day14 继承、super()、this()、方法重写</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-09-23T02:00:16.000Z" title="发表于 2025-09-23 10:00:16">2025-09-23</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-09-23T08:23:19.116Z" title="更新于 2025-09-23 16:23:19">2025-09-23</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Java%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">Java学习笔记</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">3.1k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>11分钟</span></span><span class="post-meta-separator">|</span><span class="leancloud_visitors" id="/post/day14-inheritance-super-override.html" data-flag-title="Day14 继承、super()、this()、方法重写"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span class="leancloud-visitors-count"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>深入掌握 Java 继承机制，理解子类如何复用父类代码；学习 super 和 this 关键字在构造方法与成员访问中的应用；掌握方法重写（Override）的规则与 @Override 注解的作用；理解继承的优缺点及内存结构，为多态学习打下坚实基础。</p>
+<span id="more"></span>
+
+<h1 id="Day14"><a href="#Day14" class="headerlink" title="Day14"></a>Day14</h1><h2 id="1-继承的使用"><a href="#1-继承的使用" class="headerlink" title="1.继承的使用"></a>1.继承的使用</h2><blockquote>
+<p>理解：子类继承父类非私有化的属性和方法</p>
+</blockquote>
+<blockquote>
+<p>使用场景：多个类似的类，有相同的属性和方法，就可以把相同属性和方法抽取到父类</p>
+</blockquote>
+<blockquote>
+<p>优点：减少代码的冗余； 使类与类之间产生了关系(多态的前提)</p>
+</blockquote>
+<blockquote>
+<p>缺点：继承会增加类与类之间的关系，会增加代码的维护难度</p>
+</blockquote>
+<blockquote>
+<p>需求：编写中国人和日本人的类，创建各自的对象</p>
+<p>分析：</p>
+<p>人类：</p>
+<p>属性：姓名、性别、年龄</p>
+<p>方法：吃饭饭、睡觉觉</p>
+<p>中国人的类 继承 人类 ：</p>
+<p>属性：身份证</p>
+<p>方法：打太极</p>
+<p>日本人的类 继承 人类：</p>
+<p>属性：年号</p>
+<p>方法：拍电影		</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//父类</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Person</span> &#123;</span><br><span class="line">	</span><br><span class="line">	String name;</span><br><span class="line">	<span class="type">char</span> sex;</span><br><span class="line">	<span class="type">int</span> age;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">eat</span><span class="params">()</span>&#123;</span><br><span class="line">		System.out.println(<span class="built_in">this</span>.name + <span class="string">&quot;吃饭饭&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">sleep</span><span class="params">()</span>&#123;</span><br><span class="line">		System.out.println(<span class="built_in">this</span>.name + <span class="string">&quot;睡觉觉&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//            子类   继承      父类</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Chinese</span> <span class="keyword">extends</span> <span class="title class_">Person</span>&#123;</span><br><span class="line"></span><br><span class="line">	String id;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">playTaiJi</span><span class="params">()</span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;中国人打太极&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//			     子类  继承    父类</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Japanese</span> <span class="keyword">extends</span> <span class="title class_">Person</span>&#123;</span><br><span class="line"></span><br><span class="line">	String yearNum;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">playVideo</span><span class="params">()</span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;日本人拍电影&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//测试类</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test01</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//创建对象</span></span><br><span class="line">		<span class="type">Chinese</span> <span class="variable">c</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Chinese</span>();</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//操作父类属性</span></span><br><span class="line">		c.name = <span class="string">&quot;小彭&quot;</span>;</span><br><span class="line">		c.sex = <span class="string">&#x27;男&#x27;</span>;</span><br><span class="line">		c.age = <span class="number">21</span>;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//操作子类属性</span></span><br><span class="line">		c.id = <span class="string">&quot;1234567890&quot;</span>;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//调用父类方法</span></span><br><span class="line">		c.eat();</span><br><span class="line">		c.sleep();</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//调用子类方法</span></span><br><span class="line">		c.playTaiJi();</span><br><span class="line">		</span><br><span class="line">		System.out.println(<span class="string">&quot;-----------------------------&quot;</span>);</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//创建对象</span></span><br><span class="line">		<span class="type">Japanese</span> <span class="variable">j</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Japanese</span>();</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//操作父类属性</span></span><br><span class="line">		j.name = <span class="string">&quot;波多野结衣&quot;</span>;</span><br><span class="line">		j.sex = <span class="string">&#x27;女&#x27;</span>;</span><br><span class="line">		j.age = <span class="number">18</span>;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//操作子类属性</span></span><br><span class="line">		j.yearNum = <span class="string">&quot;令和&quot;</span>;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//调用父类方法</span></span><br><span class="line">		j.eat();</span><br><span class="line">		j.sleep();</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//调用子类方法</span></span><br><span class="line">		j.playVideo();</span><br><span class="line">		</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<h5 id="继承内存图"><a href="#继承内存图" class="headerlink" title="继承内存图"></a>继承内存图</h5></blockquote>
+<p><img src="/img/java-notes/day14/%E7%BB%A7%E6%89%BF%E5%86%85%E5%AD%98%E5%9B%BE.png" alt="继承内存图"></p>
+<blockquote>
+<h5 id="父类空间优先于子类对象产生"><a href="#父类空间优先于子类对象产生" class="headerlink" title="父类空间优先于子类对象产生"></a>父类空间优先于子类对象产生</h5></blockquote>
+<blockquote>
+<h5 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h5><p>1.继承实际上是子类相同的属性和行为可以定义在父类中，子类特有的属性和行为由自己定义，这样就实现了相同属性和行为的重复利用，从而提高了代码复用。</p>
+<p>2.继承是在多个类中之间的，使用关键字extends，在父类的非私有属性和方法可以被子类继承</p>
+<p>3.java是单继承、多实现的</p>
+</blockquote>
+<h2 id="2-继承的深入"><a href="#2-继承的深入" class="headerlink" title="2.继承的深入"></a>2.继承的深入</h2><blockquote>
+<p>1.创建子类对象，会调用父类的构造方法吗？</p>
+<p>会</p>
+</blockquote>
+<blockquote>
+<p>2.创建子类对象，为什么会调用父类构造方法？</p>
+<p>因为会在子类对象中开辟空间，用于存储父类的成员属性</p>
+</blockquote>
+<blockquote>
+<p>3.创建子类对象，先调用父类构造方法还是子类构造方法？</p>
+<p>先调用子类的构造方法</p>
+</blockquote>
+<blockquote>
+<p>4.创建子类对象，先完成父类构造方法还是子类构造方法？</p>
+<p>先完成父类的构造方法（super）</p>
+</blockquote>
+<blockquote>
+<p>5.子类对象是否能继承父类所有的属性和方法？</p>
+<p>Java官网上，明确表示子类不能继承父类私有化的属性和方法，这是站在使用的角度</p>
+<p>实际上，子类能继承父类私有化的属性和方法，但是不能直接使用，可以在父类中编写公有方法去调用(存放)私有的属性和方法（子类再去调用这个公有方法，就可以拿到父类私有化的属性和方法）</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Father</span> &#123;</span><br><span class="line"><span class="keyword">private</span> <span class="type">String</span> <span class="variable">fatherAttr</span> <span class="operator">=</span> <span class="string">&quot;父类私有化属性&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="title function_">Father</span><span class="params">()</span> &#123;</span><br><span class="line">	System.out.println(<span class="string">&quot;调用父类的构造方法&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> String <span class="title function_">getFatherAttr</span><span class="params">()</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> fatherAttr;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setFatherAttr</span><span class="params">(String fatherAttr)</span> &#123;</span><br><span class="line">	<span class="built_in">this</span>.fatherAttr = fatherAttr;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">method01</span><span class="params">()</span>&#123;</span><br><span class="line">	System.out.println(<span class="string">&quot;父类私有化方法&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">method02</span><span class="params">()</span>&#123;</span><br><span class="line">	method01();</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Son</span> <span class="keyword">extends</span> <span class="title class_">Father</span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="title function_">Son</span><span class="params">()</span> &#123;</span><br><span class="line">		<span class="comment">//super();//默认实现：调用父类的构造方法,所以首先完成父类构造方法，再执行下一句</span></span><br><span class="line">		System.out.println(<span class="string">&quot;调用子类的构造方法&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//测试类</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test01</span> &#123;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">	</span><br><span class="line">	<span class="type">Son</span> <span class="variable">son</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Son</span>();</span><br><span class="line">	</span><br><span class="line">	System.out.println(son.getFatherAttr());</span><br><span class="line">	</span><br><span class="line">	son.method02();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-super"><a href="#3-super" class="headerlink" title="3.super"></a>3.super</h2><blockquote>
+<p>理解：super表示父类</p>
+<h5 id="super代表的是父类对象的引用，this代表的是当前对象的引用"><a href="#super代表的是父类对象的引用，this代表的是当前对象的引用" class="headerlink" title="super代表的是父类对象的引用，this代表的是当前对象的引用"></a>super代表的是父类对象的引用，this代表的是当前对象的引用</h5></blockquote>
+<blockquote>
+<p>作用：</p>
+<p>1.super.属性：在子类中，调用父类的非私有化的成员属性（不常用，因为属性已经私有化了）</p>
+<p>2.super.方法：在子类中，调用父类的非私有化的成员方法</p>
+<p>3.super()：在子类构造方法中的第一句使用，调用父类的非私有化的构造方法</p>
+</blockquote>
+<blockquote>
+<p>需求：编写中国人和日本人的类，创建各自的对象</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Person</span> &#123;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">private</span> String name;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="title function_">Person</span><span class="params">()</span> &#123;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="title function_">Person</span><span class="params">(String name)</span> &#123;</span><br><span class="line">		<span class="built_in">this</span>.name = name;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> String <span class="title function_">getName</span><span class="params">()</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> name;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setName</span><span class="params">(String name)</span> &#123;</span><br><span class="line">		<span class="built_in">this</span>.name = name;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">eat</span><span class="params">()</span>&#123;</span><br><span class="line">		System.out.println(<span class="built_in">this</span>.name + <span class="string">&quot;吃饭饭&quot;</span>);<span class="comment">//name这个属性是本类的，所以使用this，而不是super</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Chinese</span> <span class="keyword">extends</span> <span class="title class_">Person</span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> String id;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="title function_">Chinese</span><span class="params">()</span> &#123;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="title function_">Chinese</span><span class="params">(String name,String id)</span> &#123;</span><br><span class="line">		<span class="built_in">super</span>(name);<span class="comment">//子类中把父类的成员变量一起有参构造出来，方便使用</span></span><br><span class="line">		<span class="built_in">this</span>.id = id;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> String <span class="title function_">getId</span><span class="params">()</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> id;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setId</span><span class="params">(String id)</span> &#123;</span><br><span class="line">		<span class="built_in">this</span>.id = id;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">playTaiJi</span><span class="params">()</span>&#123;</span><br><span class="line">		</span><br><span class="line">		System.out.println(<span class="built_in">super</span>.getName() + <span class="string">&quot;打太极&quot;</span>);<span class="comment">//super.属性：用的是分类的成员变量，子类中没有名字这个属性</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Japanese</span> <span class="keyword">extends</span> <span class="title class_">Person</span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> String yearNum;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="title function_">Japanese</span><span class="params">()</span> &#123;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="title function_">Japanese</span><span class="params">(String name,String yearNum)</span> &#123;</span><br><span class="line">		<span class="built_in">super</span>(name);</span><br><span class="line">		<span class="built_in">this</span>.yearNum = yearNum;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> String <span class="title function_">getYearNum</span><span class="params">()</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> yearNum;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setYearNum</span><span class="params">(String yearNum)</span> &#123;</span><br><span class="line">		<span class="built_in">this</span>.yearNum = yearNum;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">playVideo</span><span class="params">()</span>&#123;</span><br><span class="line">		System.out.println(<span class="built_in">super</span>.getName() + <span class="string">&quot;拍电影&quot;</span>);<span class="comment">//super.属性：用的是分类的成员变量，子类中没有名字这个属性</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test01</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//创建对象</span></span><br><span class="line">	<span class="type">Chinese</span> <span class="variable">c</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Chinese</span>(<span class="string">&quot;小彭&quot;</span>, <span class="string">&quot;1234567890&quot;</span>);</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//调用父类方法</span></span><br><span class="line">	c.eat();</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//调用子类方法</span></span><br><span class="line">	c.playTaiJi();</span><br><span class="line">	</span><br><span class="line">	System.out.println(<span class="string">&quot;-----------------------------&quot;</span>);</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//创建对象</span></span><br><span class="line">	<span class="type">Japanese</span> <span class="variable">j</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Japanese</span>(<span class="string">&quot;波多野结衣&quot;</span>,  <span class="string">&quot;令和&quot;</span>);</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//调用父类方法</span></span><br><span class="line">	j.eat();</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//调用子类方法</span></span><br><span class="line">	j.playVideo();</span><br><span class="line">	</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>小结 - 编写一个类的步骤：</p>
+<p>1.属性</p>
+<p>2.私有化属性</p>
+<p>3.无参构造</p>
+<p>4.有参构造</p>
+<p>5.get&#x2F;set方法</p>
+<p>6.其他的方法</p>
+</blockquote>
+<blockquote>
+<h5 id="注意："><a href="#注意：" class="headerlink" title="注意："></a>注意：</h5><p>1.子类构造方法的第一行都隐含了一个super()调用父类无参数构造方法，super()可以省略不写</p>
+<p>2.super() 和 this() 都必须是在构造方法的第一行，但是不能同时出现</p>
+</blockquote>
+<h2 id="4-重写-复写"><a href="#4-重写-复写" class="headerlink" title="4.重写&#x2F;复写"></a>4.重写&#x2F;复写</h2><blockquote>
+<p>理解：在子类中，将父类的方法重新写一遍</p>
+<p>子类中出现与父类一模一样的方法时(返回值类型，方法名和参数列表都相同)，会出现覆盖效果，也称为重写或者复写。<em><strong>*声明不变，重新实现*</strong></em></p>
+</blockquote>
+<blockquote>
+<p>应用场景：父类方法不能被改动时，在子类中重新写一遍</p>
+</blockquote>
+<blockquote>
+<p>条件：</p>
+<p>1.在子类中重写父类的方法</p>
+<p>2.返回值类型，方法名和参数列表都相同</p>
+<p>3.子类访问权限大于等于父类方法访问权限  &gt;&#x3D;（访问修饰符不能比父类更严格）</p>
+<p>4.子类返回类型小于等于父类方法返回类型</p>
+<p>5.子类抛出异常小于等于父类方法抛出异常</p>
+</blockquote>
+<blockquote>
+<p>面试题：重写(overriding)与重载(overloading)的区别？</p>
+<p>重写是发生在子父类继承关系中方法名相同，参数列表相同，返回值相同，子类访问修饰符要大于等于父类的修饰符，子类的异常声明必须小于等于父类的异常声明；</p>
+<p>方法重载发生在同一个类中,方法名相同，参数列表不同，返回值无关</p>
+</blockquote>
+<blockquote>
+<p>需求：编写中国人和日本人的类，创建各自的对象</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test01</span> &#123;	</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">	<span class="comment">//创建对象</span></span><br><span class="line">	<span class="type">Chinese</span> <span class="variable">c</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Chinese</span>(<span class="string">&quot;小彭&quot;</span>, <span class="string">&quot;1234567890&quot;</span>);</span><br><span class="line">	</span><br><span class="line">	c.eat();<span class="comment">//调用子类重写后的方法</span></span><br><span class="line">	</span><br><span class="line">	System.out.println(<span class="string">&quot;-----------------------------&quot;</span>);</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//创建对象</span></span><br><span class="line">	<span class="type">Japanese</span> <span class="variable">j</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Japanese</span>(<span class="string">&quot;波多野结衣&quot;</span>,<span class="string">&quot;令和&quot;</span>);</span><br><span class="line">	</span><br><span class="line">	j.eat();<span class="comment">//调用子类重写后的方法</span></span><br><span class="line">	</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Person</span> &#123;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">private</span> String name;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="title function_">Person</span><span class="params">()</span> &#123;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="title function_">Person</span><span class="params">(String name)</span> &#123;</span><br><span class="line">		<span class="built_in">this</span>.name = name;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> String <span class="title function_">getName</span><span class="params">()</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> name;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setName</span><span class="params">(String name)</span> &#123;</span><br><span class="line">		<span class="built_in">this</span>.name = name;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">eat</span><span class="params">()</span>&#123;</span><br><span class="line">		System.out.println(<span class="built_in">this</span>.name + <span class="string">&quot;吃饭饭&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Chinese</span> <span class="keyword">extends</span> <span class="title class_">Person</span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> String id;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="title function_">Chinese</span><span class="params">()</span> &#123;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="title function_">Chinese</span><span class="params">(String name, String id)</span> &#123;</span><br><span class="line">		<span class="built_in">super</span>(name);</span><br><span class="line">		<span class="built_in">this</span>.id = id;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> String <span class="title function_">getId</span><span class="params">()</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> id;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setId</span><span class="params">(String id)</span> &#123;</span><br><span class="line">		<span class="built_in">this</span>.id = id;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//@Override -- 重写的注解</span></span><br><span class="line">	<span class="comment">//注解：给程序员和系统解释代码信息</span></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">eat</span><span class="params">()</span>&#123;</span><br><span class="line">		System.out.println(<span class="built_in">super</span>.getName() + <span class="string">&quot;吃山珍海味&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Japanese</span> <span class="keyword">extends</span> <span class="title class_">Person</span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> String yearNum;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="title function_">Japanese</span><span class="params">()</span> &#123;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="title function_">Japanese</span><span class="params">(String name,String yearNum)</span> &#123;</span><br><span class="line">		<span class="built_in">super</span>(name);</span><br><span class="line">		<span class="built_in">this</span>.yearNum = yearNum;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> String <span class="title function_">getYearNum</span><span class="params">()</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> yearNum;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setYearNum</span><span class="params">(String yearNum)</span> &#123;</span><br><span class="line">		<span class="built_in">this</span>.yearNum = yearNum;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">eat</span><span class="params">()</span> &#123;</span><br><span class="line">		System.out.println(<span class="built_in">super</span>.getName() + <span class="string">&quot;吃生鱼片&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-1-Override重写注解"><a href="#4-1-Override重写注解" class="headerlink" title="4.1 @Override重写注解"></a>4.1 @Override重写注解</h3><blockquote>
+<p>@Override:注解，重写注解校验！</p>
+<p>这个注解标记的方法，就说明这个方法必须是重写父类的方法，否则编译阶段报错。</p>
+<p>建议重写都加上这个注解，一方面可以提高代码的可读性，一方面可以防止重写出错！</p>
+</blockquote>
+<blockquote>
+<h5 id="1-Java-中是否可以重写-override-一个-private-或者是-static-的方法？"><a href="#1-Java-中是否可以重写-override-一个-private-或者是-static-的方法？" class="headerlink" title="1.Java 中是否可以重写(override)一个 private 或者是 static 的方法？"></a>1.Java 中是否可以重写(override)一个 private 或者是 static 的方法？</h5><p>1.Java 中 static 方法不能被重写，因为方法重写是基于运行时动态绑定的，而 static 方法是编译时静态绑定的。static 方法跟类的任何实例都不相关，所以概念上不适用。 </p>
+<p> 2.java 中也不可以重写 private 的方法，因为 private 修饰的变量和方法只能在当前类中使用， 如果是其他的类继承当前类是不能访问到 private变量或方法的，当然也不能重写</p>
+</blockquote>
+<blockquote>
+<h5 id="2-构造方法不能被继承，因此不能被重写，但可以被重载。"><a href="#2-构造方法不能被继承，因此不能被重写，但可以被重载。" class="headerlink" title="2.构造方法不能被继承，因此不能被重写，但可以被重载。"></a>2.构造方法不能被继承，因此不能被重写，但可以被重载。</h5><h5 id="构造方法能不能重写？"><a href="#构造方法能不能重写？" class="headerlink" title="构造方法能不能重写？"></a>构造方法能不能重写？</h5><p>构造方法不能重写。因为构造方法需要和类保持同名，而重写的要求是子类方法要和父类方法保持同名。如果允许重写构造方法的话，那么子类中将会存在与类名不同的构造方法，这与构造方法的要求是矛盾的</p>
+</blockquote>
+<blockquote>
+<h5 id="4-this关键字的用法"><a href="#4-this关键字的用法" class="headerlink" title="4.this关键字的用法"></a>4.this关键字的用法</h5><p>this代表对象本身，可以理解为：指向对象本身的一个指针</p>
+<p>this的用法分为3种： </p>
+<p>1.普通的直接引用，this相当于是指向当前对象本身</p>
+<p>2.形参与成员变量名字重名，用this来区分： </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&gt;<span class="keyword">public</span> <span class="title function_">Person</span><span class="params">(String name,<span class="type">int</span> age)</span>&#123;</span><br><span class="line"><span class="built_in">this</span>.name = name;</span><br><span class="line"><span class="built_in">this</span>.age = age;</span><br><span class="line">&gt;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>3.在构造方法中的第一句使用，调用其他的构造方法 </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&gt;<span class="keyword">class</span> <span class="title class_">Person</span>&#123;</span><br><span class="line"><span class="keyword">private</span> String name;</span><br><span class="line"><span class="keyword">private</span> <span class="type">int</span> age;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="title function_">Person</span><span class="params">()</span>&#123;&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="title function_">Person</span><span class="params">(String name)</span>&#123;</span><br><span class="line">	<span class="built_in">this</span>.name = name;</span><br><span class="line">&gt;&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="title function_">Person</span><span class="params">(String name,<span class="type">int</span> age)</span>&#123;</span><br><span class="line">	<span class="built_in">this</span>(name);</span><br><span class="line">	<span class="built_in">this</span>.age = age;</span><br><span class="line">&#125;</span><br><span class="line">&gt;&#125; </span><br></pre></td></tr></table></figure></blockquote>
+<blockquote>
+<h5 id="5-super关键字的用法"><a href="#5-super关键字的用法" class="headerlink" title="5.super关键字的用法"></a>5.super关键字的用法</h5><p>super也有三种用法： </p>
+<p>1.普通的直接引用：这样就可以用super.xxx来引用父类的成员。 </p>
+<p>2.子类中的成员变量或方法与父类中的成员变量或方法同名时，用super进行区分 </p>
+<p>3.引用父类构造函数 </p>
+<p>super()：在子类构造方法中的第一句使用，调用父类的非私有化的构造方法 </p>
+<p>this()：在构造方法中的第一句使用，调用其他的构造方法 </p>
+</blockquote>
+<blockquote>
+<h5 id="6-this与super的区别"><a href="#6-this与super的区别" class="headerlink" title="6.this与super的区别"></a>6.this与super的区别</h5><p>1.super：它引用当前对象的直接父类中的成员</p>
+<p>this：它代表当前对象名（在程序中易产生二义性之处，应使用this来指明当前对象；如果函数的形参与类中的成员变量同名，这时需用this来指明成员变量名） </p>
+<p>2.super()和this()区别是，super()在子类中调用父类非私有化的构造方法，this()在本类内调用本类的其它构造方法</p>
+<p>3.super()和this()均需放在构造方法内第一行。尽管可以用this调用一个构造器，但却不能调用两个</p>
+<p>4.this()和super()都指的是对象，所以，均不可以在static环境中使用</p>
+<p>5.从本质上讲，this是一个指向本对象的指针, 然而super是一个Java关键字。</p>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://pcb178.site">pcb</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://pcb178.site/post/day14-inheritance-super-override.html">https://pcb178.site/post/day14-inheritance-super-override.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://pcb178.site" target="_blank">java悍匪</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%BB%A7%E6%89%BF/">继承</a><a class="post-meta__tags" href="/tags/super/">super</a><a class="post-meta__tags" href="/tags/%E6%96%B9%E6%B3%95%E9%87%8D%E5%86%99/">方法重写</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="/pluginsSrc/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="/pluginsSrc/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/post/day13-encapsulation-static-private-this.html" title="Day13 封装、static、private、this 关键字"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Day13 封装、static、private、this 关键字</div></div><div class="info-2"><div class="info-item-1">深入掌握 Java 面向对象核心概念，理解 private 关键字的私有化作用与封装思想；学习 static 关键字修饰属性、方法、代码块的使用场景与生命周期；掌握 this 关键字在构造方法、成员方法中的应用；了解分包的意义与命名规范，提升代码组织能力。   Day131. private – 私有化 理解：private是访问修饰符的一种，访问修饰符规定了访问权限.    作用： 1.private修饰属性：该属性只能在类的内部使用 2.private修饰方法：该方法只能在类的内部使用	   应用场景：不让外界访问的属性和方法就用private修饰  123456789101112public class A &#123;	private String str = &quot;好好学习&quot;;		private void method01()&#123;		System.out.println(&quot;aaabbbccc -- &quot; + str);	&#125;		public void method02()&#123;		method01();	&#125...</div></div></div></a></nav><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">pcb</div><div class="author-info-description"><span style="background:linear-gradient(45deg,#f59,#fb0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:bold;">干饭！干饭！</span></div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">16</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">44</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fa-solid fa-bowl-rice"></i><span>冲呀干饭人</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content"><div style="text-align: center; font-size: 14px; line-height: 1.6;">
+<img src="/img/card1.gif" width="120" style="vertical-align: middle; margin: 6px 0; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.15);">
+<br>
+<strong style="background:linear-gradient(45deg,#ff9a9e,#fad0c4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:16px;">干饭时间到！</strong>
+<br>
+<span style="color: #ff6b6b; font-size: 12px;">今日份快乐：一碗热腾腾的猪脚饭~</span>
+</div>
+</div></div><div class="xpand" style="height:200px;"><canvas class="illo" width="800" height="800" style="max-width: 200px; max-height: 200px; touch-action: none; width: 640px; height: 640px;"></canvas></div><script src="https://fastly.jsdelivr.net/gh/xiaopengand/blogCdn@latest/xzxr/twopeople1.js"></script><script src="https://fastly.jsdelivr.net/gh/xiaopengand/blogCdn@latest/xzxr/zdog.dist.js"></script><script id="rendered-js" src="https://fastly.jsdelivr.net/gh/xiaopengand/blogCdn@latest/xzxr/twopeople.js"></script><style>.card-widget.card-announcement {
+  margin: 0;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+canvas {
+  display: block;
+  margin: 0 auto;
+  cursor: move;
+}</style><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Day14"><span class="toc-number">1.</span> <span class="toc-text">Day14</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E7%BB%A7%E6%89%BF%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="toc-number">1.1.</span> <span class="toc-text">1.继承的使用</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%BB%A7%E6%89%BF%E5%86%85%E5%AD%98%E5%9B%BE"><span class="toc-number">1.1.0.0.1.</span> <span class="toc-text">继承内存图</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%88%B6%E7%B1%BB%E7%A9%BA%E9%97%B4%E4%BC%98%E5%85%88%E4%BA%8E%E5%AD%90%E7%B1%BB%E5%AF%B9%E8%B1%A1%E4%BA%A7%E7%94%9F"><span class="toc-number">1.1.0.0.2.</span> <span class="toc-text">父类空间优先于子类对象产生</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">1.1.0.0.3.</span> <span class="toc-text">小结</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E7%BB%A7%E6%89%BF%E7%9A%84%E6%B7%B1%E5%85%A5"><span class="toc-number">1.2.</span> <span class="toc-text">2.继承的深入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-super"><span class="toc-number">1.3.</span> <span class="toc-text">3.super</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#super%E4%BB%A3%E8%A1%A8%E7%9A%84%E6%98%AF%E7%88%B6%E7%B1%BB%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%BC%95%E7%94%A8%EF%BC%8Cthis%E4%BB%A3%E8%A1%A8%E7%9A%84%E6%98%AF%E5%BD%93%E5%89%8D%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%BC%95%E7%94%A8"><span class="toc-number">1.3.0.0.1.</span> <span class="toc-text">super代表的是父类对象的引用，this代表的是当前对象的引用</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%B3%A8%E6%84%8F%EF%BC%9A"><span class="toc-number">1.3.0.0.2.</span> <span class="toc-text">注意：</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E9%87%8D%E5%86%99-%E5%A4%8D%E5%86%99"><span class="toc-number">1.4.</span> <span class="toc-text">4.重写&#x2F;复写</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-Override%E9%87%8D%E5%86%99%E6%B3%A8%E8%A7%A3"><span class="toc-number">1.4.1.</span> <span class="toc-text">4.1 @Override重写注解</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-Java-%E4%B8%AD%E6%98%AF%E5%90%A6%E5%8F%AF%E4%BB%A5%E9%87%8D%E5%86%99-override-%E4%B8%80%E4%B8%AA-private-%E6%88%96%E8%80%85%E6%98%AF-static-%E7%9A%84%E6%96%B9%E6%B3%95%EF%BC%9F"><span class="toc-number">1.4.1.0.1.</span> <span class="toc-text">1.Java 中是否可以重写(override)一个 private 或者是 static 的方法？</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95%E4%B8%8D%E8%83%BD%E8%A2%AB%E7%BB%A7%E6%89%BF%EF%BC%8C%E5%9B%A0%E6%AD%A4%E4%B8%8D%E8%83%BD%E8%A2%AB%E9%87%8D%E5%86%99%EF%BC%8C%E4%BD%86%E5%8F%AF%E4%BB%A5%E8%A2%AB%E9%87%8D%E8%BD%BD%E3%80%82"><span class="toc-number">1.4.1.0.2.</span> <span class="toc-text">2.构造方法不能被继承，因此不能被重写，但可以被重载。</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95%E8%83%BD%E4%B8%8D%E8%83%BD%E9%87%8D%E5%86%99%EF%BC%9F"><span class="toc-number">1.4.1.0.3.</span> <span class="toc-text">构造方法能不能重写？</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-this%E5%85%B3%E9%94%AE%E5%AD%97%E7%9A%84%E7%94%A8%E6%B3%95"><span class="toc-number">1.4.1.0.4.</span> <span class="toc-text">4.this关键字的用法</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#5-super%E5%85%B3%E9%94%AE%E5%AD%97%E7%9A%84%E7%94%A8%E6%B3%95"><span class="toc-number">1.4.1.0.5.</span> <span class="toc-text">5.super关键字的用法</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#6-this%E4%B8%8Esuper%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">1.4.1.0.6.</span> <span class="toc-text">6.this与super的区别</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day14-inheritance-super-override.html" title="Day14 继承、super()、this()、方法重写">Day14 继承、super()、this()、方法重写</a><time datetime="2025-09-23T02:00:16.000Z" title="发表于 2025-09-23 10:00:16">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day13-encapsulation-static-private-this.html" title="Day13 封装、static、private、this 关键字">Day13 封装、static、private、this 关键字</a><time datetime="2025-09-23T02:00:15.000Z" title="发表于 2025-09-23 10:00:15">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day13-class-loading-mechanism.html" title="Day13 补 深入类加载机制及底层">Day13 补 深入类加载机制及底层</a><time datetime="2025-09-23T02:00:14.000Z" title="发表于 2025-09-23 10:00:14">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day12-constructor-java-bean.html" title="Day12 一维数组">Day12 一维数组</a><time datetime="2025-09-23T02:00:13.000Z" title="发表于 2025-09-23 10:00:13">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day11-intro-to-oop.html" title="Day11 初识面向对象">Day11 初识面向对象</a><time datetime="2025-09-23T02:00:12.000Z" title="发表于 2025-09-23 10:00:12">2025-09-23</time></div></div></div></div></div></div></main><footer id="footer" style="background: &lt;%= theme.custom_images.banner %&gt;;"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 By pcb</span></div><div class="footer_custom_text">true</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const initValine = (el, path) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyValine = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const valineConfig = {
+      el: '#vcomment',
+      appId: '',
+      appKey: '',
+      avatar: 'retro',
+      serverURLs: '',
+      emojiMaps: "",
+      visitor: true,
+      ...option,
+      path: isShuoshuo ? path : (option && option.path) || window.location.pathname
+    }
+
+    new Valine(valineConfig)
+  }
+
+  const loadValine = async (el, path) => {
+    if (typeof Valine === 'function') {
+      initValine(el, path)
+    } else {
+      await btf.getScript('/pluginsSrc/valine/dist/Valine.min.js')
+      initValine(el, path)
+    }
+  }
+
+  if (isShuoshuo) {
+    'Valine' === 'Valine'
+      ? window.shuoshuoComment = { loadComment: loadValine }
+      : window.loadOtherComment = loadValine
+    return
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script></div><div class="aplayer no-destroy" data-id="5183531430" data-server="netease" data-type="playlist" data-fixed="true" data-mini="true" data-listFolded="false" data-order="random" data-preload="none" data-autoplay="false" muted></div><canvas id="universe"></canvas><script defer src="/js/universe.js"></script><script src="/js/daily-swap.js"></script><div class="sticky_layout">
+  <div id="clock"></div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.js';
+    document.body.appendChild(s);
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const clock = document.querySelector('#clock');
+    if (!clock) return;
+
+    // 1. 隐藏任何包含“undefined”的元素
+    clock.querySelectorAll('*').forEach(el => {
+      if (el.textContent.includes('undefined')) {
+        el.style.display = 'none';
+      }
+    });
+
+    // 2. 强制样式压缩
+    clock.style.cssText += `
+      max-width: 100% !important;
+      white-space: normal !important;
+      word-break: break-all !important;
+      font-size: 14px !important;
+      line-height: 1.5 !important;
+      padding: 10px 8px !important;
+      background: rgba(255,255,255,.75) !important;
+      border-radius: 12px !important;
+      backdrop-filter: blur(6px) !important;
+      box-sizing: border-box !important;
+    `;
+  });
+</script>
+<canvas class="fireworks" mobile="true"></canvas><script src="/pluginsSrc/butterfly-extsrc/dist/fireworks.min.js"></script><script defer="defer" id="fluttering_ribbon" mobile="true" src="/pluginsSrc/butterfly-extsrc/dist/canvas-fluttering-ribbon.min.js"></script><script src="/pluginsSrc/butterfly-extsrc/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><link rel="stylesheet" href="/pluginsSrc/aplayer/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="/pluginsSrc/aplayer/dist/APlayer.min.js"></script><script src="/pluginsSrc/butterfly-extsrc/metingjs/dist/Meting.min.js"></script></div><!-- hexo injector body_end start --><script data-pjax>
+  function butterfly_clock_anzhiyu_injector_config(){
+    var parent_div_git = document.getElementsByClassName('sticky_layout')[0];
+    var item_html = '<div class="card-widget card-clock"><div class="card-glass"><div class="card-background"><div class="card-content"><div id="hexo_electric_clock"><img class="entered loading" id="card-clock-loading" src="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/loading.gif" style="height: 120px; width: 100%;" data-ll-status="loading"/></div></div></div></div></div>';
+    console.log('已挂载butterfly_clock_anzhiyu')
+    if(parent_div_git) {
+      parent_div_git.insertAdjacentHTML("afterbegin",item_html)
+    }
+  }
+  var elist = 'undefined'.split(',');
+  var cpage = location.pathname;
+  var epage = 'all';
+  var qweather_key = 'b16a1fa0e63c46a4b8f28abfb06ae3fe';
+  var gaud_map_key = 'e2b04289e870b005374ee030148d64fd&s=rsv3';
+  var baidu_ak_key = 'undefined';
+  var flag = 0;
+  var clock_rectangle = '104.07,30.57';
+  var clock_default_rectangle_enable = 'true';
+
+  for (var i=0;i<elist.length;i++){
+    if (cpage.includes(elist[i])){
+      flag++;
+    }
+  }
+
+  if ((epage ==='all')&&(flag == 0)){
+    butterfly_clock_anzhiyu_injector_config();
+  }
+  else if (epage === cpage){
+    butterfly_clock_anzhiyu_injector_config();
+  }
+  </script><script src="https://widget.qweather.net/simple/static/js/he-simple-common.js?v=2.0"></script><script data-pjax src="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.js"></script><!-- hexo injector body_end end --><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body></html>

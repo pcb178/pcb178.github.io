@@ -1,0 +1,411 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Day12 一维数组 | java悍匪</title><meta name="author" content="pcb"><meta name="copyright" content="pcb"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="深入掌握 Java 中构造方法的概念、作用与使用规则；理解 this 关键字的含义与应用场景；学习标准 JavaBean 类的制作规范，包括私有化成员变量、提供 getter&#x2F;setter 方法、编写无参与全参构造方法等，为后续面向对象编程打下坚实基础。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Day12 一维数组">
+<meta property="og:url" content="https://pcb178.site/post/day12-constructor-java-bean.html">
+<meta property="og:site_name" content="java悍匪">
+<meta property="og:description" content="深入掌握 Java 中构造方法的概念、作用与使用规则；理解 this 关键字的含义与应用场景；学习标准 JavaBean 类的制作规范，包括私有化成员变量、提供 getter&#x2F;setter 方法、编写无参与全参构造方法等，为后续面向对象编程打下坚实基础。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pcb178.site/img/avatar.jpg">
+<meta property="article:published_time" content="2025-09-23T02:00:13.000Z">
+<meta property="article:modified_time" content="2025-09-23T08:23:24.319Z">
+<meta property="article:author" content="pcb">
+<meta property="article:tag" content="构造方法">
+<meta property="article:tag" content="标准JavaBean">
+<meta property="article:tag" content="this关键字">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pcb178.site/img/avatar.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Day12 一维数组",
+  "url": "https://pcb178.site/post/day12-constructor-java-bean.html",
+  "image": "https://pcb178.site/img/avatar.jpg",
+  "datePublished": "2025-09-23T02:00:13.000Z",
+  "dateModified": "2025-09-23T08:23:24.319Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "pcb",
+      "url": "https://pcb178.site"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://pcb178.site/post/day12-constructor-java-bean.html"><link rel="preconnect"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="/pluginsSrc/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: '/pluginsSrc/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Day12 一维数组',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><link rel="stylesheet" href="/css/universe.css"><link rel="stylesheet" href="/css/banner-fullscreen.css"><link rel="stylesheet" href="/css/font-bigger.css"><!-- hexo injector head_end start --><link rel="stylesheet" href="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.css" /><!-- hexo injector head_end end --><meta name="generator" content="Hexo 7.3.0"></head><body><div id="web_bg" style="background: &lt;%= theme.custom_images.banner %&gt;;"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">16</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">44</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 导航</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间线</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-fish"></i><span> 摸鱼</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/moyu/"><i class="fa-fw fas fa-gamepad"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/tools/"><i class="fa-fw fas fa-tools"></i><span> 工具</span></a></li><li><a class="site-page child" href="/demo/"><i class="fa-fw fas fa-anchor"></i><span> 动画</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: &lt;%= theme.custom_images.banner %&gt;;"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">java悍匪</span></a><a class="nav-page-title" href="/"><span class="site-name">Day12 一维数组</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 导航</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间线</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-fish"></i><span> 摸鱼</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/moyu/"><i class="fa-fw fas fa-gamepad"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/tools/"><i class="fa-fw fas fa-tools"></i><span> 工具</span></a></li><li><a class="site-page child" href="/demo/"><i class="fa-fw fas fa-anchor"></i><span> 动画</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Day12 一维数组</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-09-23T02:00:13.000Z" title="发表于 2025-09-23 10:00:13">2025-09-23</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-09-23T08:23:24.319Z" title="更新于 2025-09-23 16:23:24">2025-09-23</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Java%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">Java学习笔记</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">1.9k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>7分钟</span></span><span class="post-meta-separator">|</span><span class="leancloud_visitors" id="/post/day12-constructor-java-bean.html" data-flag-title="Day12 一维数组"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span class="leancloud-visitors-count"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>深入掌握 Java 中构造方法的概念、作用与使用规则；理解 this 关键字的含义与应用场景；学习标准 JavaBean 类的制作规范，包括私有化成员变量、提供 getter&#x2F;setter 方法、编写无参与全参构造方法等，为后续面向对象编程打下坚实基础。</p>
+<span id="more"></span>
+
+
+<h1 id="Day12"><a href="#Day12" class="headerlink" title="Day12"></a>Day12</h1><blockquote>
+<p>需求：创建人类的对象，并操作对象</p>
+</blockquote>
+<blockquote>
+<p>分析：</p>
+<p>人类 - Person</p>
+<p>属性：name、sex、age</p>
+<p>方法：eat、sleep</p>
+</blockquote>
+<blockquote>
+<p>场景：创建多个对象，去操作对象</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//测试类：该类中有main方法，测试我们写好的代码</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test01</span> &#123;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">		</span><br><span class="line">		<span class="type">Person</span> <span class="variable">p1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Person</span>();</span><br><span class="line">		<span class="type">Person</span> <span class="variable">p2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Person</span>();</span><br><span class="line">		</span><br><span class="line">		p1.name = <span class="string">&quot;巴得伟&quot;</span>;</span><br><span class="line">		p1.sex = <span class="string">&#x27;男&#x27;</span>;</span><br><span class="line">		p1.age = <span class="number">23</span>;</span><br><span class="line">		</span><br><span class="line">		p2.name = <span class="string">&quot;波多野结衣&quot;</span>;</span><br><span class="line">		p2.sex = <span class="string">&#x27;女&#x27;</span>;</span><br><span class="line">		p2.age = <span class="number">18</span>;</span><br><span class="line">		</span><br><span class="line">		p1.eat();</span><br><span class="line">		p1.sleep();</span><br><span class="line">		</span><br><span class="line">		p2.eat();</span><br><span class="line">		p2.sleep();</span><br><span class="line">		</span><br><span class="line">		Person.method();</span><br><span class="line">		</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Person</span> &#123;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//成员变量</span></span><br><span class="line">	String name;</span><br><span class="line">	<span class="type">char</span> sex;</span><br><span class="line">	<span class="type">int</span> age;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//成员方法</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">eat</span><span class="params">()</span>&#123;</span><br><span class="line">		System.out.println(<span class="built_in">this</span>.name + <span class="string">&quot;吃饭饭&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//成员方法</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">sleep</span><span class="params">()</span>&#123;</span><br><span class="line">		System.out.println(<span class="built_in">this</span>.name + <span class="string">&quot;睡觉觉&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//静态方法</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">method</span><span class="params">()</span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;静态方法&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<blockquote>
+<h5 id="面向对象内存图："><a href="#面向对象内存图：" class="headerlink" title="面向对象内存图："></a>面向对象内存图：</h5></blockquote>
+<p><img src="/img/java-notes/day12/%E9%9D%A2%E7%9B%B8%E5%AF%B9%E8%B1%A1%E5%86%85%E5%AD%98%E5%9B%BE.png" alt="面相对象内存图"></p>
+<blockquote>
+<h5 id="注意："><a href="#注意：" class="headerlink" title="注意："></a>注意：</h5><p>1.class文件只加载一次，class文件中包含了该类中的所有信息(包含方法等)</p>
+<p>2.new对象会在堆中开辟空间，存储成员变量，成员变量系统会赋默认值，每个对象共享一份成员变量</p>
+<p>3.方法中的this表示调用该方法的对象(谁调用的，this - 就指向谁)</p>
+<p>4.成员方法可以调用this</p>
+<p>5.静态方法使用类名调用，所以静态方法内不能使用this</p>
+</blockquote>
+<h2 id="1-构造方法"><a href="#1-构造方法" class="headerlink" title="1.构造方法"></a>1.构造方法</h2><blockquote>
+<p>前言 - 创建对象的语法：类型 引用 &#x3D; new 构造方法;</p>
+</blockquote>
+<blockquote>
+<p>含义：与类名相同，且没有返回项的方法(在类中定义的。方法名与类名字相同，无返回值类型声明(包括void))</p>
+</blockquote>
+<blockquote>
+<p>作用：</p>
+<p>1.和new关键字在一起表示创建对象<br>2.初始化数据</p>
+</blockquote>
+<blockquote>
+<p>注意：</p>
+<p>1.创建对象的过程(  Person p &#x3D; new Person()  )，也叫做实例化<br>2.当类中没有有参构造时，系统会默认实现无参构造</p>
+</blockquote>
+<blockquote>
+<p>经验：类中编写了有参构造，我们记得把无参构造加上</p>
+</blockquote>
+<blockquote>
+<p>需求：创建人类，操作对象</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//类型 引用 = new 构造方法;</span></span><br><span class="line">		<span class="type">Person</span> <span class="variable">p</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Person</span>(<span class="string">&quot;巴得伟&quot;</span>, <span class="string">&#x27;男&#x27;</span>, <span class="number">23</span>);</span><br><span class="line">		</span><br><span class="line">		System.out.println(p.name);</span><br><span class="line">		System.out.println(p.sex);</span><br><span class="line">		System.out.println(p.age);</span><br><span class="line">		</span><br><span class="line">		p.eat();</span><br><span class="line">		p.sleep();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Person</span> &#123;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//成员变量</span></span><br><span class="line">	String name;</span><br><span class="line">	<span class="type">char</span> sex;</span><br><span class="line">	<span class="type">int</span> age;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//构造方法 - 无参构造</span></span><br><span class="line">	<span class="keyword">public</span> <span class="title function_">Person</span><span class="params">()</span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;无参构造&quot;</span>);</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//初始化数据</span></span><br><span class="line">		<span class="built_in">this</span>.name = <span class="string">&quot;默认值&quot;</span>;</span><br><span class="line">		<span class="built_in">this</span>.sex = <span class="string">&#x27;男&#x27;</span>;</span><br><span class="line">		<span class="built_in">this</span>.age = <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//构造方法 - 有参构造</span></span><br><span class="line">	<span class="keyword">public</span> <span class="title function_">Person</span><span class="params">(String name,<span class="type">char</span> sex,<span class="type">int</span> age)</span>&#123;</span><br><span class="line">		</span><br><span class="line">		System.out.println(<span class="string">&quot;有参构造&quot;</span>);</span><br><span class="line">		</span><br><span class="line">		<span class="built_in">this</span>.name = name;</span><br><span class="line">		<span class="built_in">this</span>.sex = sex;</span><br><span class="line">		<span class="built_in">this</span>.age = age;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//成员方法</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">eat</span><span class="params">()</span>&#123;</span><br><span class="line">		System.out.println(<span class="built_in">this</span>.name + <span class="string">&quot;吃饭饭&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//成员方法</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">sleep</span><span class="params">()</span>&#123;</span><br><span class="line">		System.out.println(<span class="built_in">this</span>.name + <span class="string">&quot;睡觉觉&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<h5 id="构造方法内存图："><a href="#构造方法内存图：" class="headerlink" title="构造方法内存图："></a>构造方法内存图：</h5></blockquote>
+<p><img src="/img/java-notes/day12/%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95%E5%86%85%E5%AD%98%E5%9B%BE2.png" alt="构造方法内存图2"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Person</span>&#123;</span><br><span class="line">    <span class="comment">//注意：这种不是构造方法，是成员方法</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">Person</span><span class="params">()</span>&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-1-构造方法的注意事项"><a href="#1-1-构造方法的注意事项" class="headerlink" title="1.1 构造方法的注意事项"></a>1.1 构造方法的注意事项</h2><blockquote>
+<h5 id="构造方法的创建"><a href="#构造方法的创建" class="headerlink" title="构造方法的创建"></a>构造方法的创建</h5><p>如果没有定义构造方法，系统将给出一个默认的无参数构造方法</p>
+<p>如果定义了构造方法，系统将不再提供默认的构造方法</p>
+</blockquote>
+<blockquote>
+<p>推荐的使用方式</p>
+<h5 id="无论是否使用，都手工书写无参数构造方法"><a href="#无论是否使用，都手工书写无参数构造方法" class="headerlink" title="无论是否使用，都手工书写无参数构造方法"></a>无论是否使用，都手工书写无参数构造方法</h5></blockquote>
+<blockquote>
+<p>注意：</p>
+<p>构造方法只能被调用，不能被继承</p>
+</blockquote>
+<h2 id="1-2-赋值方式"><a href="#1-2-赋值方式" class="headerlink" title="1.2 赋值方式"></a>1.2 赋值方式</h2><blockquote>
+<p> 创建对象并为其成员变量赋值的两种方式</p>
+<p>   1.无参构造方法创建对象后使用setXxx()赋值</p>
+<p>   2.使用带参构造方法直接创建带有属性值的对象</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">StudentDemo</span> &#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//无参构造方法创建对象后使用setXxx()赋值</span></span><br><span class="line"></span><br><span class="line">   <span class="type">Student</span> <span class="variable">s1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Student</span>();</span><br><span class="line"></span><br><span class="line">   s1.setName(<span class="string">&quot;小彭&quot;</span>);</span><br><span class="line"></span><br><span class="line">   s1.setAge(<span class="number">21</span>);</span><br><span class="line"></span><br><span class="line">   s1.show();</span><br><span class="line"></span><br><span class="line">   <span class="comment">//使用带参构造方法直接创建带有属性值的对象</span></span><br><span class="line"></span><br><span class="line">   <span class="type">Student</span> <span class="variable">s2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Student</span>(<span class="string">&quot;小彭&quot;</span>,<span class="number">21</span>);</span><br><span class="line"></span><br><span class="line">   s2.show();</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-3-idea直接生成构造方法"><a href="#1-3-idea直接生成构造方法" class="headerlink" title="1.3 idea直接生成构造方法"></a>1.3 idea直接生成构造方法</h2><blockquote>
+<p>鼠标右键，选择生成，找到get、set，ctrl+a全选一键生成</p>
+<p>或者鼠标右键，选择 ptg to javaBean，一键生成</p>
+</blockquote>
+<h1 id="2-标准类制作"><a href="#2-标准类制作" class="headerlink" title="2.标准类制作"></a>2.标准类制作</h1><blockquote>
+<p>1.类名需要见名知意</p>
+<p>2.成员变量使用private修饰</p>
+<p>3.提供至少两个构造方法：无参构造方法；带全部参数的构造方法</p>
+<p> 4.get和set方法：提供每一个成员变量对应的setXxx()&#x2F;getXxx()  </p>
+<p>5.如果还有其他行为，也需要写上</p>
+</blockquote>
+<blockquote>
+<h5 id="案例"><a href="#案例" class="headerlink" title="案例"></a>案例</h5></blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">User</span> &#123;</span><br><span class="line"></span><br><span class="line">     <span class="comment">//1.私有化全部的成员变量</span></span><br><span class="line"></span><br><span class="line">     <span class="comment">//2.空参构造</span></span><br><span class="line"></span><br><span class="line">     <span class="comment">//3.带全部参数的构造</span></span><br><span class="line"></span><br><span class="line">     <span class="comment">//4.针对于每一个私有化的成员变量都要提供其对应的get和set方法</span></span><br><span class="line"></span><br><span class="line">     <span class="comment">//5.如果当前事物还有其他行为，那么也要写出来，比如学生的吃饭，睡觉等行为</span></span><br><span class="line"></span><br><span class="line">     <span class="keyword">private</span> String username;<span class="comment">//用户名</span></span><br><span class="line"></span><br><span class="line">     <span class="keyword">private</span> String password;<span class="comment">//密码</span></span><br><span class="line"></span><br><span class="line">     <span class="keyword">private</span> String email;<span class="comment">//邮箱</span></span><br><span class="line"></span><br><span class="line">     <span class="keyword">private</span> <span class="type">char</span> gender;<span class="comment">//性别</span></span><br><span class="line"></span><br><span class="line">     <span class="keyword">private</span> <span class="type">int</span> age;<span class="comment">//年龄</span></span><br><span class="line"></span><br><span class="line">     <span class="comment">//空参构造方法</span></span><br><span class="line"></span><br><span class="line">     <span class="keyword">public</span> <span class="title function_">User</span><span class="params">()</span> &#123;</span><br><span class="line"></span><br><span class="line">     &#125;</span><br><span class="line">     <span class="comment">//带全部参数的构造</span></span><br><span class="line">     <span class="keyword">public</span> <span class="title function_">User</span><span class="params">(String username, String password, String email, <span class="type">char</span> gender, <span class="type">int</span> age)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.username = username;</span><br><span class="line">        <span class="built_in">this</span>.password = password;</span><br><span class="line">        <span class="built_in">this</span>.email = email;</span><br><span class="line">        <span class="built_in">this</span>.gender = gender;</span><br><span class="line">        <span class="built_in">this</span>.age = age;</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//get和set</span></span><br><span class="line"></span><br><span class="line">     <span class="keyword">public</span> String <span class="title function_">getUsername</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> username;</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setUsername</span><span class="params">(String username)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.username = username;</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     <span class="keyword">public</span> String <span class="title function_">getPassword</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> password;</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setPassword</span><span class="params">(String password)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.password = password;</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     <span class="keyword">public</span> String <span class="title function_">getEmail</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> email;</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setEmail</span><span class="params">(String email)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.email = email;</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">public</span> <span class="type">char</span> <span class="title function_">getGender</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> gender;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">     <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setGender</span><span class="params">(<span class="type">char</span> gender)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.gender = gender;</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">getAge</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> age;</span><br><span class="line">     &#125;</span><br><span class="line"> </span><br><span class="line">     <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setAge</span><span class="params">(<span class="type">int</span> age)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.age = age;</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">eat</span><span class="params">()</span>&#123;</span><br><span class="line">        System.out.println(username + <span class="string">&quot;在吃饭&quot;</span>);</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<h5 id="测试类"><a href="#测试类" class="headerlink" title="测试类"></a>测试类</h5></blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test</span> &#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//写一个标准的javabean类</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//咱们在课后只要能把这个标准的javabean能自己写出来，那么就表示今天的知识点就ok了</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//利用空参构造创建对象</span></span><br><span class="line"></span><br><span class="line">    <span class="type">User</span> <span class="variable">u1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">User</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">//如果利用空参创建对象，还想赋值只能用set方法赋值</span></span><br><span class="line"></span><br><span class="line">    u1.setUsername(<span class="string">&quot;zhangsan&quot;</span>);</span><br><span class="line"></span><br><span class="line">    u1.setPassword(<span class="string">&quot;1234qwer&quot;</span>);</span><br><span class="line"></span><br><span class="line">    u1.setEmail(<span class="string">&quot;pcb@qq.cn&quot;</span>);</span><br><span class="line"></span><br><span class="line">    u1.setGender(<span class="string">&#x27;男&#x27;</span>);</span><br><span class="line">    u1.setAge(<span class="number">23</span>);</span><br><span class="line">    <span class="comment">//获取属性的值并打印</span></span><br><span class="line">    System.out.println(u1.getUsername() + <span class="string">&quot;, &quot;</span> + u1.getPassword()</span><br><span class="line">              + <span class="string">&quot;, &quot;</span> + u1.getEmail() + <span class="string">&quot;, &quot;</span> + u1.getGender() + <span class="string">&quot;, &quot;</span> + u1.getAge());</span><br><span class="line">    u1.eat();</span><br><span class="line"></span><br><span class="line">    System.out.println(<span class="string">&quot;=============================&quot;</span>);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//简单的办法</span></span><br><span class="line">        <span class="comment">//利用带全部参数的构造来创建对象</span></span><br><span class="line">        <span class="comment">//快捷键:ctrl + p</span></span><br><span class="line">        <span class="type">User</span> <span class="variable">u2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">User</span>(<span class="string">&quot;lisi&quot;</span>,<span class="string">&quot;12345678&quot;</span>,<span class="string">&quot;pcb@qq.cn&quot;</span>,<span class="string">&#x27;女&#x27;</span>,<span class="number">24</span>);</span><br><span class="line">        System.out.println(u2.getUsername() + <span class="string">&quot;, &quot;</span> + u2.getPassword()</span><br><span class="line">                + <span class="string">&quot;, &quot;</span> + u2.getEmail() + <span class="string">&quot;, &quot;</span> + u2.getGender() + <span class="string">&quot;, &quot;</span> + u2.getAge());</span><br><span class="line">        u2.eat();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<blockquote>
+<p><strong>1.</strong> <strong>构造器</strong> <strong>Constructor</strong> <strong>是否可被</strong> <strong>override?</strong> </p>
+<p>Constructor 不能被 override（重写）,但是可以 overload（重载）,所以你可以看到一个类中有多个构造函数的情况  </p>
+<p>注意：构造方法不能被继承，所以更不能被重写</p>
+</blockquote>
+<blockquote>
+<p><strong>2.</strong> <strong>在</strong> <strong>Java</strong> <strong>中定义一个不做事且没有参数的构造方法的作用</strong> </p>
+<p>Java 程序在执行子类的构造方法之前，如果没有用 super() 来调用父类特定的构造方法，则会调用父类中“没有参数的构造方法”</p>
+<p>因此，如果父类中只定义了有参数的构造方法，而在子类的构造方法中又没有用 super() 来调用父类中特定的构造方法，则编译时将发生错误，因为 Java 程序在父类中找不到没有参数的构造方法可供执行。解决办法是在父类里加上一个不做事且没有参数的构造方法 </p>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://pcb178.site">pcb</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://pcb178.site/post/day12-constructor-java-bean.html">https://pcb178.site/post/day12-constructor-java-bean.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://pcb178.site" target="_blank">java悍匪</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95/">构造方法</a><a class="post-meta__tags" href="/tags/%E6%A0%87%E5%87%86JavaBean/">标准JavaBean</a><a class="post-meta__tags" href="/tags/this%E5%85%B3%E9%94%AE%E5%AD%97/">this关键字</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="/pluginsSrc/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="/pluginsSrc/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/post/day13-class-loading-mechanism.html" title="Day13 补 深入类加载机制及底层"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Day13 补 深入类加载机制及底层</div></div><div class="info-2"><div class="info-item-1">深入剖析 Java 类加载机制的完整生命周期，包括加载、连接（验证、准备、解析）、初始化、使用、卸载；理解类加载器的分类（启动、扩展、应用）及其层次关系；掌握双亲委派模型的工作原理、优势与安全性保障，从 JVM 底层视角理解 Java 程序的运行机制。   Day13 补 深入类加载机制 类加载机制内存图：    理解：   Java万物皆对象！！！！！    一个class文件，对于Java来说，都是一个对象，而这个对象就是 class对象  class文件是什么？  class文件包含了该类的所有的信息eg： 一个类有几个成员属性 一个类有几个静态属性？ 一个类有几个构造方法属性 一个类有几个成员方法 等这些信息   class对象是什么？？？？  class对象是class文件的访问入口  理解：JVM无法直接访问class文件，是通过class对象找到对应的class文件，才能获取该类的信息  1.初识类加载过程 使用某个类时，如果该类的class文件没有加载到内存时，则系统会通过以下三个步骤来对该类进行初始化： 1.类的加载   →	2.类的连接	→	3.类的初始化 类...</div></div></div></a><a class="pagination-related" href="/post/day11-intro-to-oop.html" title="Day11 初识面向对象"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Day11 初识面向对象</div></div><div class="info-2"><div class="info-item-1">深入理解 Java 面向对象编程的核心概念，掌握类与对象的定义与使用；学习成员变量与成员方法的编写；区分成员变量与局部变量、实例变量与静态变量；了解面向对象三大特性（封装、继承、多态）的初步概念，为后续深入学习打下坚实基础。   day111.初识面相对象1.1 类的定义 Java的基本编程单位是类，基本存储单元是变量       类的组成是由属性和行为两部分组成 属性：在类中通过成员变量来体现（类中方法外的变量） 行为：在类中通过成员方法来体现（和前面的方法相比去掉static关键字即可）   类的定义步骤： ①定义类 ②编写类的成员变量 ③编写类的成员方法 public class 类名 { &#x2F;&#x2F; 成员变量 变量1的数据类型 变量1； 变量2的数据类型 变量2; … &#x2F;&#x2F; 成员方法 方法1; 方法2;    }  1.3 对象的使用 创建对象的格式： 类名 对象名 &#x3D; new 类名();   调用成员的格式： 对象名.成员变量 对象名.成员方法();  1.4 案例 需求：创建人类的对象，并操作对象   分析：  人类 - P...</div></div></div></a></nav><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">pcb</div><div class="author-info-description"><span style="background:linear-gradient(45deg,#f59,#fb0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:bold;">干饭！干饭！</span></div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">16</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">44</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fa-solid fa-bowl-rice"></i><span>冲呀干饭人</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content"><div style="text-align: center; font-size: 14px; line-height: 1.6;">
+<img src="/img/card1.gif" width="120" style="vertical-align: middle; margin: 6px 0; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.15);">
+<br>
+<strong style="background:linear-gradient(45deg,#ff9a9e,#fad0c4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:16px;">干饭时间到！</strong>
+<br>
+<span style="color: #ff6b6b; font-size: 12px;">今日份快乐：一碗热腾腾的猪脚饭~</span>
+</div>
+</div></div><div class="xpand" style="height:200px;"><canvas class="illo" width="800" height="800" style="max-width: 200px; max-height: 200px; touch-action: none; width: 640px; height: 640px;"></canvas></div><script src="https://fastly.jsdelivr.net/gh/xiaopengand/blogCdn@latest/xzxr/twopeople1.js"></script><script src="https://fastly.jsdelivr.net/gh/xiaopengand/blogCdn@latest/xzxr/zdog.dist.js"></script><script id="rendered-js" src="https://fastly.jsdelivr.net/gh/xiaopengand/blogCdn@latest/xzxr/twopeople.js"></script><style>.card-widget.card-announcement {
+  margin: 0;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+canvas {
+  display: block;
+  margin: 0 auto;
+  cursor: move;
+}</style><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Day12"><span class="toc-number">1.</span> <span class="toc-text">Day12</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E5%86%85%E5%AD%98%E5%9B%BE%EF%BC%9A"><span class="toc-number">1.0.0.0.1.</span> <span class="toc-text">面向对象内存图：</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%B3%A8%E6%84%8F%EF%BC%9A"><span class="toc-number">1.0.0.0.2.</span> <span class="toc-text">注意：</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95"><span class="toc-number">1.1.</span> <span class="toc-text">1.构造方法</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95%E5%86%85%E5%AD%98%E5%9B%BE%EF%BC%9A"><span class="toc-number">1.1.0.0.1.</span> <span class="toc-text">构造方法内存图：</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95%E7%9A%84%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="toc-number">1.2.</span> <span class="toc-text">1.1 构造方法的注意事项</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95%E7%9A%84%E5%88%9B%E5%BB%BA"><span class="toc-number">1.2.0.0.1.</span> <span class="toc-text">构造方法的创建</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%97%A0%E8%AE%BA%E6%98%AF%E5%90%A6%E4%BD%BF%E7%94%A8%EF%BC%8C%E9%83%BD%E6%89%8B%E5%B7%A5%E4%B9%A6%E5%86%99%E6%97%A0%E5%8F%82%E6%95%B0%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95"><span class="toc-number">1.2.0.0.2.</span> <span class="toc-text">无论是否使用，都手工书写无参数构造方法</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-%E8%B5%8B%E5%80%BC%E6%96%B9%E5%BC%8F"><span class="toc-number">1.3.</span> <span class="toc-text">1.2 赋值方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-idea%E7%9B%B4%E6%8E%A5%E7%94%9F%E6%88%90%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95"><span class="toc-number">1.4.</span> <span class="toc-text">1.3 idea直接生成构造方法</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E6%A0%87%E5%87%86%E7%B1%BB%E5%88%B6%E4%BD%9C"><span class="toc-number">2.</span> <span class="toc-text">2.标准类制作</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%A1%88%E4%BE%8B"><span class="toc-number">2.0.0.0.1.</span> <span class="toc-text">案例</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%B5%8B%E8%AF%95%E7%B1%BB"><span class="toc-number">2.0.0.0.2.</span> <span class="toc-text">测试类</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day14-inheritance-super-override.html" title="Day14 继承、super()、this()、方法重写">Day14 继承、super()、this()、方法重写</a><time datetime="2025-09-23T02:00:16.000Z" title="发表于 2025-09-23 10:00:16">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day13-encapsulation-static-private-this.html" title="Day13 封装、static、private、this 关键字">Day13 封装、static、private、this 关键字</a><time datetime="2025-09-23T02:00:15.000Z" title="发表于 2025-09-23 10:00:15">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day13-class-loading-mechanism.html" title="Day13 补 深入类加载机制及底层">Day13 补 深入类加载机制及底层</a><time datetime="2025-09-23T02:00:14.000Z" title="发表于 2025-09-23 10:00:14">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day12-constructor-java-bean.html" title="Day12 一维数组">Day12 一维数组</a><time datetime="2025-09-23T02:00:13.000Z" title="发表于 2025-09-23 10:00:13">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day11-intro-to-oop.html" title="Day11 初识面向对象">Day11 初识面向对象</a><time datetime="2025-09-23T02:00:12.000Z" title="发表于 2025-09-23 10:00:12">2025-09-23</time></div></div></div></div></div></div></main><footer id="footer" style="background: &lt;%= theme.custom_images.banner %&gt;;"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 By pcb</span></div><div class="footer_custom_text">true</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const initValine = (el, path) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyValine = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const valineConfig = {
+      el: '#vcomment',
+      appId: '',
+      appKey: '',
+      avatar: 'retro',
+      serverURLs: '',
+      emojiMaps: "",
+      visitor: true,
+      ...option,
+      path: isShuoshuo ? path : (option && option.path) || window.location.pathname
+    }
+
+    new Valine(valineConfig)
+  }
+
+  const loadValine = async (el, path) => {
+    if (typeof Valine === 'function') {
+      initValine(el, path)
+    } else {
+      await btf.getScript('/pluginsSrc/valine/dist/Valine.min.js')
+      initValine(el, path)
+    }
+  }
+
+  if (isShuoshuo) {
+    'Valine' === 'Valine'
+      ? window.shuoshuoComment = { loadComment: loadValine }
+      : window.loadOtherComment = loadValine
+    return
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script></div><div class="aplayer no-destroy" data-id="5183531430" data-server="netease" data-type="playlist" data-fixed="true" data-mini="true" data-listFolded="false" data-order="random" data-preload="none" data-autoplay="false" muted></div><canvas id="universe"></canvas><script defer src="/js/universe.js"></script><script src="/js/daily-swap.js"></script><div class="sticky_layout">
+  <div id="clock"></div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.js';
+    document.body.appendChild(s);
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const clock = document.querySelector('#clock');
+    if (!clock) return;
+
+    // 1. 隐藏任何包含“undefined”的元素
+    clock.querySelectorAll('*').forEach(el => {
+      if (el.textContent.includes('undefined')) {
+        el.style.display = 'none';
+      }
+    });
+
+    // 2. 强制样式压缩
+    clock.style.cssText += `
+      max-width: 100% !important;
+      white-space: normal !important;
+      word-break: break-all !important;
+      font-size: 14px !important;
+      line-height: 1.5 !important;
+      padding: 10px 8px !important;
+      background: rgba(255,255,255,.75) !important;
+      border-radius: 12px !important;
+      backdrop-filter: blur(6px) !important;
+      box-sizing: border-box !important;
+    `;
+  });
+</script>
+<canvas class="fireworks" mobile="true"></canvas><script src="/pluginsSrc/butterfly-extsrc/dist/fireworks.min.js"></script><script defer="defer" id="fluttering_ribbon" mobile="true" src="/pluginsSrc/butterfly-extsrc/dist/canvas-fluttering-ribbon.min.js"></script><script src="/pluginsSrc/butterfly-extsrc/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><link rel="stylesheet" href="/pluginsSrc/aplayer/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="/pluginsSrc/aplayer/dist/APlayer.min.js"></script><script src="/pluginsSrc/butterfly-extsrc/metingjs/dist/Meting.min.js"></script></div><!-- hexo injector body_end start --><script data-pjax>
+  function butterfly_clock_anzhiyu_injector_config(){
+    var parent_div_git = document.getElementsByClassName('sticky_layout')[0];
+    var item_html = '<div class="card-widget card-clock"><div class="card-glass"><div class="card-background"><div class="card-content"><div id="hexo_electric_clock"><img class="entered loading" id="card-clock-loading" src="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/loading.gif" style="height: 120px; width: 100%;" data-ll-status="loading"/></div></div></div></div></div>';
+    console.log('已挂载butterfly_clock_anzhiyu')
+    if(parent_div_git) {
+      parent_div_git.insertAdjacentHTML("afterbegin",item_html)
+    }
+  }
+  var elist = 'undefined'.split(',');
+  var cpage = location.pathname;
+  var epage = 'all';
+  var qweather_key = 'b16a1fa0e63c46a4b8f28abfb06ae3fe';
+  var gaud_map_key = 'e2b04289e870b005374ee030148d64fd&s=rsv3';
+  var baidu_ak_key = 'undefined';
+  var flag = 0;
+  var clock_rectangle = '104.07,30.57';
+  var clock_default_rectangle_enable = 'true';
+
+  for (var i=0;i<elist.length;i++){
+    if (cpage.includes(elist[i])){
+      flag++;
+    }
+  }
+
+  if ((epage ==='all')&&(flag == 0)){
+    butterfly_clock_anzhiyu_injector_config();
+  }
+  else if (epage === cpage){
+    butterfly_clock_anzhiyu_injector_config();
+  }
+  </script><script src="https://widget.qweather.net/simple/static/js/he-simple-common.js?v=2.0"></script><script data-pjax src="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.js"></script><!-- hexo injector body_end end --><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body></html>
