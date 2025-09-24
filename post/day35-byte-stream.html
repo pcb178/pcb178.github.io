@@ -1,0 +1,419 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Day35 字节流 | java悍匪</title><meta name="author" content="pcb"><meta name="copyright" content="pcb"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="深入掌握 Java 字节流的核心应用。详解 FileInputStream 和 FileOutputStream 的文件读写操作，理解文件存在与不存在时的处理逻辑；掌握带缓冲区的处理流（BufferedOutputStream）如何大幅提升 I&#x2F;O 性能；学习字节流的异常处理与资源关闭，为高效处理图片、音频、视频等二进制数据提供完整解决方案。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Day35 字节流">
+<meta property="og:url" content="https://pcb178.site/post/day35-byte-stream.html">
+<meta property="og:site_name" content="java悍匪">
+<meta property="og:description" content="深入掌握 Java 字节流的核心应用。详解 FileInputStream 和 FileOutputStream 的文件读写操作，理解文件存在与不存在时的处理逻辑；掌握带缓冲区的处理流（BufferedOutputStream）如何大幅提升 I&#x2F;O 性能；学习字节流的异常处理与资源关闭，为高效处理图片、音频、视频等二进制数据提供完整解决方案。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pcb178.site/img/avatar.jpg">
+<meta property="article:published_time" content="2025-09-23T02:00:35.000Z">
+<meta property="article:modified_time" content="2025-09-24T03:53:57.247Z">
+<meta property="article:author" content="pcb">
+<meta property="article:tag" content="字节流">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pcb178.site/img/avatar.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Day35 字节流",
+  "url": "https://pcb178.site/post/day35-byte-stream.html",
+  "image": "https://pcb178.site/img/avatar.jpg",
+  "datePublished": "2025-09-23T02:00:35.000Z",
+  "dateModified": "2025-09-24T03:53:57.247Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "pcb",
+      "url": "https://pcb178.site"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://pcb178.site/post/day35-byte-stream.html"><link rel="preconnect"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="/pluginsSrc/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":3,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: '/pluginsSrc/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Day35 字节流',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><link rel="stylesheet" href="/css/universe.css"><link rel="stylesheet" href="/css/banner-fullscreen.css"><link rel="stylesheet" href="/css/font-bigger.css"><link rel="stylesheet" href="/css/search-style.css"><link rel="stylesheet" href="/css/footer-transparent.css"><!-- hexo injector head_end start --><link rel="stylesheet" href="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.css" /><!-- hexo injector head_end end --><meta name="generator" content="Hexo 7.3.0"></head><body><div id="web_bg" style="background: &lt;%= theme.custom_images.banner %&gt;;"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">34</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">89</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 导航</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间线</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-fish"></i><span> 摸鱼</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/moyu/"><i class="fa-fw fas fa-gamepad"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/tools/"><i class="fa-fw fas fa-tools"></i><span> 工具</span></a></li><li><a class="site-page child" href="/demo/"><i class="fa-fw fas fa-anchor"></i><span> 动画</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: &lt;%= theme.custom_images.banner %&gt;;"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">java悍匪</span></a><a class="nav-page-title" href="/"><span class="site-name">Day35 字节流</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 导航</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间线</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-fish"></i><span> 摸鱼</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/moyu/"><i class="fa-fw fas fa-gamepad"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/tools/"><i class="fa-fw fas fa-tools"></i><span> 工具</span></a></li><li><a class="site-page child" href="/demo/"><i class="fa-fw fas fa-anchor"></i><span> 动画</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Day35 字节流</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-09-23T02:00:35.000Z" title="发表于 2025-09-23 10:00:35">2025-09-23</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-09-24T03:53:57.247Z" title="更新于 2025-09-24 11:53:57">2025-09-24</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Java%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">Java学习笔记</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">2.2k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>9分钟</span></span><span class="post-meta-separator">|</span><span class="leancloud_visitors" id="/post/day35-byte-stream.html" data-flag-title="Day35 字节流"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span class="leancloud-visitors-count"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h2 id="5-字节流"><a href="#5-字节流" class="headerlink" title="5.字节流"></a>5.字节流</h2><blockquote>
+<p>应用场景：操作二进制数据（音频、视频、图片）</p>
+</blockquote>
+<blockquote>
+<p>abstract class InputStream 	– 字节输入流的基类（抽象类）</p>
+<p>abstract class OutputStream  – 字节输出流的基类（抽象类）</p>
+</blockquote>
+<blockquote>
+<p>class FileInputStream extends InputStream 		– 文件字节输入流  基础流</p>
+<p>class FileOutputStream extends OutputStream  – 文件字节输出流</p>
+</blockquote>
+<blockquote>
+<p>class FilterInputStream extends InputStream 	 	– 过滤器字节输入流   一般不使用</p>
+<p>class FilterOutputStream extends OutputStream   – 过滤器字节输出流</p>
+</blockquote>
+<blockquote>
+<p>class BufferedInputStream extends FilterInputStream        – 带缓冲区的字节输入流  处理流</p>
+<p>class BufferedOutputStream extends FilterOutputStream  – 带缓冲区的字节输出流</p>
+<p>默认缓冲区大小：8192字节</p>
+</blockquote>
+<blockquote>
+<p>注意：处理流里包含基础流</p>
+</blockquote>
+<p><img src="/img/java-notes/day35/%E5%AD%97%E8%8A%82%E6%B5%81%E7%BB%A7%E6%89%BF%E5%9B%BE.png" alt="字节流继承图"></p>
+<h3 id="5-1-利用-文件字节输出流-向文件写入数据FileOutputStream"><a href="#5-1-利用-文件字节输出流-向文件写入数据FileOutputStream" class="headerlink" title="5.1 利用 文件字节输出流 向文件写入数据FileOutputStream"></a>5.1 利用 文件字节输出流 向文件写入数据FileOutputStream</h3><blockquote>
+<p>1)不处理异常的方式</p>
+<p>2)文件存在的情况</p>
+<p>3)文件不存在的情况</p>
+<p>经验：所有的输出流，文件不存在的情况都会创建文件</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test01</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//1.创建流对象</span></span><br><span class="line">		<span class="type">FileOutputStream</span> <span class="variable">fos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;io.txt&quot;</span>);</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//2.写入数据</span></span><br><span class="line">		<span class="comment">//fos.write(97);//写入UniCode码</span></span><br><span class="line">		<span class="comment">//fos.write(&quot;123abc&quot;.getBytes());//写入byte数组</span></span><br><span class="line">		fos.write(<span class="string">&quot;123abc&quot;</span>.getBytes(), <span class="number">2</span>, <span class="number">3</span>);<span class="comment">//写入byte数组、偏移量、写入长度</span></span><br><span class="line">		</span><br><span class="line">		<span class="comment">//3.关闭资源</span></span><br><span class="line">		fos.close();</span><br><span class="line">		</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<ol start="4">
+<li>在文件末尾追加内容</li>
+</ol>
+<p>经验：在文件末尾追加考虑基础流的构造方法</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test02</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//1.创建流对象 + 设置在文件末尾追加</span></span><br><span class="line">		<span class="type">FileOutputStream</span> <span class="variable">fos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;io.txt&quot;</span>,<span class="literal">true</span>);</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//2.写入数据</span></span><br><span class="line">		fos.write(<span class="string">&quot;123abc&quot;</span>.getBytes());<span class="comment">//写入byte数组</span></span><br><span class="line">		</span><br><span class="line">		<span class="comment">//3.关闭资源</span></span><br><span class="line">		fos.close();</span><br><span class="line">		</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<ol start="5">
+<li>处理异常</li>
+</ol>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test03</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">		</span><br><span class="line">		</span><br><span class="line">		<span class="type">FileOutputStream</span> <span class="variable">fos</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line">			<span class="comment">//1.创建流对象 + 设置在文件末尾追加</span></span><br><span class="line">			fos = <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;io.txt&quot;</span>,<span class="literal">true</span>);</span><br><span class="line">			</span><br><span class="line">			<span class="comment">//2.写入数据</span></span><br><span class="line">			fos.write(<span class="string">&quot;123abc&quot;</span>.getBytes());<span class="comment">//写入byte数组</span></span><br><span class="line">			</span><br><span class="line">		&#125; <span class="keyword">catch</span> (FileNotFoundException e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">			</span><br><span class="line">			<span class="comment">//3.关闭资源</span></span><br><span class="line">			<span class="keyword">if</span>(fos != <span class="literal">null</span>)&#123;</span><br><span class="line">				<span class="keyword">try</span> &#123;</span><br><span class="line">					fos.close();</span><br><span class="line">				&#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">					e.printStackTrace();</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;		</span><br><span class="line">		</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-2-利用-文件字节输入流-读取文件里的数据FileInputStream"><a href="#5-2-利用-文件字节输入流-读取文件里的数据FileInputStream" class="headerlink" title="5.2 利用 文件字节输入流 读取文件里的数据FileInputStream"></a>5.2 利用 文件字节输入流 读取文件里的数据FileInputStream</h3><blockquote>
+<p>1)不处理异常的方式</p>
+<p>2)文件存在的情况</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test04</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//1.创建流对象</span></span><br><span class="line">		<span class="type">FileInputStream</span> <span class="variable">fis</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileInputStream</span>(<span class="string">&quot;io.txt&quot;</span>);</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//2.读取数据</span></span><br><span class="line">		<span class="comment">//read()：一个字节一个字节的读取数据，读取到文件末尾返回-1</span></span><br><span class="line">		<span class="comment">//int read = fis.read();</span></span><br><span class="line">		<span class="comment">//System.out.println(read);</span></span><br><span class="line">        </span><br><span class="line">        <span class="type">int</span> read;</span><br><span class="line">		<span class="keyword">while</span>((read = fis.read()) != -<span class="number">1</span>)&#123;</span><br><span class="line">			System.out.println((<span class="type">char</span>)read);</span><br><span class="line">		&#125;</span><br><span class="line">				</span><br><span class="line">		<span class="comment">//3.关闭资源</span></span><br><span class="line">		fis.close();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<ol start="3">
+<li>文件不存在</li>
+</ol>
+<p>经验：所有文件输入流，在文件不存在的情况下都会报错 – FileNotFoundException</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test06</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException&#123;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//1.创建流对象</span></span><br><span class="line">		<span class="type">FileInputStream</span> <span class="variable">fis</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileInputStream</span>(<span class="string">&quot;io.txt&quot;</span>);</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//2.读取数据</span></span><br><span class="line">		<span class="comment">//read(bs)：读取bs长度的数据，并把数据放入数组，返回读取到的有效字节数，如果读取到文件末尾则返回-1</span></span><br><span class="line">		<span class="type">byte</span>[] bs = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">1024</span>];</span><br><span class="line">		<span class="type">int</span> len;</span><br><span class="line">		<span class="keyword">while</span>((len = fis.read(bs)) != -<span class="number">1</span>)&#123;</span><br><span class="line">			System.out.println(<span class="keyword">new</span> <span class="title class_">String</span>(bs, <span class="number">0</span>, len));</span><br><span class="line">		&#125;	</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//3.关闭资源</span></span><br><span class="line">		fis.close();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<ol start="4">
+<li>处理异常</li>
+</ol>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test07</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">		</span><br><span class="line">		<span class="type">FileInputStream</span> <span class="variable">fis</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line">			<span class="comment">//1.创建流对象</span></span><br><span class="line">			fis = <span class="keyword">new</span> <span class="title class_">FileInputStream</span>(<span class="string">&quot;io.txt&quot;</span>);</span><br><span class="line">			</span><br><span class="line">			<span class="comment">//2.读取数据</span></span><br><span class="line">			<span class="comment">//read(bs)：读取bs长度的数据，并把数据放入数组，返回读取到的有效字节数，如果读取到文件末尾则返回-1</span></span><br><span class="line">			<span class="type">byte</span>[] bs = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">1024</span>];</span><br><span class="line">			<span class="type">int</span> len;</span><br><span class="line">			<span class="keyword">while</span>((len = fis.read(bs)) != -<span class="number">1</span>)&#123;</span><br><span class="line">				System.out.println(<span class="keyword">new</span> <span class="title class_">String</span>(bs, <span class="number">0</span>, len));</span><br><span class="line">			&#125;</span><br><span class="line">			</span><br><span class="line">		&#125; <span class="keyword">catch</span> (FileNotFoundException e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">			<span class="comment">//3.关闭资源</span></span><br><span class="line">			<span class="keyword">if</span>(fis != <span class="literal">null</span>)&#123;</span><br><span class="line">				<span class="keyword">try</span> &#123;</span><br><span class="line">					fis.close();</span><br><span class="line">				&#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">					e.printStackTrace();</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-3-深入-带缓冲区的字节输出流-FileOutputStream"><a href="#5-3-深入-带缓冲区的字节输出流-FileOutputStream" class="headerlink" title="5.3 深入 带缓冲区的字节输出流 FileOutputStream"></a>5.3 深入 带缓冲区的字节输出流 FileOutputStream</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test04</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException&#123;</span><br><span class="line">		</span><br><span class="line">		<span class="type">FileOutputStream</span> <span class="variable">fos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;io.txt&quot;</span>);  基础流</span><br><span class="line">		<span class="comment">//写几次，就和硬盘交互几次  -- 6次（内存与硬盘交互的次数）</span></span><br><span class="line">		fos.write(<span class="string">&quot;1&quot;</span>.getBytes());</span><br><span class="line">		fos.write(<span class="string">&quot;2&quot;</span>.getBytes());</span><br><span class="line">		fos.write(<span class="string">&quot;3&quot;</span>.getBytes());</span><br><span class="line">		fos.write(<span class="string">&quot;a&quot;</span>.getBytes());</span><br><span class="line">		fos.write(<span class="string">&quot;b&quot;</span>.getBytes());</span><br><span class="line">		fos.write(<span class="string">&quot;c&quot;</span>.getBytes());</span><br><span class="line">		fos.close();</span><br><span class="line">		</span><br><span class="line">		<span class="type">BufferedOutputStream</span> <span class="variable">bos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedOutputStream</span>(<span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;io.txt&quot;</span>));</span><br><span class="line">		<span class="comment">//将数据写入到字节缓冲数组中 -- 1次（内存与硬盘交互的次数）</span></span><br><span class="line">		bos.write(<span class="string">&quot;1&quot;</span>.getBytes());</span><br><span class="line">		bos.write(<span class="string">&quot;2&quot;</span>.getBytes());</span><br><span class="line">		bos.write(<span class="string">&quot;3&quot;</span>.getBytes());</span><br><span class="line">		bos.write(<span class="string">&quot;a&quot;</span>.getBytes());</span><br><span class="line">		bos.write(<span class="string">&quot;b&quot;</span>.getBytes());</span><br><span class="line">		bos.write(<span class="string">&quot;c&quot;</span>.getBytes());</span><br><span class="line">		<span class="comment">//关闭时才将数据写入到文件中</span></span><br><span class="line">		bos.close();</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//默认缓冲区 -- 8192个字节(8*1024)</span></span><br><span class="line">		<span class="type">BufferedOutputStream</span> <span class="variable">bos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedOutputStream</span>(<span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;io.txt&quot;</span>));</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//自定义缓冲区大小 -- 2048个字节</span></span><br><span class="line">		<span class="type">BufferedOutputStream</span> <span class="variable">bos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedOutputStream</span>(<span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;io.txt&quot;</span>), <span class="number">2048</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-4-利用-带缓冲区的字节输出流-向文件写入数据BufferedOutputStream"><a href="#5-4-利用-带缓冲区的字节输出流-向文件写入数据BufferedOutputStream" class="headerlink" title="5.4 利用 带缓冲区的字节输出流 向文件写入数据BufferedOutputStream"></a>5.4 利用 带缓冲区的字节输出流 向文件写入数据BufferedOutputStream</h3><blockquote>
+<p>1)不处理异常的方式</p>
+<p>2)文件存在的情况</p>
+<p>3)文件不存在的情况</p>
+<p>经验：所有的输出流，文件不存在的情况都会创建文件</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test01</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//1.创建流对象                     处理流</span></span><br><span class="line">		<span class="type">BufferedOutputStream</span> <span class="variable">bos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedOutputStream</span>(<span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;io.txt&quot;</span>));</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//2.写入数据</span></span><br><span class="line">		bos.write(<span class="string">&quot;123abc&quot;</span>.getBytes());</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//3.关闭资源</span></span><br><span class="line">		bos.close();</span><br><span class="line">		</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>4)在文件末尾追加内容</p>
+<p>经验：在文件末尾追加考虑基础流的构造方法</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test02</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//1.创建流对象</span></span><br><span class="line">		<span class="type">BufferedOutputStream</span> <span class="variable">bos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedOutputStream</span>(<span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;io.txt&quot;</span>,<span class="literal">true</span>));</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//2.写入数据</span></span><br><span class="line">		bos.write(<span class="string">&quot;123abc&quot;</span>.getBytes());</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//3.关闭资源</span></span><br><span class="line">		bos.close();</span><br><span class="line">		</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>5)处理异常的方式</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test03</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">		</span><br><span class="line">		</span><br><span class="line">		<span class="type">BufferedOutputStream</span> <span class="variable">bos</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line">			<span class="comment">//1.创建流对象</span></span><br><span class="line">			bos = <span class="keyword">new</span> <span class="title class_">BufferedOutputStream</span>(<span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;io.txt&quot;</span>,<span class="literal">true</span>));</span><br><span class="line">			<span class="comment">//2.写入数据</span></span><br><span class="line">			bos.write(<span class="string">&quot;123abc&quot;</span>.getBytes());</span><br><span class="line">			</span><br><span class="line">		&#125; <span class="keyword">catch</span> (FileNotFoundException e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">			<span class="comment">//3.关闭资源</span></span><br><span class="line">			<span class="keyword">if</span>(bos != <span class="literal">null</span>)&#123;</span><br><span class="line">				<span class="keyword">try</span> &#123;</span><br><span class="line">					bos.close();</span><br><span class="line">				&#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">					e.printStackTrace();</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;		</span><br><span class="line">		</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-5-手撕BufferedOutputStream底层源码"><a href="#5-5-手撕BufferedOutputStream底层源码" class="headerlink" title="5.5 手撕BufferedOutputStream底层源码"></a>5.5 手撕BufferedOutputStream底层源码</h3><blockquote>
+<p>缓冲流起到缓冲作用，先写入缓冲区，达到一定量，再写入磁盘中，提高了IO性能，同时也提高了CPU使用率</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">FilterOutputStream</span> <span class="keyword">extends</span> <span class="title class_">OutputStream</span> &#123;</span><br><span class="line">    </span><br><span class="line">	<span class="keyword">protected</span> OutputStream out;<span class="comment">//0x001</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">//out - 0x001</span></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">FilterOutputStream</span><span class="params">(OutputStream out)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.out = out;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//b - [65]</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">write</span><span class="params">(<span class="type">byte</span>[] b)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="built_in">this</span>.write(b, <span class="number">0</span>, b.length);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@SuppressWarnings(&quot;try&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">close</span><span class="params">()</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="keyword">try</span> (<span class="type">OutputStream</span> <span class="variable">ostream</span> <span class="operator">=</span> out) &#123;</span><br><span class="line">            flush();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">BufferedOutputStream</span> <span class="keyword">extends</span> <span class="title class_">FilterOutputStream</span> &#123;</span><br><span class="line">    <span class="comment">//缓冲区数组</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="type">byte</span>[] buf;<span class="comment">//new byte[8192]</span></span><br><span class="line">    <span class="comment">//缓冲区存放数据的个数</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="type">int</span> count;<span class="comment">//1</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">//out - 0x001</span></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">BufferedOutputStream</span><span class="params">(OutputStream out)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>(out, <span class="number">8192</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//out - 0x001</span></span><br><span class="line">    <span class="comment">//size - 8192</span></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">BufferedOutputStream</span><span class="params">(OutputStream out, <span class="type">int</span> size)</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>(out);</span><br><span class="line">        <span class="keyword">if</span> (size &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>(<span class="string">&quot;Buffer size &lt;= 0&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        buf = <span class="keyword">new</span> <span class="title class_">byte</span>[size];</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//b - [65]</span></span><br><span class="line">    <span class="comment">//off - 0</span></span><br><span class="line">    <span class="comment">//len - 1</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title function_">write</span><span class="params">(<span class="type">byte</span> b[], <span class="type">int</span> off, <span class="type">int</span> len)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="comment">//判断现在需要写出的数据长度是否大于缓冲区数组</span></span><br><span class="line">        <span class="keyword">if</span> (len &gt;= buf.length) &#123;<span class="comment">//1 &gt;= 8192</span></span><br><span class="line">            <span class="comment">//将缓冲区数组里的数据写入到文件,将缓冲区清空</span></span><br><span class="line">            flushBuffer();</span><br><span class="line">            <span class="comment">//将线程需要写出的数据写入到文件</span></span><br><span class="line">            out.write(b, off, len);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//判断现在需要写出的数据长度 超过了缓冲区剩余的存储长度</span></span><br><span class="line">        <span class="keyword">if</span> (len &gt; buf.length - count) &#123;<span class="comment">//1 &gt; 8192-0</span></span><br><span class="line">            <span class="comment">//将缓冲区数组里的数据写入到文件,将缓冲区清空</span></span><br><span class="line">            flushBuffer();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//将数据写入到缓冲区数组里</span></span><br><span class="line">        System.arraycopy(b, off, buf, count, len);</span><br><span class="line">        <span class="comment">//更新缓冲区数组数据个数</span></span><br><span class="line">        count += len;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">flushBuffer</span><span class="params">()</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="comment">//count &gt; 0说明缓冲区数组里有数据</span></span><br><span class="line">        <span class="keyword">if</span> (count &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="built_in">super</span>.out.write(buf, <span class="number">0</span>, count);<span class="comment">//调用的是FileOutputSteam的write()</span></span><br><span class="line">            count = <span class="number">0</span>;<span class="comment">//缓冲区清空</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title function_">flush</span><span class="params">()</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="comment">//将缓冲区数组里的数据写入到文件,将缓冲区清空</span></span><br><span class="line">        flushBuffer();</span><br><span class="line">        <span class="built_in">super</span>.out.flush();<span class="comment">//调用的是FileOutputSteam的close() -- 关流</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">FileOutputStream</span> <span class="variable">fos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;io.txt&quot;</span>);<span class="comment">//0x001</span></span><br><span class="line"><span class="type">BufferedOutputStream</span> <span class="variable">bos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedOutputStream</span>(fos);</span><br><span class="line"></span><br><span class="line">bos.write(<span class="string">&quot;1&quot;</span>.getBytes());</span><br><span class="line">bos.write(<span class="string">&quot;2&quot;</span>.getBytes());</span><br><span class="line">bos.write(<span class="string">&quot;3&quot;</span>.getBytes());</span><br><span class="line">bos.write(<span class="string">&quot;a&quot;</span>.getBytes());</span><br><span class="line">bos.write(<span class="string">&quot;b&quot;</span>.getBytes());</span><br><span class="line">bos.write(<span class="string">&quot;c&quot;</span>.getBytes());</span><br><span class="line"></span><br><span class="line">bos.close();</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-6-利用-带有缓冲区的字节输入流-读取文件里的数据-BufferedInputStream"><a href="#5-6-利用-带有缓冲区的字节输入流-读取文件里的数据-BufferedInputStream" class="headerlink" title="5.6 利用 带有缓冲区的字节输入流 读取文件里的数据 BufferedInputStream"></a>5.6 利用 带有缓冲区的字节输入流 读取文件里的数据 BufferedInputStream</h3><blockquote>
+<ol>
+<li><p>不处理异常</p>
+</li>
+<li><p>文件存在</p>
+</li>
+<li><p>文件不存在</p>
+</li>
+</ol>
+<p>经验：所有输入流，当文件不存在都会报错</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test05</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//1.创建流对象 （默认缓冲区大小：8192字节）</span></span><br><span class="line">		<span class="type">BufferedInputStream</span> <span class="variable">bis</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedInputStream</span>(<span class="keyword">new</span> <span class="title class_">FileInputStream</span>(<span class="string">&quot;io.txt&quot;</span>));</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//1.创建流对象 （自定义缓冲区大小：2048字节）</span></span><br><span class="line">		<span class="comment">//BufferedInputStream bis = new BufferedInputStream(new FileInputStream(&quot;io.txt&quot;),2048);</span></span><br><span class="line">		</span><br><span class="line">		<span class="comment">//2.读取数据 </span></span><br><span class="line">		<span class="type">byte</span>[] bs = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">1024</span>];</span><br><span class="line">		<span class="type">int</span> len;</span><br><span class="line">		<span class="keyword">while</span>((len = bis.read(bs)) != -<span class="number">1</span>)&#123;</span><br><span class="line">			System.out.println(<span class="keyword">new</span> <span class="title class_">String</span>(bs, <span class="number">0</span>, len));</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//3.关闭资源</span></span><br><span class="line">		bis.close();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-7-拷贝文件"><a href="#5-7-拷贝文件" class="headerlink" title="5.7 拷贝文件"></a>5.7 拷贝文件</h3><blockquote>
+<p>思路：读取源文件，写入目标文件</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Copy</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">		</span><br><span class="line">		<span class="type">BufferedInputStream</span> <span class="variable">bis</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedInputStream</span>(<span class="keyword">new</span> <span class="title class_">FileInputStream</span>(<span class="string">&quot;麻生希.mp4&quot;</span>));</span><br><span class="line">		<span class="type">BufferedOutputStream</span> <span class="variable">bos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedOutputStream</span>(<span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;copy.mp4&quot;</span>));</span><br><span class="line">		</span><br><span class="line">		<span class="type">byte</span>[] bs = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">1024</span>];</span><br><span class="line">		<span class="type">int</span> len;</span><br><span class="line">		<span class="keyword">while</span>((len = bis.read(bs)) != -<span class="number">1</span>)&#123;</span><br><span class="line">			bos.write(bs, <span class="number">0</span>, len);</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		bis.close();</span><br><span class="line">		bos.close();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://pcb178.site">pcb</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://pcb178.site/post/day35-byte-stream.html">https://pcb178.site/post/day35-byte-stream.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://pcb178.site" target="_blank">java悍匪</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%AD%97%E8%8A%82%E6%B5%81/">字节流</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="/pluginsSrc/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="/pluginsSrc/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/post/day36-character-stream.html" title="Day36 字符流"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Day36 字符流</div></div><div class="info-2"><div class="info-item-1">Day361.字符流 应用场景：操作纯文本数据   注意：字符流 &#x3D; 字节流+编译器 编译器：可以识别中文字符和非中文字符，非中文字符获取1个字节（一个字节&#x3D;一个字符），编译器会根据编码格式获取中文字符对应的字节数（GBK获取两个字节，UTF-8获取三个字节）   abstract class Reader – 字符输入流的基类（抽象类） abstract class Writer – 字符输出流的基类（抽象类）   class InputStreamReader  extends Reader – 字符输入转换流 class OutputStreamWriter extends Writer  – 字符输出转换流 特点：将字节流转换为字符流，字符转换流是字节流和字符流的桥梁   class FileReader extends InputStreamReader  – 文件字符输入流 class FileWriter extends OutputStreamWriter  – 文件字符输出流   class BufferedReader extends Re...</div></div></div></a><a class="pagination-related" href="/post/day33-file-io.html" title="Day33 File类、IO流"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Day33 File类、IO流</div></div><div class="info-2"><div class="info-item-1">Day331.File类 File是文件和目录路径名的抽象表示   File只关注文件本身的信息（文件名、是否可读、是否可写…），而不能操作文件里面的内容 对文件里的数据进行操作的是：IO流   需求1：通过程序，获取已知文件的信息  123456789101112131415161718public class Test01 &#123;	public static void main(String[] args) &#123;				//创建file对象(java中两个\\才是\)		File file = new File(&quot;C:\\Users\\何小宝\\Desktop\\hhy.txt&quot;);				System.out.println(&quot;获取文件路径：&quot; + file.getAbsolutePath());		System.out.println(&quot;获取文件名：&quot; + file.getName());		System.out.println(&quot;获取文件是否可读：&quot; + file.canRea...</div></div></div></a></nav><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">pcb</div><div class="author-info-description"><span style="background:linear-gradient(45deg,#f59,#fb0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:bold;">干饭！干饭！</span></div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">34</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">89</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fa-solid fa-bowl-rice"></i><span>冲呀干饭人</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content"><div style="text-align: center; font-size: 14px; line-height: 1.6;">
+<img src="/img/card1.gif" width="120" style="vertical-align: middle; margin: 6px 0; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.15);">
+<br>
+<strong style="background:linear-gradient(45deg,#ff9a9e,#fad0c4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:16px;">干饭时间到！</strong>
+<br>
+<span style="color: #ff6b6b; font-size: 12px;">今日份快乐：一碗热腾腾的猪脚饭~</span>
+</div>
+</div></div><div class="xpand" style="height:200px;"><canvas class="illo" width="800" height="800" style="max-width: 200px; max-height: 200px; touch-action: none; width: 640px; height: 640px;"></canvas></div><script src="https://fastly.jsdelivr.net/gh/xiaopengand/blogCdn@latest/xzxr/twopeople1.js"></script><script src="https://fastly.jsdelivr.net/gh/xiaopengand/blogCdn@latest/xzxr/zdog.dist.js"></script><script id="rendered-js" src="https://fastly.jsdelivr.net/gh/xiaopengand/blogCdn@latest/xzxr/twopeople.js"></script><style>.card-widget.card-announcement {
+  margin: 0;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+canvas {
+  display: block;
+  margin: 0 auto;
+  cursor: move;
+}</style><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E5%AD%97%E8%8A%82%E6%B5%81"><span class="toc-number">1.</span> <span class="toc-text">5.字节流</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E5%88%A9%E7%94%A8-%E6%96%87%E4%BB%B6%E5%AD%97%E8%8A%82%E8%BE%93%E5%87%BA%E6%B5%81-%E5%90%91%E6%96%87%E4%BB%B6%E5%86%99%E5%85%A5%E6%95%B0%E6%8D%AEFileOutputStream"><span class="toc-number">1.1.</span> <span class="toc-text">5.1 利用 文件字节输出流 向文件写入数据FileOutputStream</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E5%88%A9%E7%94%A8-%E6%96%87%E4%BB%B6%E5%AD%97%E8%8A%82%E8%BE%93%E5%85%A5%E6%B5%81-%E8%AF%BB%E5%8F%96%E6%96%87%E4%BB%B6%E9%87%8C%E7%9A%84%E6%95%B0%E6%8D%AEFileInputStream"><span class="toc-number">1.2.</span> <span class="toc-text">5.2 利用 文件字节输入流 读取文件里的数据FileInputStream</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-3-%E6%B7%B1%E5%85%A5-%E5%B8%A6%E7%BC%93%E5%86%B2%E5%8C%BA%E7%9A%84%E5%AD%97%E8%8A%82%E8%BE%93%E5%87%BA%E6%B5%81-FileOutputStream"><span class="toc-number">1.3.</span> <span class="toc-text">5.3 深入 带缓冲区的字节输出流 FileOutputStream</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-4-%E5%88%A9%E7%94%A8-%E5%B8%A6%E7%BC%93%E5%86%B2%E5%8C%BA%E7%9A%84%E5%AD%97%E8%8A%82%E8%BE%93%E5%87%BA%E6%B5%81-%E5%90%91%E6%96%87%E4%BB%B6%E5%86%99%E5%85%A5%E6%95%B0%E6%8D%AEBufferedOutputStream"><span class="toc-number">1.4.</span> <span class="toc-text">5.4 利用 带缓冲区的字节输出流 向文件写入数据BufferedOutputStream</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-5-%E6%89%8B%E6%92%95BufferedOutputStream%E5%BA%95%E5%B1%82%E6%BA%90%E7%A0%81"><span class="toc-number">1.5.</span> <span class="toc-text">5.5 手撕BufferedOutputStream底层源码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-6-%E5%88%A9%E7%94%A8-%E5%B8%A6%E6%9C%89%E7%BC%93%E5%86%B2%E5%8C%BA%E7%9A%84%E5%AD%97%E8%8A%82%E8%BE%93%E5%85%A5%E6%B5%81-%E8%AF%BB%E5%8F%96%E6%96%87%E4%BB%B6%E9%87%8C%E7%9A%84%E6%95%B0%E6%8D%AE-BufferedInputStream"><span class="toc-number">1.6.</span> <span class="toc-text">5.6 利用 带有缓冲区的字节输入流 读取文件里的数据 BufferedInputStream</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-7-%E6%8B%B7%E8%B4%9D%E6%96%87%E4%BB%B6"><span class="toc-number">1.7.</span> <span class="toc-text">5.7 拷贝文件</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day36-character-stream.html" title="Day36 字符流">Day36 字符流</a><time datetime="2025-09-23T02:00:36.000Z" title="发表于 2025-09-23 10:00:36">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day35-byte-stream.html" title="Day35 字节流">Day35 字节流</a><time datetime="2025-09-23T02:00:35.000Z" title="发表于 2025-09-23 10:00:35">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day33-file-io.html" title="Day33 File类、IO流">Day33 File类、IO流</a><time datetime="2025-09-23T02:00:33.000Z" title="发表于 2025-09-23 10:00:33">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day32-thread-pool.html" title="Day32 线程池">Day32 线程池</a><time datetime="2025-09-23T02:00:32.000Z" title="发表于 2025-09-23 10:00:32">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day31-singleton-producer-consumer.html" title="Day31 单例模式 ，生产者消费者模型，仓储模型">Day31 单例模式 ，生产者消费者模型，仓储模型</a><time datetime="2025-09-23T02:00:31.000Z" title="发表于 2025-09-23 10:00:31">2025-09-23</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 By pcb</span></div><div class="footer_custom_text">true</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const initValine = (el, path) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyValine = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const valineConfig = {
+      el: '#vcomment',
+      appId: '',
+      appKey: '',
+      avatar: 'retro',
+      serverURLs: '',
+      emojiMaps: "",
+      visitor: true,
+      ...option,
+      path: isShuoshuo ? path : (option && option.path) || window.location.pathname
+    }
+
+    new Valine(valineConfig)
+  }
+
+  const loadValine = async (el, path) => {
+    if (typeof Valine === 'function') {
+      initValine(el, path)
+    } else {
+      await btf.getScript('/pluginsSrc/valine/dist/Valine.min.js')
+      initValine(el, path)
+    }
+  }
+
+  if (isShuoshuo) {
+    'Valine' === 'Valine'
+      ? window.shuoshuoComment = { loadComment: loadValine }
+      : window.loadOtherComment = loadValine
+    return
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script></div><div class="aplayer no-destroy" data-id="5183531430" data-server="netease" data-type="playlist" data-fixed="true" data-mini="true" data-listFolded="false" data-order="random" data-preload="none" data-autoplay="false" muted></div><canvas id="universe"></canvas><script defer src="/js/universe.js"></script><script src="/js/daily-swap.js"></script><div class="sticky_layout">
+  <div id="clock"></div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.js';
+    document.body.appendChild(s);
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const clock = document.querySelector('#clock');
+    if (!clock) return;
+
+    // 1. 隐藏任何包含“undefined”的元素
+    clock.querySelectorAll('*').forEach(el => {
+      if (el.textContent.includes('undefined')) {
+        el.style.display = 'none';
+      }
+    });
+
+    // 2. 强制样式压缩
+    clock.style.cssText += `
+      max-width: 100% !important;
+      white-space: normal !important;
+      word-break: break-all !important;
+      font-size: 14px !important;
+      line-height: 1.5 !important;
+      padding: 10px 8px !important;
+      background: rgba(255,255,255,.75) !important;
+      border-radius: 12px !important;
+      backdrop-filter: blur(6px) !important;
+      box-sizing: border-box !important;
+    `;
+  });
+</script>
+<canvas class="fireworks" mobile="true"></canvas><script src="/pluginsSrc/butterfly-extsrc/dist/fireworks.min.js"></script><script defer="defer" id="fluttering_ribbon" mobile="true" src="/pluginsSrc/butterfly-extsrc/dist/canvas-fluttering-ribbon.min.js"></script><script src="/pluginsSrc/butterfly-extsrc/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><link rel="stylesheet" href="/pluginsSrc/aplayer/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="/pluginsSrc/aplayer/dist/APlayer.min.js"></script><script src="/pluginsSrc/butterfly-extsrc/metingjs/dist/Meting.min.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章..." type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></div><!-- hexo injector body_end start --><script data-pjax>
+  function butterfly_clock_anzhiyu_injector_config(){
+    var parent_div_git = document.getElementsByClassName('sticky_layout')[0];
+    var item_html = '<div class="card-widget card-clock"><div class="card-glass"><div class="card-background"><div class="card-content"><div id="hexo_electric_clock"><img class="entered loading" id="card-clock-loading" src="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/loading.gif" style="height: 120px; width: 100%;" data-ll-status="loading"/></div></div></div></div></div>';
+    console.log('已挂载butterfly_clock_anzhiyu')
+    if(parent_div_git) {
+      parent_div_git.insertAdjacentHTML("afterbegin",item_html)
+    }
+  }
+  var elist = 'undefined'.split(',');
+  var cpage = location.pathname;
+  var epage = 'all';
+  var qweather_key = 'b16a1fa0e63c46a4b8f28abfb06ae3fe';
+  var gaud_map_key = 'e2b04289e870b005374ee030148d64fd&s=rsv3';
+  var baidu_ak_key = 'undefined';
+  var flag = 0;
+  var clock_rectangle = '104.07,30.57';
+  var clock_default_rectangle_enable = 'true';
+
+  for (var i=0;i<elist.length;i++){
+    if (cpage.includes(elist[i])){
+      flag++;
+    }
+  }
+
+  if ((epage ==='all')&&(flag == 0)){
+    butterfly_clock_anzhiyu_injector_config();
+  }
+  else if (epage === cpage){
+    butterfly_clock_anzhiyu_injector_config();
+  }
+  </script><script src="https://widget.qweather.net/simple/static/js/he-simple-common.js?v=2.0"></script><script data-pjax src="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.js"></script><!-- hexo injector body_end end --><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body></html>
