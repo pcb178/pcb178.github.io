@@ -1,0 +1,519 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Day30 线程安全、synchronized、Lock锁 | java悍匪</title><meta name="author" content="pcb"><meta name="copyright" content="pcb"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="彻底掌握多线程并发编程的核心——线程安全。深入理解 synchronized 关键字的使用与底层原理（monitor 机制、锁升级过程）；对比 synchronized 与 Lock 的区别，熟练运用 ReentrantLock 实现线程同步；剖析常见的线程安全问题（重票、超卖）及其解决方案，为高并发场景下的程序稳定运行保驾护航。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Day30 线程安全、synchronized、Lock锁">
+<meta property="og:url" content="https://pcb178.site/post/day30-thread-safety.html">
+<meta property="og:site_name" content="java悍匪">
+<meta property="og:description" content="彻底掌握多线程并发编程的核心——线程安全。深入理解 synchronized 关键字的使用与底层原理（monitor 机制、锁升级过程）；对比 synchronized 与 Lock 的区别，熟练运用 ReentrantLock 实现线程同步；剖析常见的线程安全问题（重票、超卖）及其解决方案，为高并发场景下的程序稳定运行保驾护航。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pcb178.site/img/avatar.jpg">
+<meta property="article:published_time" content="2025-09-23T02:00:30.000Z">
+<meta property="article:modified_time" content="2025-09-24T03:27:46.425Z">
+<meta property="article:author" content="pcb">
+<meta property="article:tag" content="线程安全">
+<meta property="article:tag" content="synchronized">
+<meta property="article:tag" content="Lock锁">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pcb178.site/img/avatar.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Day30 线程安全、synchronized、Lock锁",
+  "url": "https://pcb178.site/post/day30-thread-safety.html",
+  "image": "https://pcb178.site/img/avatar.jpg",
+  "datePublished": "2025-09-23T02:00:30.000Z",
+  "dateModified": "2025-09-24T03:27:46.425Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "pcb",
+      "url": "https://pcb178.site"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://pcb178.site/post/day30-thread-safety.html"><link rel="preconnect"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="/pluginsSrc/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":3,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: '/pluginsSrc/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Day30 线程安全、synchronized、Lock锁',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><link rel="stylesheet" href="/css/universe.css"><link rel="stylesheet" href="/css/banner-fullscreen.css"><link rel="stylesheet" href="/css/font-bigger.css"><link rel="stylesheet" href="/css/search-style.css"><link rel="stylesheet" href="/css/footer-transparent.css"><!-- hexo injector head_end start --><link rel="stylesheet" href="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.css" /><!-- hexo injector head_end end --><meta name="generator" content="Hexo 7.3.0"></head><body><div id="web_bg" style="background: &lt;%= theme.custom_images.banner %&gt;;"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">32</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">87</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 导航</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间线</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-fish"></i><span> 摸鱼</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/moyu/"><i class="fa-fw fas fa-gamepad"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/tools/"><i class="fa-fw fas fa-tools"></i><span> 工具</span></a></li><li><a class="site-page child" href="/demo/"><i class="fa-fw fas fa-anchor"></i><span> 动画</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: &lt;%= theme.custom_images.banner %&gt;;"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">java悍匪</span></a><a class="nav-page-title" href="/"><span class="site-name">Day30 线程安全、synchronized、Lock锁</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 导航</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间线</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-fish"></i><span> 摸鱼</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/moyu/"><i class="fa-fw fas fa-gamepad"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/tools/"><i class="fa-fw fas fa-tools"></i><span> 工具</span></a></li><li><a class="site-page child" href="/demo/"><i class="fa-fw fas fa-anchor"></i><span> 动画</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Day30 线程安全、synchronized、Lock锁</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-09-23T02:00:30.000Z" title="发表于 2025-09-23 10:00:30">2025-09-23</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-09-24T03:27:46.425Z" title="更新于 2025-09-24 11:27:46">2025-09-24</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Java%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">Java学习笔记</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">4.5k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>17分钟</span></span><span class="post-meta-separator">|</span><span class="leancloud_visitors" id="/post/day30-thread-safety.html" data-flag-title="Day30 线程安全、synchronized、Lock锁"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span class="leancloud-visitors-count"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="Day30"><a href="#Day30" class="headerlink" title="Day30"></a>Day30</h1><h2 id="1-作业"><a href="#1-作业" class="headerlink" title="1.作业"></a>1.作业</h2><h3 id="1-1-线程类解决"><a href="#1-1-线程类解决" class="headerlink" title="1.1 线程类解决"></a>1.1 线程类解决</h3><blockquote>
+<p>1.计算任务，一个包含了2万个整数的数组，分拆了多个线程来进行并行计算，最后汇总出计算的结果。</p>
+</blockquote>
+<blockquote>
+<p>注意：使用线程类的方式解决该需求</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test01</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException &#123;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//创建数组</span></span><br><span class="line">		<span class="type">int</span>[] arr = <span class="keyword">new</span> <span class="title class_">int</span>[<span class="number">20000</span>];</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//初始化数组数据 -- &#123;1,2,3,....,20000&#125;</span></span><br><span class="line">		<span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; arr.length; i++) &#123;</span><br><span class="line">			arr[i] = i+<span class="number">1</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//创建线程</span></span><br><span class="line">		<span class="type">MyThread</span> <span class="variable">t1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MyThread</span>(<span class="number">0</span>, <span class="number">5000</span>, arr);</span><br><span class="line">		<span class="type">MyThread</span> <span class="variable">t2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MyThread</span>(<span class="number">5000</span>, <span class="number">10000</span>, arr);</span><br><span class="line">		<span class="type">MyThread</span> <span class="variable">t3</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MyThread</span>(<span class="number">10000</span>, <span class="number">15000</span>, arr);</span><br><span class="line">		<span class="type">MyThread</span> <span class="variable">t4</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MyThread</span>(<span class="number">15000</span>, <span class="number">20000</span>, arr);</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//启动线程</span></span><br><span class="line">		t1.start();</span><br><span class="line">		t2.start();</span><br><span class="line">		t3.start();</span><br><span class="line">		t4.start();</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//问题出现原因：四个子线程还没有运行完毕，就被主线程抢到CPU资源了</span></span><br><span class="line">		<span class="comment">//解决思路：让四个子线程执行完毕后，主线程才能执行 --- 主线程阻塞！！！</span></span><br><span class="line">		</span><br><span class="line">		<span class="comment">//解决方案一：</span></span><br><span class="line"><span class="comment">//		Thread.sleep(6);</span></span><br><span class="line">		</span><br><span class="line">		<span class="comment">//解决方案二：</span></span><br><span class="line"><span class="comment">//		while(t1.isFlag() || t2.isFlag() || t3.isFlag() || t4.isFlag())&#123;&#125;</span></span><br><span class="line">		</span><br><span class="line">		<span class="comment">//解决方案三：</span></span><br><span class="line">		t1.join();</span><br><span class="line">		t2.join();</span><br><span class="line">		t3.join();</span><br><span class="line">		t4.join();</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//合并子线程的运行结果</span></span><br><span class="line">		<span class="type">int</span> <span class="variable">result</span> <span class="operator">=</span> t1.getSum() + t2.getSum() + t3.getSum() + t4.getSum();</span><br><span class="line">		System.out.println(result);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MyThread</span> <span class="keyword">extends</span> <span class="title class_">Thread</span>&#123;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">private</span> <span class="type">int</span> startIndex;</span><br><span class="line">	<span class="keyword">private</span> <span class="type">int</span> endIndex;</span><br><span class="line">	<span class="keyword">private</span> <span class="type">int</span>[] arr;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="title function_">MyThread</span><span class="params">(<span class="type">int</span> startIndex, <span class="type">int</span> endIndex, <span class="type">int</span>[] arr)</span> &#123;</span><br><span class="line">		<span class="built_in">this</span>.startIndex = startIndex;</span><br><span class="line">		<span class="built_in">this</span>.endIndex = endIndex;</span><br><span class="line">		<span class="built_in">this</span>.arr = arr;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> <span class="type">int</span> sum;</span><br><span class="line">	<span class="keyword">private</span> <span class="type">boolean</span> <span class="variable">flag</span> <span class="operator">=</span> <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> startIndex; i &lt; endIndex; i++) &#123;</span><br><span class="line">			sum += arr[i];</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		flag = <span class="literal">false</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="type">int</span> <span class="title function_">getSum</span><span class="params">()</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> sum;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">isFlag</span><span class="params">()</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> flag;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-任务类解决"><a href="#1-2-任务类解决" class="headerlink" title="1.2 任务类解决"></a>1.2 任务类解决</h3><blockquote>
+<p>注意：使用任务类的方式解决该需求</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test01</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException &#123;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//创建数组</span></span><br><span class="line">		<span class="type">int</span>[] arr = <span class="keyword">new</span> <span class="title class_">int</span>[<span class="number">20000</span>];</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//初始化数组数据 -- &#123;1,2,3,....,20000&#125;</span></span><br><span class="line">		<span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; arr.length; i++) &#123;</span><br><span class="line">			arr[i] = i+<span class="number">1</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//创建任务</span></span><br><span class="line">		<span class="type">Task</span> <span class="variable">task1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Task</span>(<span class="number">0</span>, <span class="number">5000</span>, arr);</span><br><span class="line">		<span class="type">Task</span> <span class="variable">task2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Task</span>(<span class="number">5000</span>, <span class="number">10000</span>, arr);</span><br><span class="line">		<span class="type">Task</span> <span class="variable">task3</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Task</span>(<span class="number">10000</span>, <span class="number">15000</span>, arr);</span><br><span class="line">		<span class="type">Task</span> <span class="variable">task4</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Task</span>(<span class="number">15000</span>, <span class="number">20000</span>, arr);</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//创建线程</span></span><br><span class="line">		<span class="type">Thread</span> <span class="variable">t1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(task1);</span><br><span class="line">		<span class="type">Thread</span> <span class="variable">t2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(task2);</span><br><span class="line">		<span class="type">Thread</span> <span class="variable">t3</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(task3);</span><br><span class="line">		<span class="type">Thread</span> <span class="variable">t4</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(task4);</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//启动线程</span></span><br><span class="line">		t1.start();</span><br><span class="line">		t2.start();</span><br><span class="line">		t3.start();</span><br><span class="line">		t4.start();</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//问题出现原因：四个子线程还没有运行完毕，就被主线程抢到CPU资源了</span></span><br><span class="line">		<span class="comment">//解决思路：让四个子线程执行完毕后，主线程才能执行 --- 主线程阻塞！！！</span></span><br><span class="line">		</span><br><span class="line">		<span class="comment">//解决方案一：</span></span><br><span class="line"><span class="comment">//		Thread.sleep(6);</span></span><br><span class="line">		</span><br><span class="line">		<span class="comment">//解决方案二：</span></span><br><span class="line"><span class="comment">//		while(task1.isFlag() || task2.isFlag() || task3.isFlag() || task4.isFlag())&#123;&#125;</span></span><br><span class="line">		</span><br><span class="line">		<span class="comment">//解决方案三：</span></span><br><span class="line">		t1.join();</span><br><span class="line">		t2.join();</span><br><span class="line">		t3.join();</span><br><span class="line">		t4.join();</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//合并任务的运行结果</span></span><br><span class="line">		<span class="type">int</span> <span class="variable">result</span> <span class="operator">=</span> task1.getSum() + task2.getSum() + task3.getSum() + task4.getSum();</span><br><span class="line">		System.out.println(result);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Task</span> <span class="keyword">implements</span> <span class="title class_">Runnable</span>&#123;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">private</span> <span class="type">int</span> startIndex;</span><br><span class="line">	<span class="keyword">private</span> <span class="type">int</span> endIndex;</span><br><span class="line">	<span class="keyword">private</span> <span class="type">int</span>[] arr;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="title function_">Task</span><span class="params">(<span class="type">int</span> startIndex, <span class="type">int</span> endIndex, <span class="type">int</span>[] arr)</span> &#123;</span><br><span class="line">		<span class="built_in">this</span>.startIndex = startIndex;</span><br><span class="line">		<span class="built_in">this</span>.endIndex = endIndex;</span><br><span class="line">		<span class="built_in">this</span>.arr = arr;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">private</span> <span class="type">int</span> sum;</span><br><span class="line">	<span class="keyword">private</span> <span class="type">boolean</span> <span class="variable">flag</span> <span class="operator">=</span> <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">		<span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> startIndex; i &lt; endIndex; i++) &#123;</span><br><span class="line">			sum += arr[i];</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		flag = <span class="literal">false</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="type">int</span> <span class="title function_">getSum</span><span class="params">()</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> sum;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">isFlag</span><span class="params">()</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> flag;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-线程安全"><a href="#1-线程安全" class="headerlink" title="1.线程安全"></a>1.线程安全</h2><h3 id="1-1-线程类解决-1"><a href="#1-1-线程类解决-1" class="headerlink" title="1.1 线程类解决"></a>1.1 线程类解决</h3><h4 id="1-1-1-同步代码块"><a href="#1-1-1-同步代码块" class="headerlink" title="1.1.1 同步代码块"></a>1.1.1 同步代码块</h4><blockquote>
+<p>线程安全 – 加锁</p>
+<p>注意：要想多个线程互斥住，就必须使用同一把锁(对象)！！！  重要</p>
+</blockquote>
+<blockquote>
+<p>synchronized</p>
+<p>同步代码块：  </p>
+<p>synchronized(锁对象){&#x2F;&#x2F;自动上锁</p>
+<p>…想要互斥的代码…</p>
+<p>}&#x2F;&#x2F;自动解锁</p>
+</blockquote>
+<blockquote>
+<p>Lock</p>
+</blockquote>
+<blockquote>
+<p>需求：铁道部发布了一个售票任务，要求销售1000张票，要求有3个窗口来进行销售，请编写多线程程序来模拟这个效果</p>
+<p>窗口001正在销售第1张票</p>
+<p>窗口001正在销售第2张票</p>
+<p>窗口002正在销售第3张票</p>
+<p>。。。</p>
+<p>窗口002正在销售第1000张票</p>
+<p>窗口002票已售完</p>
+<p>窗口001票已售完</p>
+<p>窗口003票已售完</p>
+</blockquote>
+<blockquote>
+<p>注意：使用线程类的方式解决该需求</p>
+</blockquote>
+<blockquote>
+<p>问题一：三个窗口各卖1000张票，一共卖了3000张</p>
+<p>出现原因：allTicket和curTicket是run方法的局部变量，三个线程抢到CPU资源后，都会调用run方法，run方法被调用了3次，所以卖了3000张票</p>
+<p>解决方案：将allTicket和curTicket设置为静态变量，让三个线程共享</p>
+</blockquote>
+<blockquote>
+<p>问题二：有些票没有卖，有些票卖了重票</p>
+<p>出现原因：当前线程抢到CPU资源后做了票的自增，但是还没来得及输出，时间片到了就退出CPU资源，然后其他线程抢到CPU资源了</p>
+<p>解决方案：当前线程抢到CPU资源后，票的自增和输出执行完毕才能切换到其他线程运行 – 加锁</p>
+</blockquote>
+<blockquote>
+<p>问题三：多卖了票</p>
+<p>出现原因：curTicket到了临界点（999），三个线程都可以进判断，然后上锁</p>
+<p>解决方案：在锁中再次判断</p>
+</blockquote>
+<blockquote>
+<p>注意：锁对象使用static非常不好</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test01</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">		</span><br><span class="line">		<span class="type">MyThread</span> <span class="variable">t1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MyThread</span>(<span class="string">&quot;001&quot;</span>);</span><br><span class="line">		<span class="type">MyThread</span> <span class="variable">t2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MyThread</span>(<span class="string">&quot;002&quot;</span>);</span><br><span class="line">		<span class="type">MyThread</span> <span class="variable">t3</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MyThread</span>(<span class="string">&quot;003&quot;</span>);</span><br><span class="line">		</span><br><span class="line">		t1.start();</span><br><span class="line">		t2.start();</span><br><span class="line">		t3.start();</span><br><span class="line">		</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MyThread</span> <span class="keyword">extends</span> <span class="title class_">Thread</span>&#123;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="type">int</span> <span class="variable">allTicket</span> <span class="operator">=</span> <span class="number">1000</span>;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="type">int</span> <span class="variable">curTicket</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="type">Object</span> <span class="variable">obj</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Object</span>();</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="title function_">MyThread</span><span class="params">(String name)</span> &#123;</span><br><span class="line">		<span class="built_in">super</span>(name);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">while</span>(curTicket &lt; allTicket)&#123;</span><br><span class="line"><span class="comment">//			synchronized (Object.class) &#123;</span></span><br><span class="line"><span class="comment">//			synchronized (&quot;abc&quot;) &#123;</span></span><br><span class="line">			<span class="keyword">synchronized</span> (obj) &#123;</span><br><span class="line">				<span class="keyword">if</span>(curTicket &lt; allTicket)&#123;</span><br><span class="line">					curTicket++;</span><br><span class="line">					System.out.println(Thread.currentThread().getName() + <span class="string">&quot;正在销售第&quot;</span> + curTicket + <span class="string">&quot;张票&quot;</span>);</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		System.out.println(Thread.currentThread().getName() + <span class="string">&quot;票已售完&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="1-1-2-同步方法"><a href="#1-1-2-同步方法" class="headerlink" title="1.1.2 同步方法"></a>1.1.2 同步方法</h4><blockquote>
+<p>synchronized</p>
+<p>同步代码块：  </p>
+<p>synchronized(锁对象){&#x2F;&#x2F;自动上锁</p>
+<p>…想要互斥的代码…</p>
+<p>}&#x2F;&#x2F;自动解锁</p>
+</blockquote>
+<blockquote>
+<p>同步方法</p>
+<p>同步方法 – 成员同步方法：</p>
+<p>注意：锁对象 -&gt; this</p>
+<p>public synchronized void method(){&#x2F;&#x2F;自动上锁</p>
+<p>…想要互斥的代码…</p>
+<p>}&#x2F;&#x2F;自动解锁</p>
+</blockquote>
+<blockquote>
+<p>同步方法 – 静态同步方法：</p>
+<p>注意：锁对象 -&gt; 类.class</p>
+<p>public static synchronized void method(){&#x2F;&#x2F;自动上锁</p>
+<p>…想要互斥的代码…</p>
+<p>}&#x2F;&#x2F;自动解锁</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test01</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">		</span><br><span class="line">		<span class="type">MyThread</span> <span class="variable">t1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MyThread</span>(<span class="string">&quot;001&quot;</span>);</span><br><span class="line">		<span class="type">MyThread</span> <span class="variable">t2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MyThread</span>(<span class="string">&quot;002&quot;</span>);</span><br><span class="line">		<span class="type">MyThread</span> <span class="variable">t3</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MyThread</span>(<span class="string">&quot;003&quot;</span>);</span><br><span class="line">		</span><br><span class="line">		t1.start();</span><br><span class="line">		t2.start();</span><br><span class="line">		t3.start();</span><br><span class="line">		</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MyThread</span> <span class="keyword">extends</span> <span class="title class_">Thread</span>&#123;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="type">int</span> <span class="variable">allTicket</span> <span class="operator">=</span> <span class="number">1000</span>;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="type">int</span> <span class="variable">curTicket</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="title function_">MyThread</span><span class="params">(String name)</span> &#123;</span><br><span class="line">		<span class="built_in">super</span>(name);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">while</span>(curTicket &lt; allTicket)&#123;</span><br><span class="line">			method();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">    <span class="comment">//一定是要加static，因为不加锁对象是this，锁不住</span></span><br><span class="line">	<span class="comment">//锁对象：MyThread.class</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title function_">method</span><span class="params">()</span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(curTicket &lt; allTicket)&#123;</span><br><span class="line">			curTicket++;</span><br><span class="line">			System.out.println(<span class="string">&quot;窗口&quot;</span> + Thread.currentThread().getName() + <span class="string">&quot;正在销售第&quot;</span> + curTicket + <span class="string">&quot;张票&quot;</span>);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span>(curTicket &gt;= allTicket)&#123;</span><br><span class="line">			System.out.println(<span class="string">&quot;窗口&quot;</span> +  Thread.currentThread().getName() + <span class="string">&quot;票已经售完&quot;</span>);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="1-1-3-Lock锁"><a href="#1-1-3-Lock锁" class="headerlink" title="1.1.3 Lock锁"></a>1.1.3 Lock锁</h4><blockquote>
+<p>&#x2F;&#x2F;锁对象</p>
+<p>Lock lock &#x3D; new ReentrantLock();</p>
+<p>&#x2F;&#x2F;要加 try…catch…</p>
+<p>lock.lock();&#x2F;&#x2F;手动上锁   写在 synchronized的位置，代替</p>
+<p>…想要互斥的代码…</p>
+<p>lock.unlock();&#x2F;&#x2F;手动解锁</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test01</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">		</span><br><span class="line">		<span class="type">MyThread</span> <span class="variable">t1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MyThread</span>(<span class="string">&quot;001&quot;</span>);</span><br><span class="line">		<span class="type">MyThread</span> <span class="variable">t2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MyThread</span>(<span class="string">&quot;002&quot;</span>);</span><br><span class="line">		<span class="type">MyThread</span> <span class="variable">t3</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MyThread</span>(<span class="string">&quot;003&quot;</span>);</span><br><span class="line">		</span><br><span class="line">		t1.start();</span><br><span class="line">		t2.start();</span><br><span class="line">		t3.start();</span><br><span class="line">		</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MyThread</span> <span class="keyword">extends</span> <span class="title class_">Thread</span>&#123;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="type">int</span> <span class="variable">allTicket</span> <span class="operator">=</span> <span class="number">1000</span>;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="type">int</span> <span class="variable">curTicket</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">	<span class="comment">//必须是静态的，因为有三个对象，让线程所有对象都共享</span></span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="type">Lock</span> <span class="variable">lock</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ReentrantLock</span>();</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">public</span> <span class="title function_">MyThread</span><span class="params">(String name)</span> &#123;</span><br><span class="line">		<span class="built_in">super</span>(name);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">while</span>(curTicket &lt; allTicket)&#123;</span><br><span class="line">			</span><br><span class="line">			lock.lock();<span class="comment">//手动上锁</span></span><br><span class="line">			<span class="keyword">try</span> &#123;</span><br><span class="line">				<span class="keyword">if</span>(curTicket &lt; allTicket)&#123;</span><br><span class="line">					curTicket++;</span><br><span class="line">					System.out.println(<span class="string">&quot;窗口&quot;</span> + Thread.currentThread().getName() + <span class="string">&quot;正在销售第&quot;</span> + curTicket + <span class="string">&quot;张票&quot;</span>);</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">if</span>(curTicket &gt;= allTicket)&#123;</span><br><span class="line">					System.out.println(<span class="string">&quot;窗口&quot;</span> +  Thread.currentThread().getName() + <span class="string">&quot;票已经售完&quot;</span>);</span><br><span class="line">				&#125;</span><br><span class="line">			&#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">				e.printStackTrace();</span><br><span class="line">			&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">				lock.unlock();<span class="comment">//手动解锁</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Lock是接口不能直接实例化，这里采用它的实现类ReentrantLock来实例化</p>
+<p>ReentrantLock构造方法</p>
+<p>ReentrantLock()：创建一个ReentrantLock的实例 </p>
+<p>加锁解锁方法</p>
+<p>lock()：获得锁</p>
+<p>unlock()：释放锁  </p>
+</blockquote>
+<h3 id="1-2-任务类解决-1"><a href="#1-2-任务类解决-1" class="headerlink" title="1.2 任务类解决"></a>1.2 任务类解决</h3><h4 id="1-2-1-同步代码块"><a href="#1-2-1-同步代码块" class="headerlink" title="1.2.1 同步代码块"></a>1.2.1 同步代码块</h4><blockquote>
+<p>需求：铁道部发布了一个售票任务，要求销售1000张票，要求有3个窗口来进行销售，请编写多线程程序来模拟这个效果</p>
+<p>窗口001正在销售第1张票</p>
+<p>窗口001正在销售第2张票</p>
+<p>窗口002正在销售第3张票</p>
+<p>。。。</p>
+<p>窗口002正在销售第1000张票</p>
+<p>窗口002票已售完</p>
+<p>窗口001票已售完</p>
+<p>窗口003票已售完</p>
+</blockquote>
+<blockquote>
+<p>注意：使用任务类的方式解决该需求</p>
+</blockquote>
+<blockquote>
+<p>(与上面的不一样)</p>
+<p>问题一：三个窗口各卖1000张票，一共卖了3000张</p>
+<p>出现原因：三个线程抢到CPU资源后都会调用run方法，curTicket和allTicket都是run方法里的局部变量，所以会调用3次</p>
+<p>解决思路：curTicket和allTicket设置为成员属性，三个线程共用同一个任务</p>
+</blockquote>
+<blockquote>
+<p>问题二：有些票没有卖，有些票卖了重票</p>
+<p>出现原因：当前线程抢到CPU资源后做了票的自增，但是还没来得及输出，时间片到了就退出CPU资源，然后其他线程抢到CPU资源了</p>
+<p>解决方案：当前线程抢到CPU资源后，票的自增和输出执行完毕才能切换到其他线程运行 – 加锁</p>
+</blockquote>
+<blockquote>
+<p>问题三：多卖了票</p>
+<p>出现原因：curTicket到了临界点（999），三个线程都可以进判断，然后上锁</p>
+<p>解决方案：在锁中再次判断</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test01</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">		</span><br><span class="line">		<span class="type">Task</span> <span class="variable">task</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Task</span>();</span><br><span class="line">		</span><br><span class="line">		<span class="type">Thread</span> <span class="variable">t1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(task, <span class="string">&quot;001&quot;</span>);</span><br><span class="line">		<span class="type">Thread</span> <span class="variable">t2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(task, <span class="string">&quot;002&quot;</span>);</span><br><span class="line">		<span class="type">Thread</span> <span class="variable">t3</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(task, <span class="string">&quot;003&quot;</span>);</span><br><span class="line">		</span><br><span class="line">		t1.start();</span><br><span class="line">		t2.start();</span><br><span class="line">		t3.start();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Task</span> <span class="keyword">implements</span> <span class="title class_">Runnable</span>&#123;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">private</span> <span class="type">int</span> <span class="variable">allTicket</span> <span class="operator">=</span> <span class="number">1000</span>; <span class="comment">//不设置成静态的</span></span><br><span class="line">	<span class="keyword">private</span> <span class="type">int</span> <span class="variable">curTicket</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">		 </span><br><span class="line">		<span class="keyword">while</span>(curTicket &lt; allTicket)&#123;</span><br><span class="line">			<span class="keyword">synchronized</span> (<span class="built_in">this</span>) &#123;<span class="comment">//使用this,不用obj</span></span><br><span class="line">				<span class="keyword">if</span>(curTicket &lt; allTicket)&#123;</span><br><span class="line">					curTicket++; <span class="comment">//票的自加</span></span><br><span class="line">					System.out.println(Thread.currentThread().getName() + <span class="string">&quot;正在销售第&quot;</span> + curTicket + <span class="string">&quot;张票&quot;</span>);</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">			</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		System.out.println(Thread.currentThread().getName() + <span class="string">&quot;票已售完&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="1-2-2-同步方法"><a href="#1-2-2-同步方法" class="headerlink" title="1.2.2 同步方法"></a>1.2.2 同步方法</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test01</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">		</span><br><span class="line">		<span class="type">Task</span> <span class="variable">task</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Task</span>();</span><br><span class="line">		</span><br><span class="line">		<span class="type">Thread</span> <span class="variable">t1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(task, <span class="string">&quot;001&quot;</span>);</span><br><span class="line">		<span class="type">Thread</span> <span class="variable">t2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(task, <span class="string">&quot;002&quot;</span>);</span><br><span class="line">		<span class="type">Thread</span> <span class="variable">t3</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(task, <span class="string">&quot;003&quot;</span>);</span><br><span class="line">		</span><br><span class="line">		t1.start();</span><br><span class="line">		t2.start();</span><br><span class="line">		t3.start();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Task</span> <span class="keyword">implements</span> <span class="title class_">Runnable</span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> <span class="type">int</span> <span class="variable">allTicket</span> <span class="operator">=</span> <span class="number">1000</span>;</span><br><span class="line">	<span class="keyword">private</span> <span class="type">int</span> <span class="variable">curTicket</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">while</span>(curTicket &lt; allTicket)&#123;</span><br><span class="line">			method();</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		System.out.println(<span class="string">&quot;窗口&quot;</span> + Thread.currentThread().getName() + <span class="string">&quot;票已售完&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">    </span><br><span class="line">	<span class="comment">//用成员同步方法</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title function_">method</span><span class="params">()</span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(curTicket &lt; allTicket)&#123;</span><br><span class="line">			curTicket++;</span><br><span class="line">			System.out.println(<span class="string">&quot;窗口&quot;</span> + Thread.currentThread().getName() + <span class="string">&quot;正在销售第&quot;</span> + curTicket + <span class="string">&quot;张票&quot;</span>);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="1-2-3-Lock锁"><a href="#1-2-3-Lock锁" class="headerlink" title="1.2.3 Lock锁"></a>1.2.3 Lock锁</h4><blockquote>
+<p>Lock锁要加try…catch</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test01</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">		</span><br><span class="line">		<span class="type">Task</span> <span class="variable">task</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Task</span>();</span><br><span class="line">		</span><br><span class="line">		<span class="type">Thread</span> <span class="variable">t1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(task, <span class="string">&quot;001&quot;</span>);</span><br><span class="line">		<span class="type">Thread</span> <span class="variable">t2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(task, <span class="string">&quot;002&quot;</span>);</span><br><span class="line">		<span class="type">Thread</span> <span class="variable">t3</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(task, <span class="string">&quot;003&quot;</span>);</span><br><span class="line">		</span><br><span class="line">		t1.start();</span><br><span class="line">		t2.start();</span><br><span class="line">		t3.start();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Task</span> <span class="keyword">implements</span> <span class="title class_">Runnable</span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> <span class="type">int</span> <span class="variable">allTicket</span> <span class="operator">=</span> <span class="number">1000</span>;</span><br><span class="line">	<span class="keyword">private</span> <span class="type">int</span> <span class="variable">curTicket</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">private</span> <span class="type">Lock</span> <span class="variable">lock</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ReentrantLock</span>();</span><br><span class="line">	</span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">while</span>(curTicket &lt; allTicket)&#123;</span><br><span class="line">			lock.lock();</span><br><span class="line">			<span class="keyword">try</span> &#123;</span><br><span class="line">				<span class="keyword">if</span>(curTicket &lt; allTicket)&#123;</span><br><span class="line">					curTicket++;</span><br><span class="line">					System.out.println(<span class="string">&quot;窗口&quot;</span> + Thread.currentThread().getName() + <span class="string">&quot;正在销售第&quot;</span> + curTicket + <span class="string">&quot;张票&quot;</span>);</span><br><span class="line">				&#125;</span><br><span class="line">			&#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">				e.printStackTrace();</span><br><span class="line">			&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">				lock.unlock();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		System.out.println(<span class="string">&quot;窗口&quot;</span> + Thread.currentThread().getName() + <span class="string">&quot;票已售完&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意：一般解决需求，使用任务类，更灵活</p>
+</blockquote>
+<blockquote>
+<p>关于 Java多线程，在面试的时候，问的比较多的就是①悲观锁和乐观锁、②synchronized和lock区别以及volatile和synchronized的区别**，<strong>③可重入锁与非可重入锁的区 别</strong>、<strong>④多线程是解决什么问题的</strong>、<strong>⑤线程池解决什么问题</strong>、<strong>⑥线程池的原理</strong>、**⑦线程池使用时的注意事项、⑧AQS原理、⑨ReentranLock源码，设计原理，整体过程等等问题。 </p>
+<p>面试官在多线程这一部分很可能会问你有没有在项目中实际使用多线程的经历。所以，如果你在你的项目中有实际使用Java多线程的经历的话，会为你加分不少哦！ </p>
+</blockquote>
+<blockquote>
+<h5 id="1-什么是线程安全？"><a href="#1-什么是线程安全？" class="headerlink" title="1.什么是线程安全？"></a>1.什么是线程安全？</h5><p>线程安全就是说多线程访问同一代码，不会产生不确定的结果；如果每次运行结果和单线程运行的结果是一样的，就是线程安全的</p>
+<h5 id="（多个线程访问了同一个共享变量并改变了他）"><a href="#（多个线程访问了同一个共享变量并改变了他）" class="headerlink" title="（多个线程访问了同一个共享变量并改变了他）"></a>（多个线程访问了同一个共享变量并改变了他）</h5><p>线程安全一般都涉及到synchronized， 就是一段代码同时只能有一个线程来操作，不然中间过程可能会产生不可预制的结果 </p>
+</blockquote>
+<blockquote>
+<p>注意：所谓的同步就是指阻塞式操作，而异步就是非阻塞式操作</p>
+</blockquote>
+<blockquote>
+<h5 id="2-说一说自己对于synchronized关键字的了解"><a href="#2-说一说自己对于synchronized关键字的了解" class="headerlink" title="2.说一说自己对于synchronized关键字的了解"></a>2.说一说自己对于synchronized关键字的了解</h5><p>1.synchronized关键字解决的是多个线程之间访问资源的同步性，synchronized关键字可以保证被它修饰的方法或者代码块在任意时刻只能有一个线程执行</p>
+<p>2.底层实现：Synchronized进入编译，会形成monitorenter和monitorexit这个两个字节码指令。在执行monitorenter指令时，首先要尝试获取对象锁。如果这个对象没被锁定，或者当前线程已经拥有了那个对象锁，把锁的计算器+1；相应的，在执行monitorexit指令时会将锁计算器就-1；当计算器为0时，锁就被释放了，则当前锁空闲，可以占用</p>
+<p>monitor 机制：<br>Synchronized 是在加锁，加对象锁。对象锁是一种重量锁，synchronized 的锁机制会根据线程竞争情况在运行时会有偏向锁（单一线程）、轻量锁（多个线程访问 synchronized 区域）、对象锁（重量锁，多个线程存在竞争的情况）、自旋锁等。该关键字是一个几种锁的封装。</p>
+</blockquote>
+<blockquote>
+<h5 id="3-锁升级的过程是什么-不同状态锁的使用场景"><a href="#3-锁升级的过程是什么-不同状态锁的使用场景" class="headerlink" title="3.锁升级的过程是什么?不同状态锁的使用场景?"></a>3.锁升级的过程是什么?不同状态锁的使用场景?</h5><p>在Java中，锁升级主要是指对象在被多线程访问时，锁状态的转换过程。<br>最开始是无锁状态，当有线程进入同步块时，会先尝试使用偏向锁。偏向锁会在对象头中记录获取它的线.程ID,如果该线程再次获取锁，就无需做额外同步。<br>如果有另一个线程尝试获取这个锁，偏向锁就会升级为轻量级锁。轻量级锁会在当前线程的栈帧中创建锁记录，用CAS操作来获取锁。<br>如果竞争激烈，则会升级为重量级锁，即传统的互斥锁，会使其他尝试获取锁的线程阻塞。<br>轻量级锁适用于线程交替执行同步块的场景，而重量级锁适用于长时间执行的同步操作。</p>
+</blockquote>
+<blockquote>
+<h5 id="4-说说自己是怎么使用synchronized关键字，在项目中用到了吗？"><a href="#4-说说自己是怎么使用synchronized关键字，在项目中用到了吗？" class="headerlink" title="4.说说自己是怎么使用synchronized关键字，在项目中用到了吗？"></a>4.说说自己是怎么使用synchronized关键字，在项目中用到了吗？</h5><p>synchronized关键字最主要的三种使用方式：</p>
+<p><strong>修饰实例方法</strong>: 作用于当前对象加锁，进入同步代码前要获得当前对象的锁     this</p>
+<p><strong>修饰静态方法</strong>: 也就是给当前类加锁，会作用于类的所有对象实例，因为静态成员不属于任何一个实例对象，是类成员    类名.class</p>
+<p><strong>修饰代码块</strong>: 指定加锁对象，对给定对象加锁，进入同步代码库前要获得给定对象的锁</p>
+<p>面试中面试官经常会说：“单例模式了解吗？来给我手写一下！给我解释一下双重检验锁方式实现单例模式的原理呗！” </p>
+</blockquote>
+<blockquote>
+<h5 id="5-Java中synchronized和ReentrantLock有什么不同？"><a href="#5-Java中synchronized和ReentrantLock有什么不同？" class="headerlink" title="5.Java中synchronized和ReentrantLock有什么不同？"></a>5.Java中synchronized和ReentrantLock有什么不同？</h5><p>相似点： </p>
+<p>它们都是阻塞式的同步，也就是说当如果一个线程获得了对象锁，进入了同步块，其他访问该代码块的线程都必须阻塞在代码块外面等待，而进行线程阻塞和唤醒的代价是比较高的</p>
+<p>两者都是可重入锁：自己可以再次获取自己的内部锁。比如一个线程获得了某个对象的锁，此时这个对象锁还没有释放，当再次想要获取这个对象的锁的时候还是可以获取的</p>
+<p>区别： </p>
+<p>synchronized依赖于JVM，而ReenTrantLock依赖于API。这两种方式最大区别就是对于Synchronized来说，它是java语言的关键字，是原生语法层面的，需要jvm实现。而ReentrantLock它是JDK 1.5之后提供的API层面的互斥锁，需要lock()和unlock()方法配合try&#x2F;finally语句块来完成</p>
+</blockquote>
+<blockquote>
+<h5 id="6-线程-B-怎么知道线程-A-修改了变量"><a href="#6-线程-B-怎么知道线程-A-修改了变量" class="headerlink" title="6.线程 B 怎么知道线程 A 修改了变量?"></a>6.线程 B 怎么知道线程 A 修改了变量?</h5><p>volatile 修饰变量</p>
+<p>synchronized 修饰修改变量的方法</p>
+<p>wait&#x2F;notify</p>
+</blockquote>
+<blockquote>
+<h5 id="7-synchronized-和-Volatile、CAS-比较"><a href="#7-synchronized-和-Volatile、CAS-比较" class="headerlink" title="7.synchronized 和 Volatile、CAS 比较?"></a>7.synchronized 和 Volatile、CAS 比较?</h5><p>synchronized 是悲观锁，属于抢占式，会引起其他线程阻塞</p>
+<p>volatile 提供多线程共享变量可见性和禁止指令重排序优化</p>
+<p>CAS 是基于冲突检测的乐观锁（非阻塞）</p>
+<p>还要注意一点 就是涉及到线程之间的通信，就肯定会用到 validate 修饰</p>
+</blockquote>
+<blockquote>
+<h5 id="7-线程同步的方法"><a href="#7-线程同步的方法" class="headerlink" title="7.线程同步的方法?"></a>7.线程同步的方法?</h5><p>wait()：使一个线程处于等待状态，并且释放所持有的对象的 lock</p>
+<p>sleep()：使一个正在运行的线程处于睡眠状态，是一个静态方法，调用此方法要捕捉InterruptedException 异常</p>
+<p>notify()：唤醒一个处于等待状态的线程，注意的是在调用此方法的时候，并不能确切的唤醒某一个等待状态的线程，而是由 JVM 确定唤醒哪个线程，而且不是按优先级</p>
+<p>notityAll()：唤醒所有处于等待状态的线程，注意并不是给所有唤醒线程一个对象的锁，而是让它们竞争</p>
+</blockquote>
+<blockquote>
+<h5 id="8-什么是乐观锁和悲观锁？"><a href="#8-什么是乐观锁和悲观锁？" class="headerlink" title="8.什么是乐观锁和悲观锁？"></a>8.什么是乐观锁和悲观锁？</h5><p>1.乐观锁：就像它的名字一样，对于并发间操作产生的线程安全问题持乐观状态，乐观锁认为竞争不总是会发生，因此它不需要持有锁，将比较–替换这两个动作作为一个原子操作尝试去修改内存中的变量，如果失败则表示发生冲突，那么就应该有相应的重试逻辑</p>
+<p>2.悲观锁：还是像它的名字一样，对于并发间操作产生的线程安全问题持悲观状态，悲观锁认为竞争总是会发生，因此每次对某资源进行操作时，都会持有一个独占的锁，就像synchronized，不管三七二十一，直接上了锁就操作资源了</p>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://pcb178.site">pcb</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://pcb178.site/post/day30-thread-safety.html">https://pcb178.site/post/day30-thread-safety.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://pcb178.site" target="_blank">java悍匪</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/">线程安全</a><a class="post-meta__tags" href="/tags/synchronized/">synchronized</a><a class="post-meta__tags" href="/tags/Lock%E9%94%81/">Lock锁</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="/pluginsSrc/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="/pluginsSrc/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/post/day31-singleton-producer-consumer.html" title="Day31 单例模式 ，生产者消费者模型，仓储模型"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Day31 单例模式 ，生产者消费者模型，仓储模型</div></div><div class="info-2"><div class="info-item-1">Day31单例模式 单例模式就是: 在程序运行期间, 类有且最多只有一个实例对象单例模式的优势: 尽可能节约内存空间(不用为一个类创建多个实例对象)， 减少GC(垃圾回收)的消耗， 并使得程序正常运行  1.懒汉式–线程不安全 懒汉式如何实现单例?使用时才创建实例，“确实懒”。这种实现方式需要考虑线程安全问题   特点：第一次调用getInstance()方法时才创建实例。 优点：实现了延迟加载，节省资源 缺点：在多线程环境下可能创建多个实例，不能保证线程安全   理解：该类的对象在整个项目中只创建一次（只实例化一次）  1234567891011121314public class Test01 &#123;	public static void main(String[] args) &#123;				A a1 = A.getIntance();		A a2 = A.getIntance();		A a3 = A.getIntance();		A a4 = A.getIntance();				System.out.println(a1);		System.out.prin...</div></div></div></a><a class="pagination-related" href="/post/day29-thread-advanced.html" title="Day29 线程高级特性：yield、join、中断、守护线程、ThreadLocal"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Day29 线程高级特性：yield、join、中断、守护线程、ThreadLocal</div></div><div class="info-2"><div class="info-item-1">Day29多线程(接前面那一章)10.线程的礼让 Thread.yield(); 理解：此方法为静态方法，此方法写在哪个线程中，哪个线程就礼让 注意：所谓的礼让是指当前线程退出CPU资源，并转到就绪状态，接着再抢   需求：创建两个线程A,B，分别各打印1-100的数字，其中B一个线程，每打印一次，就礼让一次，观察实验结果 sleep，yield都是Thread的方法  12345678910public class Test01 &#123;	public static void main(String[] args) &#123;				A a = new A();		B b = new B();				a.start();		b.start();	&#125;&#125;  123456789public class A extends Thread&#123;	@Override	public void run() &#123;		for (int i = 1; i &lt;= 100; i++) &#123;			System.out.println(&quot;A：&...</div></div></div></a></nav><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">pcb</div><div class="author-info-description"><span style="background:linear-gradient(45deg,#f59,#fb0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:bold;">干饭！干饭！</span></div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">32</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">87</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fa-solid fa-bowl-rice"></i><span>冲呀干饭人</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content"><div style="text-align: center; font-size: 14px; line-height: 1.6;">
+<img src="/img/card1.gif" width="120" style="vertical-align: middle; margin: 6px 0; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.15);">
+<br>
+<strong style="background:linear-gradient(45deg,#ff9a9e,#fad0c4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:16px;">干饭时间到！</strong>
+<br>
+<span style="color: #ff6b6b; font-size: 12px;">今日份快乐：一碗热腾腾的猪脚饭~</span>
+</div>
+</div></div><div class="xpand" style="height:200px;"><canvas class="illo" width="800" height="800" style="max-width: 200px; max-height: 200px; touch-action: none; width: 640px; height: 640px;"></canvas></div><script src="https://fastly.jsdelivr.net/gh/xiaopengand/blogCdn@latest/xzxr/twopeople1.js"></script><script src="https://fastly.jsdelivr.net/gh/xiaopengand/blogCdn@latest/xzxr/zdog.dist.js"></script><script id="rendered-js" src="https://fastly.jsdelivr.net/gh/xiaopengand/blogCdn@latest/xzxr/twopeople.js"></script><style>.card-widget.card-announcement {
+  margin: 0;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+canvas {
+  display: block;
+  margin: 0 auto;
+  cursor: move;
+}</style><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Day30"><span class="toc-number">1.</span> <span class="toc-text">Day30</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E4%BD%9C%E4%B8%9A"><span class="toc-number">1.1.</span> <span class="toc-text">1.作业</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E7%BA%BF%E7%A8%8B%E7%B1%BB%E8%A7%A3%E5%86%B3"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.1 线程类解决</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E4%BB%BB%E5%8A%A1%E7%B1%BB%E8%A7%A3%E5%86%B3"><span class="toc-number">1.1.2.</span> <span class="toc-text">1.2 任务类解决</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8"><span class="toc-number">1.2.</span> <span class="toc-text">1.线程安全</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E7%BA%BF%E7%A8%8B%E7%B1%BB%E8%A7%A3%E5%86%B3-1"><span class="toc-number">1.2.1.</span> <span class="toc-text">1.1 线程类解决</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-1-1-%E5%90%8C%E6%AD%A5%E4%BB%A3%E7%A0%81%E5%9D%97"><span class="toc-number">1.2.1.1.</span> <span class="toc-text">1.1.1 同步代码块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-1-2-%E5%90%8C%E6%AD%A5%E6%96%B9%E6%B3%95"><span class="toc-number">1.2.1.2.</span> <span class="toc-text">1.1.2 同步方法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-1-3-Lock%E9%94%81"><span class="toc-number">1.2.1.3.</span> <span class="toc-text">1.1.3 Lock锁</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E4%BB%BB%E5%8A%A1%E7%B1%BB%E8%A7%A3%E5%86%B3-1"><span class="toc-number">1.2.2.</span> <span class="toc-text">1.2 任务类解决</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-1-%E5%90%8C%E6%AD%A5%E4%BB%A3%E7%A0%81%E5%9D%97"><span class="toc-number">1.2.2.1.</span> <span class="toc-text">1.2.1 同步代码块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-2-%E5%90%8C%E6%AD%A5%E6%96%B9%E6%B3%95"><span class="toc-number">1.2.2.2.</span> <span class="toc-text">1.2.2 同步方法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-3-Lock%E9%94%81"><span class="toc-number">1.2.2.3.</span> <span class="toc-text">1.2.3 Lock锁</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-%E4%BB%80%E4%B9%88%E6%98%AF%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%EF%BC%9F"><span class="toc-number">1.2.2.3.1.</span> <span class="toc-text">1.什么是线程安全？</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%EF%BC%88%E5%A4%9A%E4%B8%AA%E7%BA%BF%E7%A8%8B%E8%AE%BF%E9%97%AE%E4%BA%86%E5%90%8C%E4%B8%80%E4%B8%AA%E5%85%B1%E4%BA%AB%E5%8F%98%E9%87%8F%E5%B9%B6%E6%94%B9%E5%8F%98%E4%BA%86%E4%BB%96%EF%BC%89"><span class="toc-number">1.2.2.3.2.</span> <span class="toc-text">（多个线程访问了同一个共享变量并改变了他）</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-%E8%AF%B4%E4%B8%80%E8%AF%B4%E8%87%AA%E5%B7%B1%E5%AF%B9%E4%BA%8Esynchronized%E5%85%B3%E9%94%AE%E5%AD%97%E7%9A%84%E4%BA%86%E8%A7%A3"><span class="toc-number">1.2.2.3.3.</span> <span class="toc-text">2.说一说自己对于synchronized关键字的了解</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-%E9%94%81%E5%8D%87%E7%BA%A7%E7%9A%84%E8%BF%87%E7%A8%8B%E6%98%AF%E4%BB%80%E4%B9%88-%E4%B8%8D%E5%90%8C%E7%8A%B6%E6%80%81%E9%94%81%E7%9A%84%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-number">1.2.2.3.4.</span> <span class="toc-text">3.锁升级的过程是什么?不同状态锁的使用场景?</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-%E8%AF%B4%E8%AF%B4%E8%87%AA%E5%B7%B1%E6%98%AF%E6%80%8E%E4%B9%88%E4%BD%BF%E7%94%A8synchronized%E5%85%B3%E9%94%AE%E5%AD%97%EF%BC%8C%E5%9C%A8%E9%A1%B9%E7%9B%AE%E4%B8%AD%E7%94%A8%E5%88%B0%E4%BA%86%E5%90%97%EF%BC%9F"><span class="toc-number">1.2.2.3.5.</span> <span class="toc-text">4.说说自己是怎么使用synchronized关键字，在项目中用到了吗？</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#5-Java%E4%B8%ADsynchronized%E5%92%8CReentrantLock%E6%9C%89%E4%BB%80%E4%B9%88%E4%B8%8D%E5%90%8C%EF%BC%9F"><span class="toc-number">1.2.2.3.6.</span> <span class="toc-text">5.Java中synchronized和ReentrantLock有什么不同？</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#6-%E7%BA%BF%E7%A8%8B-B-%E6%80%8E%E4%B9%88%E7%9F%A5%E9%81%93%E7%BA%BF%E7%A8%8B-A-%E4%BF%AE%E6%94%B9%E4%BA%86%E5%8F%98%E9%87%8F"><span class="toc-number">1.2.2.3.7.</span> <span class="toc-text">6.线程 B 怎么知道线程 A 修改了变量?</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#7-synchronized-%E5%92%8C-Volatile%E3%80%81CAS-%E6%AF%94%E8%BE%83"><span class="toc-number">1.2.2.3.8.</span> <span class="toc-text">7.synchronized 和 Volatile、CAS 比较?</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#7-%E7%BA%BF%E7%A8%8B%E5%90%8C%E6%AD%A5%E7%9A%84%E6%96%B9%E6%B3%95"><span class="toc-number">1.2.2.3.9.</span> <span class="toc-text">7.线程同步的方法?</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#8-%E4%BB%80%E4%B9%88%E6%98%AF%E4%B9%90%E8%A7%82%E9%94%81%E5%92%8C%E6%82%B2%E8%A7%82%E9%94%81%EF%BC%9F"><span class="toc-number">1.2.2.3.10.</span> <span class="toc-text">8.什么是乐观锁和悲观锁？</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day33-file-io.html" title="Day33 File类、IO流">Day33 File类、IO流</a><time datetime="2025-09-23T02:00:33.000Z" title="发表于 2025-09-23 10:00:33">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day32-thread-pool.html" title="Day32 线程池">Day32 线程池</a><time datetime="2025-09-23T02:00:32.000Z" title="发表于 2025-09-23 10:00:32">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day31-singleton-producer-consumer.html" title="Day31 单例模式 ，生产者消费者模型，仓储模型">Day31 单例模式 ，生产者消费者模型，仓储模型</a><time datetime="2025-09-23T02:00:31.000Z" title="发表于 2025-09-23 10:00:31">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day30-thread-safety.html" title="Day30 线程安全、synchronized、Lock锁">Day30 线程安全、synchronized、Lock锁</a><time datetime="2025-09-23T02:00:30.000Z" title="发表于 2025-09-23 10:00:30">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day29-thread-advanced.html" title="Day29 线程高级特性：yield、join、中断、守护线程、ThreadLocal">Day29 线程高级特性：yield、join、中断、守护线程、ThreadLocal</a><time datetime="2025-09-23T02:00:29.000Z" title="发表于 2025-09-23 10:00:29">2025-09-23</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 By pcb</span></div><div class="footer_custom_text">true</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const initValine = (el, path) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyValine = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const valineConfig = {
+      el: '#vcomment',
+      appId: '',
+      appKey: '',
+      avatar: 'retro',
+      serverURLs: '',
+      emojiMaps: "",
+      visitor: true,
+      ...option,
+      path: isShuoshuo ? path : (option && option.path) || window.location.pathname
+    }
+
+    new Valine(valineConfig)
+  }
+
+  const loadValine = async (el, path) => {
+    if (typeof Valine === 'function') {
+      initValine(el, path)
+    } else {
+      await btf.getScript('/pluginsSrc/valine/dist/Valine.min.js')
+      initValine(el, path)
+    }
+  }
+
+  if (isShuoshuo) {
+    'Valine' === 'Valine'
+      ? window.shuoshuoComment = { loadComment: loadValine }
+      : window.loadOtherComment = loadValine
+    return
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script></div><div class="aplayer no-destroy" data-id="5183531430" data-server="netease" data-type="playlist" data-fixed="true" data-mini="true" data-listFolded="false" data-order="random" data-preload="none" data-autoplay="false" muted></div><canvas id="universe"></canvas><script defer src="/js/universe.js"></script><script src="/js/daily-swap.js"></script><div class="sticky_layout">
+  <div id="clock"></div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.js';
+    document.body.appendChild(s);
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const clock = document.querySelector('#clock');
+    if (!clock) return;
+
+    // 1. 隐藏任何包含“undefined”的元素
+    clock.querySelectorAll('*').forEach(el => {
+      if (el.textContent.includes('undefined')) {
+        el.style.display = 'none';
+      }
+    });
+
+    // 2. 强制样式压缩
+    clock.style.cssText += `
+      max-width: 100% !important;
+      white-space: normal !important;
+      word-break: break-all !important;
+      font-size: 14px !important;
+      line-height: 1.5 !important;
+      padding: 10px 8px !important;
+      background: rgba(255,255,255,.75) !important;
+      border-radius: 12px !important;
+      backdrop-filter: blur(6px) !important;
+      box-sizing: border-box !important;
+    `;
+  });
+</script>
+<canvas class="fireworks" mobile="true"></canvas><script src="/pluginsSrc/butterfly-extsrc/dist/fireworks.min.js"></script><script defer="defer" id="fluttering_ribbon" mobile="true" src="/pluginsSrc/butterfly-extsrc/dist/canvas-fluttering-ribbon.min.js"></script><script src="/pluginsSrc/butterfly-extsrc/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><link rel="stylesheet" href="/pluginsSrc/aplayer/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="/pluginsSrc/aplayer/dist/APlayer.min.js"></script><script src="/pluginsSrc/butterfly-extsrc/metingjs/dist/Meting.min.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章..." type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></div><!-- hexo injector body_end start --><script data-pjax>
+  function butterfly_clock_anzhiyu_injector_config(){
+    var parent_div_git = document.getElementsByClassName('sticky_layout')[0];
+    var item_html = '<div class="card-widget card-clock"><div class="card-glass"><div class="card-background"><div class="card-content"><div id="hexo_electric_clock"><img class="entered loading" id="card-clock-loading" src="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/loading.gif" style="height: 120px; width: 100%;" data-ll-status="loading"/></div></div></div></div></div>';
+    console.log('已挂载butterfly_clock_anzhiyu')
+    if(parent_div_git) {
+      parent_div_git.insertAdjacentHTML("afterbegin",item_html)
+    }
+  }
+  var elist = 'undefined'.split(',');
+  var cpage = location.pathname;
+  var epage = 'all';
+  var qweather_key = 'b16a1fa0e63c46a4b8f28abfb06ae3fe';
+  var gaud_map_key = 'e2b04289e870b005374ee030148d64fd&s=rsv3';
+  var baidu_ak_key = 'undefined';
+  var flag = 0;
+  var clock_rectangle = '104.07,30.57';
+  var clock_default_rectangle_enable = 'true';
+
+  for (var i=0;i<elist.length;i++){
+    if (cpage.includes(elist[i])){
+      flag++;
+    }
+  }
+
+  if ((epage ==='all')&&(flag == 0)){
+    butterfly_clock_anzhiyu_injector_config();
+  }
+  else if (epage === cpage){
+    butterfly_clock_anzhiyu_injector_config();
+  }
+  </script><script src="https://widget.qweather.net/simple/static/js/he-simple-common.js?v=2.0"></script><script data-pjax src="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.js"></script><!-- hexo injector body_end end --><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body></html>
