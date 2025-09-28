@@ -1,0 +1,528 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Day53 触发器，存储过程，预定义函数，自定义函数 | java悍匪</title><meta name="author" content="pcb"><meta name="copyright" content="pcb"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="深入学习 MySQL 高级特性：掌握触发器（INSERT&#x2F;UPDATE&#x2F;DELETE）的创建与应用；精通存储过程（IN&#x2F;OUT&#x2F;INOUT 参数）的编写与调用；使用预定义与自定义函数；理解数据库锁机制（表级锁、行级锁）；掌握 SQL 语句优化与数据库性能提升策略。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Day53 触发器，存储过程，预定义函数，自定义函数">
+<meta property="og:url" content="https://pcb178.site/post/day53-mysql-advanced-features.html">
+<meta property="og:site_name" content="java悍匪">
+<meta property="og:description" content="深入学习 MySQL 高级特性：掌握触发器（INSERT&#x2F;UPDATE&#x2F;DELETE）的创建与应用；精通存储过程（IN&#x2F;OUT&#x2F;INOUT 参数）的编写与调用；使用预定义与自定义函数；理解数据库锁机制（表级锁、行级锁）；掌握 SQL 语句优化与数据库性能提升策略。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pcb178.site/img/avatar.jpg">
+<meta property="article:published_time" content="2025-09-23T02:00:54.000Z">
+<meta property="article:modified_time" content="2025-09-28T06:21:37.072Z">
+<meta property="article:author" content="pcb">
+<meta property="article:tag" content="触发器">
+<meta property="article:tag" content="存储过程">
+<meta property="article:tag" content="预定义函数">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pcb178.site/img/avatar.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Day53 触发器，存储过程，预定义函数，自定义函数",
+  "url": "https://pcb178.site/post/day53-mysql-advanced-features.html",
+  "image": "https://pcb178.site/img/avatar.jpg",
+  "datePublished": "2025-09-23T02:00:54.000Z",
+  "dateModified": "2025-09-28T06:21:37.072Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "pcb",
+      "url": "https://pcb178.site"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://pcb178.site/post/day53-mysql-advanced-features.html"><link rel="preconnect"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="/pluginsSrc/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":3,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: '/pluginsSrc/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Day53 触发器，存储过程，预定义函数，自定义函数',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><link rel="stylesheet" href="/css/universe.css"><link rel="stylesheet" href="/css/banner-fullscreen.css"><link rel="stylesheet" href="/css/font-bigger.css"><link rel="stylesheet" href="/css/search-style.css"><link rel="stylesheet" href="/css/footer-transparent.css"><!-- hexo injector head_end start --><link rel="stylesheet" href="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.css" /><!-- hexo injector head_end end --><meta name="generator" content="Hexo 7.3.0"></head><body><div id="web_bg" style="background: &lt;%= theme.custom_images.banner %&gt;;"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">55</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">137</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 导航</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间线</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-fish"></i><span> 摸鱼</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/moyu/"><i class="fa-fw fas fa-gamepad"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/tools/"><i class="fa-fw fas fa-tools"></i><span> 工具</span></a></li><li><a class="site-page child" href="/demo/"><i class="fa-fw fas fa-anchor"></i><span> 动画</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: &lt;%= theme.custom_images.banner %&gt;;"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">java悍匪</span></a><a class="nav-page-title" href="/"><span class="site-name">Day53 触发器，存储过程，预定义函数，自定义函数</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 导航</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间线</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-fish"></i><span> 摸鱼</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/moyu/"><i class="fa-fw fas fa-gamepad"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/tools/"><i class="fa-fw fas fa-tools"></i><span> 工具</span></a></li><li><a class="site-page child" href="/demo/"><i class="fa-fw fas fa-anchor"></i><span> 动画</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Day53 触发器，存储过程，预定义函数，自定义函数</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-09-23T02:00:54.000Z" title="发表于 2025-09-23 10:00:54">2025-09-23</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-09-28T06:21:37.072Z" title="更新于 2025-09-28 14:21:37">2025-09-28</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Java%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">Java学习笔记</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">2.4k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>9分钟</span></span><span class="post-meta-separator">|</span><span class="leancloud_visitors" id="/post/day53-mysql-advanced-features.html" data-flag-title="Day53 触发器，存储过程，预定义函数，自定义函数"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span class="leancloud-visitors-count"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="Day53"><a href="#Day53" class="headerlink" title="Day53"></a>Day53</h1><h2 id="1-触发器"><a href="#1-触发器" class="headerlink" title="1.触发器"></a>1.触发器</h2><blockquote>
+<p>由某个事件去触发某个操作，这些事件有：insert、update、delete语句；</p>
+<p>三种常用的触发器<br>1.insert触发器<br>2.update触发器<br>3.delete触发器</p>
+</blockquote>
+<blockquote>
+<p>创建触发器：</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[ delimiter XX ]</span><br><span class="line">create trigger 触发器名 [before | after] 触发事件 on 表名 for each row 执行语句</span><br><span class="line">  begin</span><br><span class="line">   多条执行语句</span><br><span class="line">  end 加上 “结束符XX”</span><br><span class="line">  </span><br><span class="line">drop trigger t1</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>before ： 前置触发器</p>
+<p>after ：后置触发器</p>
+<p>Ps：</p>
+<p> new.字段：当前写法可以获得添加语句字段对应的值</p>
+<p> old.字段：当前写法可以获得删除语句字段对应的值</p>
+</blockquote>
+<blockquote>
+<p>创建场景 —————————————————————————-</p>
+</blockquote>
+<blockquote>
+<p>创建学科表，并添加数据</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE course(</span><br><span class="line">	id INT(3) PRIMARY KEY auto_increment,</span><br><span class="line">	name VARCHAR(32),</span><br><span class="line">	count INT(3) DEFAULT 0</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">INSERT INTO course(name) VALUES(&#x27;Java&#x27;);</span><br><span class="line">INSERT INTO course(name) VALUES(&#x27;Python&#x27;);</span><br><span class="line">INSERT INTO course(name) VALUES(&#x27;HTML&#x27;);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>创建班级表，并添加数据</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE class(</span><br><span class="line">	id INT(3) PRIMARY KEY auto_increment,</span><br><span class="line">	name VARCHAR(32),</span><br><span class="line">	count INT(3) DEFAULT 0</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">INSERT INTO class(name) VALUES(&#x27;2401javaee&#x27;);</span><br><span class="line">INSERT INTO class(name) VALUES(&#x27;2402javaee&#x27;);</span><br><span class="line">INSERT INTO class(name) VALUES(&#x27;2403javaee&#x27;);</span><br><span class="line">INSERT INTO class(name) VALUES(&#x27;2401python&#x27;);</span><br><span class="line">INSERT INTO class(name) VALUES(&#x27;2402python&#x27;);</span><br><span class="line">INSERT INTO class(name) VALUES(&#x27;2401html&#x27;);</span><br><span class="line">INSERT INTO class(name) VALUES(&#x27;2402html&#x27;);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>创建学生表</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE student(</span><br><span class="line">	id INT(3) PRIMARY KEY auto_increment,</span><br><span class="line">	name VARCHAR(32),</span><br><span class="line">	course_id INT(3),</span><br><span class="line">	class_id INT(3)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h5 id="1-1-需求：添加学生，并更新班级表和学科表的数据"><a href="#1-1-需求：添加学生，并更新班级表和学科表的数据" class="headerlink" title="1.1 需求：添加学生，并更新班级表和学科表的数据"></a>1.1 需求：添加学生，并更新班级表和学科表的数据</h5><blockquote>
+<p>创建后置触发器：监听学生表的插入操作，一旦学生表插入数据之后，就更新学科表和班级表的数据</p>
+</blockquote>
+<blockquote>
+<p>delimiter xx – 设置结束符为xx</p>
+<p>trigger - 触发器</p>
+<p>after - 后置触发</p>
+<p>new.字段 – 新增的字段数据</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">delimiter xx</span><br><span class="line">CREATE TRIGGER tri01 AFTER INSERT ON student FOR EACH ROW</span><br><span class="line">	BEGIN</span><br><span class="line">		UPDATE course SET count=count+1 WHERE id=new.course_id;</span><br><span class="line">		UPDATE class SET count=count+1 WHERE id=new.class_id;</span><br><span class="line">	END xx</span><br><span class="line">delimiter ;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">INSERT INTO student(name,course_id,class_id) VALUES(&#x27;马智威&#x27;,1,3);</span><br><span class="line">INSERT INTO student(name,course_id,class_id) VALUES(&#x27;江星谊&#x27;,1,3);</span><br><span class="line">INSERT INTO student(name,course_id,class_id) VALUES(&#x27;aaa&#x27;,1,1);</span><br><span class="line">INSERT INTO student(name,course_id,class_id) VALUES(&#x27;bbb&#x27;,2,4);</span><br><span class="line">INSERT INTO student(name,course_id,class_id) VALUES(&#x27;ccc&#x27;,2,5);</span><br><span class="line">INSERT INTO student(name,course_id,class_id) VALUES(&#x27;ddd&#x27;,2,5);</span><br></pre></td></tr></table></figure>
+
+<h5 id="1-2-需求：删除学生，并更新班级表和学科表的数据"><a href="#1-2-需求：删除学生，并更新班级表和学科表的数据" class="headerlink" title="1.2 需求：删除学生，并更新班级表和学科表的数据"></a>1.2 需求：删除学生，并更新班级表和学科表的数据</h5><blockquote>
+<p>创建前置触发器：监听学生表的删除操作，一旦学生表删除数据之前，先更新学科表和班级表的数据</p>
+</blockquote>
+<blockquote>
+<p>BEFORE - 前置触发</p>
+<p>old.字段 – 原有的字段数据</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">delimiter xx</span><br><span class="line">CREATE TRIGGER tri02 BEFORE DELETE ON student FOR EACH ROW</span><br><span class="line">	BEGIN</span><br><span class="line">		UPDATE course SET count=count-1 WHERE id=old.course_id;</span><br><span class="line">		UPDATE class SET count=count-1 WHERE id=old.class_id;</span><br><span class="line">	END xx</span><br><span class="line">delimiter ;</span><br><span class="line"></span><br><span class="line">DELETE FROM student WHERE id=6;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>删除存储过程</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">DROP TRIGGER tri01;</span><br><span class="line">DROP TRIGGER tri02;</span><br></pre></td></tr></table></figure>
+
+<h5 id="1-3-更新学生表数据，就更新对应的学科表和班级表的数据"><a href="#1-3-更新学生表数据，就更新对应的学科表和班级表的数据" class="headerlink" title="1.3 更新学生表数据，就更新对应的学科表和班级表的数据"></a>1.3 更新学生表数据，就更新对应的学科表和班级表的数据</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">delimiter xx</span><br><span class="line">CREATE TRIGGER tri03 AFTER UPDATE ON student FOR EACH ROW</span><br><span class="line">	BEGIN</span><br><span class="line">		UPDATE course SET count=count-1 WHERE id=old.course_id;</span><br><span class="line">		UPDATE course SET count=count+1 WHERE id=new.course_id;</span><br><span class="line">		UPDATE class SET count=count-1 WHERE id=old.class_id;</span><br><span class="line">		UPDATE class SET count=count+1 WHERE id=new.class_id;</span><br><span class="line">	END xx</span><br><span class="line">delimiter ;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">UPDATE student SET course_id=2,class_id=4 where id=1;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-存储过程"><a href="#2-存储过程" class="headerlink" title="2.存储过程"></a>2.存储过程</h2><blockquote>
+<p>理解：类似于函数</p>
+<p>注意：存储过程必须调用，才有用！！！</p>
+<p>好处：减少代码的冗余</p>
+</blockquote>
+<blockquote>
+<p>创建场景 —————————————————————————-</p>
+</blockquote>
+<blockquote>
+<p>创建学生表，并添加数据</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE student(</span><br><span class="line">	id INT PRIMARY KEY auto_increment,</span><br><span class="line">	name VARCHAR(32),</span><br><span class="line">	course_id INT(3),</span><br><span class="line">	class_id INT(3),</span><br><span class="line">    age INT</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">INSERT INTO student(name,course_id,class_id) VALUES(&#x27;马智威&#x27;,1,3);</span><br><span class="line">INSERT INTO student(name,course_id,class_id) VALUES(&#x27;江星谊&#x27;,1,3);</span><br><span class="line">INSERT INTO student(name,course_id,class_id) VALUES(&#x27;aaa&#x27;,1,1);</span><br><span class="line">INSERT INTO student(name,course_id,class_id) VALUES(&#x27;bbb&#x27;,2,4);</span><br><span class="line">INSERT INTO student(name,course_id,class_id) VALUES(&#x27;ccc&#x27;,2,5);</span><br><span class="line">INSERT INTO student(name,course_id,class_id) VALUES(&#x27;ddd&#x27;,2,5);</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-1-最简单的存储过程"><a href="#2-1-最简单的存储过程" class="headerlink" title="2.1 最简单的存储过程"></a>2.1 最简单的存储过程</h5><blockquote>
+<p>无传入参数无返回参数的存储过程</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">delimiter xx</span><br><span class="line">CREATE PROCEDURE pro01()</span><br><span class="line">	BEGIN</span><br><span class="line">		SELECT * FROM student;</span><br><span class="line">		SELECT * FROM course;</span><br><span class="line">		SELECT * FROM class;</span><br><span class="line">	END xx</span><br><span class="line">delimiter ;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>调用存储过程</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CALL pro01();</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>SQL中存储过程 与 Java中方法 的区别</p>
+<p>Java方法中的参数指的是外界传入到方法内部的数据，返回值指定是方法结束后返回的具体数据</p>
+<p>SQL存储过程中没有返回值，但是有返回参数</p>
+</blockquote>
+<blockquote>
+<p>存储过程中参数的分类：</p>
+<p>in - 传入参数</p>
+<p>out - 传出参数</p>
+<p>inout - 传入传出参数</p>
+</blockquote>
+<h5 id="2-2-需求1：创建存储过程，传入id，查询出该学生的信息"><a href="#2-2-需求1：创建存储过程，传入id，查询出该学生的信息" class="headerlink" title="2.2 需求1：创建存储过程，传入id，查询出该学生的信息"></a>2.2 需求1：创建存储过程，传入id，查询出该学生的信息</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">delimiter xx</span><br><span class="line">CREATE PROCEDURE pro02(IN s_id INT) # s_id叫做形式参数(形参) ，形参必须规定类型</span><br><span class="line">	BEGIN</span><br><span class="line">		SELECT * FROM student WHERE id=s_id;</span><br><span class="line">	END xx</span><br><span class="line">delimiter ;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>调用存储过程</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CALL pro02(1); # 1叫做实际参数(实参)，实参表示传入的具体数据，实参最好和形参的类型一致</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-3-需求2：创建存储过程，传入id，传出学生的姓名"><a href="#2-3-需求2：创建存储过程，传入id，传出学生的姓名" class="headerlink" title="2.3 需求2：创建存储过程，传入id，传出学生的姓名"></a>2.3 需求2：创建存储过程，传入id，传出学生的姓名</h5><blockquote>
+<p>INTO 相当于赋值</p>
+<p>SELECT name INTO s_name：查询出来的name赋值给 s_name</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">delimiter xx</span><br><span class="line">CREATE PROCEDURE pro03(IN s_id INT,OUT s_name VARCHAR(32))</span><br><span class="line">	BEGIN</span><br><span class="line">		SELECT name INTO s_name FROM student WHERE id=s_id;</span><br><span class="line">	END xx</span><br><span class="line">delimiter ;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>调用存储过程</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CALL pro03(1,@s_name);</span><br><span class="line">SELECT @s_name;</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-4需求3：创建存储过程，传入id，传出学生的年龄"><a href="#2-4需求3：创建存储过程，传入id，传出学生的年龄" class="headerlink" title="2.4需求3：创建存储过程，传入id，传出学生的年龄"></a>2.4需求3：创建存储过程，传入id，传出学生的年龄</h5><blockquote>
+<p>注意：传入参数和传出参数的类型是一样的，就可以将二者合并</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">delimiter xx</span><br><span class="line">CREATE PROCEDURE pro04(INOUT param INT)</span><br><span class="line">	BEGIN</span><br><span class="line">		SELECT age INTO param FROM student WHERE id=param;</span><br><span class="line">	END xx</span><br><span class="line">delimiter ;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>调用存储过程</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">set @param = 2; # 声明一个变量</span><br><span class="line">CALL pro04(@param);</span><br><span class="line">SELECT @param;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>删除存储过程</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">DROP PROCEDURE pro01;</span><br><span class="line">DROP PROCEDURE pro02;</span><br><span class="line">DROP PROCEDURE pro03;</span><br><span class="line">DROP PROCEDURE pro04;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="3-预定义函数"><a href="#3-预定义函数" class="headerlink" title="3.预定义函数"></a>3.预定义函数</h2><blockquote>
+<p>理解：MySQL给我们提供的函数</p>
+</blockquote>
+<blockquote>
+<p>注意：</p>
+<p>函数必须有返回值</p>
+<p>函数使用select调用</p>
+</blockquote>
+<h3 id="3-1-数学类函数"><a href="#3-1-数学类函数" class="headerlink" title="3.1 数学类函数"></a>3.1 数学类函数</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">SELECT ABS(-100);# 获取绝对值</span><br><span class="line">SELECT SQRT(9);# 获取平方根</span><br><span class="line">SELECT MOD(10,3);# 获取余数</span><br><span class="line">SELECT POW(3,3);# 获取次方</span><br><span class="line">SELECT RAND();# 获取随机数（取值范围：0(包含)~1(排他)）</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-字符串类函数"><a href="#3-2-字符串类函数" class="headerlink" title="3.2 字符串类函数"></a>3.2 字符串类函数</h3><blockquote>
+<p>拼接字符串</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT CONCAT(&quot;用良心做教育&quot;,&quot;做真实的自己&quot;);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>截取字符串(目标字符串，第几个字符，截取长度)</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT SUBSTR(&quot;用良心做教育&quot;,2,2);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>获取长度（字节）</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT length(&quot;用良心做教育&quot;);</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-3-日期时间类函数"><a href="#3-3-日期时间类函数" class="headerlink" title="3.3 日期时间类函数"></a>3.3 日期时间类函数</h3><blockquote>
+<p>获取当前日期时间</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT now();</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">SELECT YEAR(NOW());# 获取年</span><br><span class="line">SELECT MONTH(NOW());# 获取月</span><br><span class="line">SELECT DAYOFMONTH(NOW());# 获取日</span><br><span class="line">SELECT HOUR(NOW());# 获取时</span><br><span class="line">SELECT MINUTE(NOW());# 获取分</span><br><span class="line">SELECT SECOND(NOW());# 获取秒</span><br><span class="line">SELECT DATE_FORMAT(NOW(),&quot;%Y年%m月%d日 %H时%i分%s秒&quot;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-自定义函数"><a href="#4-自定义函数" class="headerlink" title="4.自定义函数"></a>4.自定义函数</h2><blockquote>
+<p>注意：MySQL的函数必须有返回值</p>
+</blockquote>
+<blockquote>
+<p>需求：创建一个函数，传入学生id，返回学生信息</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">delimiter xx</span><br><span class="line">CREATE FUNCTION fun01(s_id INT) RETURNS VARCHAR(32) DETERMINISTIC # 函数必须声明返回值类型，8.0+版本必须使用DETERMINISTIC描述</span><br><span class="line">	BEGIN</span><br><span class="line">		DECLARE s_name VARCHAR(32);# 声明一个变量</span><br><span class="line">		SELECT name INTO s_name FROM student WHERE id=s_id;# 查询出的name数据赋值给变量s_name</span><br><span class="line">		RETURN s_name;# 返回s_name数据</span><br><span class="line">	END xx</span><br><span class="line">delimiter ;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>调用函数</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT fun01(2);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>删除函数</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP FUNCTION fun01;</span><br></pre></td></tr></table></figure>
+
+
+
+<blockquote>
+<p>注意：</p>
+<p>有些公司明令禁止使用视图、触发器、存储过程和函数</p>
+<p>因为现在学习的视图、触发器、存储过程和函数是MySQL的语法，<br>其他数据库的语法可能不一样，如果你在项目中使用，而你的这个项目需要拿出去销售，<br>如果甲方指定数据库，维护成本很大</p>
+</blockquote>
+<blockquote>
+<h5 id="1-什么是锁？"><a href="#1-什么是锁？" class="headerlink" title="1.什么是锁？"></a>1.什么是锁？</h5><p>数据库是一个多用户使用的共享资源。当多个用户并发地存取数据时，在数据库中就会产生多个事务同时存取同一数据的情况。若对并发操作不加控制就可能会读取和存储不正确的数据，破坏数据库的一致性</p>
+<p>加锁是实现数据库并发控制的一个非常重要的技术。当事务在对某个数据对象进行操作前，先向系统发出请求，对其加锁。加锁后事务就对该数据对象有了一定的控制，在该事务释放锁之前，其他的事务不能对此数据对象进行更新操作</p>
+<p>基本锁类型：锁包括行级锁和表级锁</p>
+</blockquote>
+<blockquote>
+<h5 id="2-MySQL-中有哪几种锁？"><a href="#2-MySQL-中有哪几种锁？" class="headerlink" title="2.MySQL 中有哪几种锁？"></a>2.MySQL 中有哪几种锁？</h5><p>1.表级锁：开销小，加锁快；不会出现死锁；锁定粒度大，发生锁冲突的概率最高，并发度最低</p>
+<p>2.行级锁：开销大，加锁慢；会出现死锁；锁定粒度最小，发生锁冲突的概率最低，并发度也最高</p>
+</blockquote>
+<blockquote>
+<h5 id="3-优化数据库的方法？"><a href="#3-优化数据库的方法？" class="headerlink" title="3.优化数据库的方法？"></a>3.优化数据库的方法？</h5><p>1.选取最适用的字段属性，尽可能减少定义字段宽度，尽量把字段设置 NOT NULL，例如’省份’、’性别’最好适用 ENUM<br>2.使用连接(JOIN)来代替子查询</p>
+<p>3.适用联合(UNION)来代替手动创建的临时表</p>
+<p>4.事务处理</p>
+<p>5.锁定表、优化事务处理</p>
+<p>6.适用外键，优化锁定表</p>
+<p>7.建立索引</p>
+<p>8.优化查询语句</p>
+</blockquote>
+<blockquote>
+<h5 id="4-说说对-SQL-语句优化有哪些方法？"><a href="#4-说说对-SQL-语句优化有哪些方法？" class="headerlink" title="4.说说对 SQL 语句优化有哪些方法？"></a>4.说说对 SQL 语句优化有哪些方法？</h5><p>1.Where 子句中：where 表之间的连接必须写在其他 Where 条件之前，那些可以过滤掉最大数量记录的条件必须写在 Where 子句的末尾，HAVING 最后</p>
+<p>2.用 EXISTS 替代 IN、用 NOT EXISTS 替代 NOT IN</p>
+<p>3.避免在索引列上使用计算</p>
+<p>4.避免在索引列上使用 IS NULL 和 IS NOT NULL</p>
+<p>5.对查询进行优化，应尽量避免全表扫描，首先应考虑在 where 及 order by 涉及的列上建立索引</p>
+<p>6.应尽量避免在 where 子句中对字段进行 null 值判断，否则将导致引擎放弃使用索引而进行全表扫描</p>
+<p>7.应尽量避免在 where 子句中对字段进行表达式操作，这将导致引擎放弃使用索引而进行全表扫描</p>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://pcb178.site">pcb</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://pcb178.site/post/day53-mysql-advanced-features.html">https://pcb178.site/post/day53-mysql-advanced-features.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://pcb178.site" target="_blank">java悍匪</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E8%A7%A6%E5%8F%91%E5%99%A8/">触发器</a><a class="post-meta__tags" href="/tags/%E5%AD%98%E5%82%A8%E8%BF%87%E7%A8%8B/">存储过程</a><a class="post-meta__tags" href="/tags/%E9%A2%84%E5%AE%9A%E4%B9%89%E5%87%BD%E6%95%B0/">预定义函数</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="/pluginsSrc/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="/pluginsSrc/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/post/day54-jdbc-fundamentals-to-advanced.html" title="Day54 JDBC"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Day54 JDBC</div></div><div class="info-2"><div class="info-item-1">Day54 JDBC JDBC：SUN公司提供的一套操作数据库的标准规范，就是使用Java语言操作关系型数据库的一套API JDBC与数据库驱动的关系：接口与实现的关系   jdbc工作模式图   1.JDBC的四大金刚 1.DriverManager：用于注册驱动   2.Connection: 表示与数据库创建的连接   3.Statement: 操作数据库sql语句的对象   4.ResultSet:  sql语句执行后返回的结果集   创建场景 创建学生表，并添加数据  12345678CREATE TABLE student(	id INT(3) PRIMARY KEY auto_increment,	name VARCHAR(32),	sex VARCHAR(32),	age INT(3),	salary FLOAT(8,2),	course VARCHAR(32))  1234567891011121314INSERT INTO student(name,sex,age,salary,course) VALUES(&#x27;龙俊&#x27;,&#x27;男&#x2...</div></div></div></a><a class="pagination-related" href="/post/day52-mysql-advanced-topics.html" title="Day52 多表联合查询，DCL，数据类型，约束，索引，视图"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Day52 多表联合查询，DCL，数据类型，约束，索引，视图</div></div><div class="info-2"><div class="info-item-1">Day521.DML-多表联合查询(重要)1.1 一对一情况略 1.2 一对多情况 当需要查询多个表中的字段时，就可以使用表连接来实现。表联接分为内连接和外连接 内连接：将两个表中存在连接关系的字段符合连接关系的那些记录形成记录集 外连接：会选出其他不匹配的记录，分为左连接和右连接   创建场景     创建老师表，并插入数据  1234CREATE TABLE teacher(	id INT(3) PRIMARY KEY auto_increment,	name VARCHAR(32))  123INSERT INTO teacher(name) VALUES(&#x27;何老师&#x27;);INSERT INTO teacher(name) VALUES(&#x27;苍老师&#x27;);INSERT INTO teacher(name) VALUES(&#x27;波多老师&#x27;);   创建学生表，并插入数据  12345CREATE TABLE student(	id INT(3) PRIMARY KEY auto_increment,	name VARCHAR(...</div></div></div></a></nav><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">pcb</div><div class="author-info-description"><span style="background:linear-gradient(45deg,#f59,#fb0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:bold;">干饭！干饭！</span></div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">55</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">137</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fa-solid fa-bowl-rice"></i><span>冲呀干饭人</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content"><div style="text-align: center; font-size: 14px; line-height: 1.6;">
+<img src="/img/card1.gif" width="120" style="vertical-align: middle; margin: 6px 0; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.15);">
+<br>
+<strong style="background:linear-gradient(45deg,#ff9a9e,#fad0c4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:16px;">干饭时间到！</strong>
+<br>
+<span style="color: #ff6b6b; font-size: 12px;">今日份快乐：一碗热腾腾的猪脚饭~</span>
+</div>
+</div></div><div class="xpand" style="height:200px;"><canvas class="illo" width="800" height="800" style="max-width: 200px; max-height: 200px; touch-action: none; width: 640px; height: 640px;"></canvas></div><script src="https://fastly.jsdelivr.net/gh/xiaopengand/blogCdn@latest/xzxr/twopeople1.js"></script><script src="https://fastly.jsdelivr.net/gh/xiaopengand/blogCdn@latest/xzxr/zdog.dist.js"></script><script id="rendered-js" src="https://fastly.jsdelivr.net/gh/xiaopengand/blogCdn@latest/xzxr/twopeople.js"></script><style>.card-widget.card-announcement {
+  margin: 0;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+canvas {
+  display: block;
+  margin: 0 auto;
+  cursor: move;
+}</style><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Day53"><span class="toc-number">1.</span> <span class="toc-text">Day53</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E8%A7%A6%E5%8F%91%E5%99%A8"><span class="toc-number">1.1.</span> <span class="toc-text">1.触发器</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-1-%E9%9C%80%E6%B1%82%EF%BC%9A%E6%B7%BB%E5%8A%A0%E5%AD%A6%E7%94%9F%EF%BC%8C%E5%B9%B6%E6%9B%B4%E6%96%B0%E7%8F%AD%E7%BA%A7%E8%A1%A8%E5%92%8C%E5%AD%A6%E7%A7%91%E8%A1%A8%E7%9A%84%E6%95%B0%E6%8D%AE"><span class="toc-number">1.1.0.0.1.</span> <span class="toc-text">1.1 需求：添加学生，并更新班级表和学科表的数据</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#1-2-%E9%9C%80%E6%B1%82%EF%BC%9A%E5%88%A0%E9%99%A4%E5%AD%A6%E7%94%9F%EF%BC%8C%E5%B9%B6%E6%9B%B4%E6%96%B0%E7%8F%AD%E7%BA%A7%E8%A1%A8%E5%92%8C%E5%AD%A6%E7%A7%91%E8%A1%A8%E7%9A%84%E6%95%B0%E6%8D%AE"><span class="toc-number">1.1.0.0.2.</span> <span class="toc-text">1.2 需求：删除学生，并更新班级表和学科表的数据</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#1-3-%E6%9B%B4%E6%96%B0%E5%AD%A6%E7%94%9F%E8%A1%A8%E6%95%B0%E6%8D%AE%EF%BC%8C%E5%B0%B1%E6%9B%B4%E6%96%B0%E5%AF%B9%E5%BA%94%E7%9A%84%E5%AD%A6%E7%A7%91%E8%A1%A8%E5%92%8C%E7%8F%AD%E7%BA%A7%E8%A1%A8%E7%9A%84%E6%95%B0%E6%8D%AE"><span class="toc-number">1.1.0.0.3.</span> <span class="toc-text">1.3 更新学生表数据，就更新对应的学科表和班级表的数据</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E5%AD%98%E5%82%A8%E8%BF%87%E7%A8%8B"><span class="toc-number">1.2.</span> <span class="toc-text">2.存储过程</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#2-1-%E6%9C%80%E7%AE%80%E5%8D%95%E7%9A%84%E5%AD%98%E5%82%A8%E8%BF%87%E7%A8%8B"><span class="toc-number">1.2.0.0.1.</span> <span class="toc-text">2.1 最简单的存储过程</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-2-%E9%9C%80%E6%B1%821%EF%BC%9A%E5%88%9B%E5%BB%BA%E5%AD%98%E5%82%A8%E8%BF%87%E7%A8%8B%EF%BC%8C%E4%BC%A0%E5%85%A5id%EF%BC%8C%E6%9F%A5%E8%AF%A2%E5%87%BA%E8%AF%A5%E5%AD%A6%E7%94%9F%E7%9A%84%E4%BF%A1%E6%81%AF"><span class="toc-number">1.2.0.0.2.</span> <span class="toc-text">2.2 需求1：创建存储过程，传入id，查询出该学生的信息</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-3-%E9%9C%80%E6%B1%822%EF%BC%9A%E5%88%9B%E5%BB%BA%E5%AD%98%E5%82%A8%E8%BF%87%E7%A8%8B%EF%BC%8C%E4%BC%A0%E5%85%A5id%EF%BC%8C%E4%BC%A0%E5%87%BA%E5%AD%A6%E7%94%9F%E7%9A%84%E5%A7%93%E5%90%8D"><span class="toc-number">1.2.0.0.3.</span> <span class="toc-text">2.3 需求2：创建存储过程，传入id，传出学生的姓名</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-4%E9%9C%80%E6%B1%823%EF%BC%9A%E5%88%9B%E5%BB%BA%E5%AD%98%E5%82%A8%E8%BF%87%E7%A8%8B%EF%BC%8C%E4%BC%A0%E5%85%A5id%EF%BC%8C%E4%BC%A0%E5%87%BA%E5%AD%A6%E7%94%9F%E7%9A%84%E5%B9%B4%E9%BE%84"><span class="toc-number">1.2.0.0.4.</span> <span class="toc-text">2.4需求3：创建存储过程，传入id，传出学生的年龄</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E9%A2%84%E5%AE%9A%E4%B9%89%E5%87%BD%E6%95%B0"><span class="toc-number">1.3.</span> <span class="toc-text">3.预定义函数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E6%95%B0%E5%AD%A6%E7%B1%BB%E5%87%BD%E6%95%B0"><span class="toc-number">1.3.1.</span> <span class="toc-text">3.1 数学类函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%B1%BB%E5%87%BD%E6%95%B0"><span class="toc-number">1.3.2.</span> <span class="toc-text">3.2 字符串类函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E6%97%A5%E6%9C%9F%E6%97%B6%E9%97%B4%E7%B1%BB%E5%87%BD%E6%95%B0"><span class="toc-number">1.3.3.</span> <span class="toc-text">3.3 日期时间类函数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E8%87%AA%E5%AE%9A%E4%B9%89%E5%87%BD%E6%95%B0"><span class="toc-number">1.4.</span> <span class="toc-text">4.自定义函数</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-%E4%BB%80%E4%B9%88%E6%98%AF%E9%94%81%EF%BC%9F"><span class="toc-number">1.4.0.0.1.</span> <span class="toc-text">1.什么是锁？</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-MySQL-%E4%B8%AD%E6%9C%89%E5%93%AA%E5%87%A0%E7%A7%8D%E9%94%81%EF%BC%9F"><span class="toc-number">1.4.0.0.2.</span> <span class="toc-text">2.MySQL 中有哪几种锁？</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-%E4%BC%98%E5%8C%96%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E6%96%B9%E6%B3%95%EF%BC%9F"><span class="toc-number">1.4.0.0.3.</span> <span class="toc-text">3.优化数据库的方法？</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-%E8%AF%B4%E8%AF%B4%E5%AF%B9-SQL-%E8%AF%AD%E5%8F%A5%E4%BC%98%E5%8C%96%E6%9C%89%E5%93%AA%E4%BA%9B%E6%96%B9%E6%B3%95%EF%BC%9F"><span class="toc-number">1.4.0.0.4.</span> <span class="toc-text">4.说说对 SQL 语句优化有哪些方法？</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/0.html" title="无标题">无标题</a><time datetime="2025-09-28T06:51:13.642Z" title="发表于 2025-09-28 14:51:13">2025-09-28</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day55-jdbc-advanced-transaction-batch-pooling.html" title="Day55 事务，批处理">Day55 事务，批处理</a><time datetime="2025-09-23T02:00:56.000Z" title="发表于 2025-09-23 10:00:56">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day54-jdbc-fundamentals-to-advanced.html" title="Day54 JDBC">Day54 JDBC</a><time datetime="2025-09-23T02:00:55.000Z" title="发表于 2025-09-23 10:00:55">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day53-mysql-advanced-features.html" title="Day53 触发器，存储过程，预定义函数，自定义函数">Day53 触发器，存储过程，预定义函数，自定义函数</a><time datetime="2025-09-23T02:00:54.000Z" title="发表于 2025-09-23 10:00:54">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day52-mysql-advanced-topics.html" title="Day52 多表联合查询，DCL，数据类型，约束，索引，视图">Day52 多表联合查询，DCL，数据类型，约束，索引，视图</a><time datetime="2025-09-23T02:00:53.000Z" title="发表于 2025-09-23 10:00:53">2025-09-23</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 By pcb</span></div><div class="footer_custom_text">true</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const initValine = (el, path) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyValine = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const valineConfig = {
+      el: '#vcomment',
+      appId: '',
+      appKey: '',
+      avatar: 'retro',
+      serverURLs: '',
+      emojiMaps: "",
+      visitor: true,
+      ...option,
+      path: isShuoshuo ? path : (option && option.path) || window.location.pathname
+    }
+
+    new Valine(valineConfig)
+  }
+
+  const loadValine = async (el, path) => {
+    if (typeof Valine === 'function') {
+      initValine(el, path)
+    } else {
+      await btf.getScript('/pluginsSrc/valine/dist/Valine.min.js')
+      initValine(el, path)
+    }
+  }
+
+  if (isShuoshuo) {
+    'Valine' === 'Valine'
+      ? window.shuoshuoComment = { loadComment: loadValine }
+      : window.loadOtherComment = loadValine
+    return
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script></div><div class="aplayer no-destroy" data-id="5183531430" data-server="netease" data-type="playlist" data-fixed="true" data-mini="true" data-listFolded="false" data-order="random" data-preload="none" data-autoplay="false" muted></div><canvas id="universe"></canvas><script defer src="/js/universe.js"></script><script src="/js/daily-swap.js"></script><div class="sticky_layout">
+  <div id="clock"></div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.js';
+    document.body.appendChild(s);
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const clock = document.querySelector('#clock');
+    if (!clock) return;
+
+    // 1. 隐藏任何包含“undefined”的元素
+    clock.querySelectorAll('*').forEach(el => {
+      if (el.textContent.includes('undefined')) {
+        el.style.display = 'none';
+      }
+    });
+
+    // 2. 强制样式压缩
+    clock.style.cssText += `
+      max-width: 100% !important;
+      white-space: normal !important;
+      word-break: break-all !important;
+      font-size: 14px !important;
+      line-height: 1.5 !important;
+      padding: 10px 8px !important;
+      background: rgba(255,255,255,.75) !important;
+      border-radius: 12px !important;
+      backdrop-filter: blur(6px) !important;
+      box-sizing: border-box !important;
+    `;
+  });
+</script>
+<canvas class="fireworks" mobile="true"></canvas><script src="/pluginsSrc/butterfly-extsrc/dist/fireworks.min.js"></script><script defer="defer" id="fluttering_ribbon" mobile="true" src="/pluginsSrc/butterfly-extsrc/dist/canvas-fluttering-ribbon.min.js"></script><script src="/pluginsSrc/butterfly-extsrc/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><link rel="stylesheet" href="/pluginsSrc/aplayer/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="/pluginsSrc/aplayer/dist/APlayer.min.js"></script><script src="/pluginsSrc/butterfly-extsrc/metingjs/dist/Meting.min.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章..." type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></div><!-- hexo injector body_end start --><script data-pjax>
+  function butterfly_clock_anzhiyu_injector_config(){
+    var parent_div_git = document.getElementsByClassName('sticky_layout')[0];
+    var item_html = '<div class="card-widget card-clock"><div class="card-glass"><div class="card-background"><div class="card-content"><div id="hexo_electric_clock"><img class="entered loading" id="card-clock-loading" src="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/loading.gif" style="height: 120px; width: 100%;" data-ll-status="loading"/></div></div></div></div></div>';
+    console.log('已挂载butterfly_clock_anzhiyu')
+    if(parent_div_git) {
+      parent_div_git.insertAdjacentHTML("afterbegin",item_html)
+    }
+  }
+  var elist = 'undefined'.split(',');
+  var cpage = location.pathname;
+  var epage = 'all';
+  var qweather_key = 'b16a1fa0e63c46a4b8f28abfb06ae3fe';
+  var gaud_map_key = 'e2b04289e870b005374ee030148d64fd&s=rsv3';
+  var baidu_ak_key = 'undefined';
+  var flag = 0;
+  var clock_rectangle = '104.07,30.57';
+  var clock_default_rectangle_enable = 'true';
+
+  for (var i=0;i<elist.length;i++){
+    if (cpage.includes(elist[i])){
+      flag++;
+    }
+  }
+
+  if ((epage ==='all')&&(flag == 0)){
+    butterfly_clock_anzhiyu_injector_config();
+  }
+  else if (epage === cpage){
+    butterfly_clock_anzhiyu_injector_config();
+  }
+  </script><script src="https://widget.qweather.net/simple/static/js/he-simple-common.js?v=2.0"></script><script data-pjax src="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.js"></script><!-- hexo injector body_end end --><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body></html>

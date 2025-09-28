@@ -1,0 +1,788 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Day51 数据库，DDL，DML | java悍匪</title><meta name="author" content="pcb"><meta name="copyright" content="pcb"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="全面学习 MySQL 数据库核心概念：数据库、数据表、字段、行；掌握 SQL 语言分类；精通 DDL (数据定义语言) 创建、修改、删除库与表；深入掌握 DML (数据操作语言) 实现数据的增删改查 (CRUD)，包括主键、自动增长、条件操作等。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Day51 数据库，DDL，DML">
+<meta property="og:url" content="https://pcb178.site/post/day51-mysql-ddl-dml.html">
+<meta property="og:site_name" content="java悍匪">
+<meta property="og:description" content="全面学习 MySQL 数据库核心概念：数据库、数据表、字段、行；掌握 SQL 语言分类；精通 DDL (数据定义语言) 创建、修改、删除库与表；深入掌握 DML (数据操作语言) 实现数据的增删改查 (CRUD)，包括主键、自动增长、条件操作等。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pcb178.site/img/avatar.jpg">
+<meta property="article:published_time" content="2025-09-23T02:00:52.000Z">
+<meta property="article:modified_time" content="2025-09-28T06:21:35.522Z">
+<meta property="article:author" content="pcb">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="DDL">
+<meta property="article:tag" content="DML">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pcb178.site/img/avatar.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Day51 数据库，DDL，DML",
+  "url": "https://pcb178.site/post/day51-mysql-ddl-dml.html",
+  "image": "https://pcb178.site/img/avatar.jpg",
+  "datePublished": "2025-09-23T02:00:52.000Z",
+  "dateModified": "2025-09-28T06:21:35.522Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "pcb",
+      "url": "https://pcb178.site"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://pcb178.site/post/day51-mysql-ddl-dml.html"><link rel="preconnect"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="/pluginsSrc/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":3,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: '/pluginsSrc/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Day51 数据库，DDL，DML',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><link rel="stylesheet" href="/css/universe.css"><link rel="stylesheet" href="/css/banner-fullscreen.css"><link rel="stylesheet" href="/css/font-bigger.css"><link rel="stylesheet" href="/css/search-style.css"><link rel="stylesheet" href="/css/footer-transparent.css"><!-- hexo injector head_end start --><link rel="stylesheet" href="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.css" /><!-- hexo injector head_end end --><meta name="generator" content="Hexo 7.3.0"></head><body><div id="web_bg" style="background: &lt;%= theme.custom_images.banner %&gt;;"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">55</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">137</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 导航</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间线</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-fish"></i><span> 摸鱼</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/moyu/"><i class="fa-fw fas fa-gamepad"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/tools/"><i class="fa-fw fas fa-tools"></i><span> 工具</span></a></li><li><a class="site-page child" href="/demo/"><i class="fa-fw fas fa-anchor"></i><span> 动画</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: &lt;%= theme.custom_images.banner %&gt;;"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">java悍匪</span></a><a class="nav-page-title" href="/"><span class="site-name">Day51 数据库，DDL，DML</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 导航</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间线</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-fish"></i><span> 摸鱼</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/moyu/"><i class="fa-fw fas fa-gamepad"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/tools/"><i class="fa-fw fas fa-tools"></i><span> 工具</span></a></li><li><a class="site-page child" href="/demo/"><i class="fa-fw fas fa-anchor"></i><span> 动画</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Day51 数据库，DDL，DML</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-09-23T02:00:52.000Z" title="发表于 2025-09-23 10:00:52">2025-09-23</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-09-28T06:21:35.522Z" title="更新于 2025-09-28 14:21:35">2025-09-28</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Java%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">Java学习笔记</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">3.7k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>14分钟</span></span><span class="post-meta-separator">|</span><span class="leancloud_visitors" id="/post/day51-mysql-ddl-dml.html" data-flag-title="Day51 数据库，DDL，DML"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span class="leancloud-visitors-count"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="Day51-MySQL"><a href="#Day51-MySQL" class="headerlink" title="Day51 MySQL"></a>Day51 MySQL</h1><h2 id="1-数据库"><a href="#1-数据库" class="headerlink" title="1.数据库"></a>1.数据库</h2><blockquote>
+<p>数据库(database)就是一个存储数据的仓库。为了方便数据的存储和管理，它将数据按照特定的规律存储在磁盘(硬盘)上。通过数据库管理系统，可以有效地组织和管理存储在数据库中的数据</p>
+</blockquote>
+<blockquote>
+<p>MySQL就是数据库管理系统，操纵和管理数据库的大型软件</p>
+<p>数据持久化特点</p>
+</blockquote>
+<h3 id="1-1-学习数据库的五个基本概念"><a href="#1-1-学习数据库的五个基本概念" class="headerlink" title="1.1 学习数据库的五个基本概念"></a>1.1 学习数据库的五个基本概念</h3><blockquote>
+<p>1.数据库服务器：是指用来运行数据库服务的一台电脑。小型项目通常为一台，中大型项目通常是多台数据库服务器共同来存储或计算。由于数据安全非常重要，所以我们需要对数据库服务器里面的数据进经备份管理</p>
+</blockquote>
+<blockquote>
+<p>2.数据库 DDB：存储数据的仓库，数据是有组织的进行存储</p>
+</blockquote>
+<blockquote>
+<p>3.数据表：例如在学员管理系统数据库中。根据业务的不同又分为了不同的数据表。专门用来存放不同人员的数据。例如：学员数据表（学号、用户名、密码）；老师数据表（用户名、密码，工作经验）</p>
+</blockquote>
+<blockquote>
+<p>4.数据字段：也叫数据列，就是我们日常所见表格里面的列。在表格中，我们会将一张用户表分成多个列。如下：用户编号、用户名、性别、年龄是字段。在真正的数据库中数据字段需要换成英文需要写成：id、username、sex、age</p>
+</blockquote>
+<blockquote>
+<p>5.数据行：真正的数据存在每一个表的行里面。字段（列）划分出来了一个表应该按照什么样的格式存数据。而行，是真正的数据。每一行需要遵循数据字段（列）的规范和要求进行存入数据</p>
+</blockquote>
+<h3 id="1-2-安装MySQL"><a href="#1-2-安装MySQL" class="headerlink" title="1.2 安装MySQL"></a>1.2 安装MySQL</h3><blockquote>
+<p>略</p>
+</blockquote>
+<blockquote>
+<p>注意：</p>
+<p>1.服务端口3306，不建议更改</p>
+<p>2.InnoDB作为默认的数据库存储引擎</p>
+<p>3.net stop mysql80 结束数据库服务器</p>
+<p>net start mysql80 开启数据库服务器</p>
+</blockquote>
+<h2 id="2-SQL-结构化查询语言"><a href="#2-SQL-结构化查询语言" class="headerlink" title="2.SQL 结构化查询语言"></a>2.SQL 结构化查询语言</h2><blockquote>
+<p><strong>一切就绪，开始学SQL</strong></p>
+<p>结构化查询语言(Structured Query Language)简称SQL，操作关系型数据库的编程语言，定义了一套操作关系型数据库统一标准，用于存取数据以及查询、更新和管理关系数据库系统；同时也是数据库脚本文件的扩展名</p>
+</blockquote>
+<h3 id="2-1-SQL分类"><a href="#2-1-SQL分类" class="headerlink" title="2.1 SQL分类"></a>2.1 SQL分类</h3><blockquote>
+<p>1.数据定义语言(DDL ，Data Defintion Language)语句：数据定义语句，用于定义不同的数据对象、数据库、表、列、索引等。常用的语句关键字包括create、drop、alter等。</p>
+<p>针对于数据库、数据表、数据字段的操作</p>
+</blockquote>
+<blockquote>
+<p>2.数据操作语言(DML ， Data Manipulation Language)语句：数据操纵语句，用来对数据增删改查，用于添加、删除、更新和查询数据库记录，并检查数据的完整性。常用的语句关键字主要包括insert、delete、update和select等。（DML:添加，修改，删除，DQL:查询）</p>
+<h5 id="重要"><a href="#重要" class="headerlink" title="重要"></a>重要</h5></blockquote>
+<blockquote>
+<p>3.数据控制语言(DCL， Data Control Language)语句：数据控制语句，创建子账号，设置权限。这些语句定义了数据库、表、字段、用户的访问权限和安全级别。主要的语句关键字包括grant、revoke等。</p>
+</blockquote>
+<blockquote>
+<p>注意：</p>
+<p>关系型数据库：表之间有联系；eg：mysql，oracle，SQL server</p>
+<p>非关系型数据库：如redis没有表 </p>
+</blockquote>
+<blockquote>
+<p>项目中使用DML，面试其他可能会考，DDL少用，DCL一般我们没有级别去开权限 </p>
+</blockquote>
+<h3 id="2-2-DDL"><a href="#2-2-DDL" class="headerlink" title="2.2 DDL"></a>2.2 DDL</h3><blockquote>
+<p>DDL：针对于数据库、数据表、数据字段的操作</p>
+</blockquote>
+<p><img src="/img/java-notes/day51/%E5%9B%BE%E7%89%871.png" alt="DDL"></p>
+<blockquote>
+<p>查询所有数据库：show databases ;</p>
+<p>删除数据库：drop database [ if exists ] 数据库名 ;</p>
+<p>切换数据库：use 数据库名 ;</p>
+</blockquote>
+<p><img src="/img/java-notes/day51/%E5%9B%BE%E7%89%872.png" alt="DDL"></p>
+<p><img src="/img/java-notes/day51/%E5%9B%BE%E7%89%873.png" alt="DDL"></p>
+<blockquote>
+<p>可视化软件操作，新建数据库，设置字符集编码为utf8</p>
+</blockquote>
+<p><img src="/img/java-notes/day51/6.png" alt="DDL"></p>
+<blockquote>
+<p>注意：为什么不是UTF-8，而是utf8？</p>
+<p>UTF-8是国际通用的字符集，utf8是MySQL里的字符集</p>
+</blockquote>
+<blockquote>
+<p>相关操作(cmd中的操作)</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>命令</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>登录</td>
+<td>mysql -u root -p</td>
+</tr>
+<tr>
+<td>展示</td>
+<td>show databases;</td>
+</tr>
+<tr>
+<td>删除数据库</td>
+<td>drop database</td>
+</tr>
+<tr>
+<td>使用数据库</td>
+<td>use 数据库名;</td>
+</tr>
+<tr>
+<td>展示表</td>
+<td>show tables;</td>
+</tr>
+<tr>
+<td>查询学生信息</td>
+<td>select * from student;</td>
+</tr>
+<tr>
+<td>创建数据库</td>
+<td>CREATE DATABASE</td>
+</tr>
+</tbody></table>
+<h4 id="2-2-1-操作库-DATABASE"><a href="#2-2-1-操作库-DATABASE" class="headerlink" title="2.2.1 操作库 DATABASE"></a>2.2.1 操作库 DATABASE</h4><blockquote>
+<p>创建库</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CREATE DATABASE fy2401javaee;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>删除库</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP DATABASE fy2401javaee;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>查询所有库</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SHOW DATABASES;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>使用库</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">USE fy2401javaee;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意：库名不能修改</p>
+</blockquote>
+<h4 id="2-2-2-操作表-ALTER-TABLE"><a href="#2-2-2-操作表-ALTER-TABLE" class="headerlink" title="2.2.2 操作表 ALTER TABLE"></a>2.2.2 操作表 ALTER TABLE</h4><h5 id="创建表"><a href="#创建表" class="headerlink" title="创建表"></a>创建表</h5><blockquote>
+<p>基本语法：create table 表名(字段名 字段类型 ，…. ， 字段名 字段类型);</p>
+</blockquote>
+<blockquote>
+<p>VARCHAR(32)：可以接收32字符长度的字符串</p>
+<p>FLOAT(8,2)：可以接收长度为8，其中有两位小数的数据</p>
+<p>字符串：</p>
+<p> varchar(32)：最多只能存储32个字符，如果未满32个，占实际字符的个数</p>
+<p>char(32)：最多只能存储32个字符，如果未满32个，也占32个的空间</p>
+<p>注意：以上两种字符串表现形式最多只能存储255个字符</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE s_student(</span><br><span class="line">	s_name VARCHAR(64),</span><br><span class="line">	s_sex VARCHAR(32),</span><br><span class="line">	age INT(3),</span><br><span class="line">	salary FLOAT(8,2),</span><br><span class="line">	course VARCHAR(32)	</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h5 id="修改表名"><a href="#修改表名" class="headerlink" title="修改表名"></a>修改表名</h5><blockquote>
+<p>语法：alter table 旧表名 rename 新的表名;</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ALTER TABLE s_student RENAME student;</span><br></pre></td></tr></table></figure>
+
+<h5 id="删除表"><a href="#删除表" class="headerlink" title="删除表"></a>删除表</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP TABLE student;</span><br></pre></td></tr></table></figure>
+
+<h5 id="查询所有表"><a href="#查询所有表" class="headerlink" title="查询所有表"></a>查询所有表</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SHOW TABLES;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-2-3-操作字段-ALTER-TABLE"><a href="#2-2-3-操作字段-ALTER-TABLE" class="headerlink" title="2.2.3 操作字段 ALTER TABLE"></a>2.2.3 操作字段 ALTER TABLE</h4><h5 id="添加字段-ADD"><a href="#添加字段-ADD" class="headerlink" title="添加字段 ADD"></a>添加字段 ADD</h5><blockquote>
+<p>语法格式：alter table 表名 add 字段名 类型;</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ALTER TABLE student ADD xxx VARCHAR(32);</span><br></pre></td></tr></table></figure>
+
+<h5 id="删除字段-DROP"><a href="#删除字段-DROP" class="headerlink" title="删除字段 DROP"></a>删除字段 DROP</h5><blockquote>
+<p>语法格式：alter table 表名 drop column 字段名;</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ALTER TABLE student DROP xxx;</span><br></pre></td></tr></table></figure>
+
+<h5 id="修改字段类型-MODIFY"><a href="#修改字段类型-MODIFY" class="headerlink" title="修改字段类型 MODIFY"></a>修改字段类型 MODIFY</h5><blockquote>
+<p>语法格式：alter table 表名 modify 字段名 varchar(20);</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ALTER TABLE student MODIFY s_sex VARCHAR(16);</span><br></pre></td></tr></table></figure>
+
+<h5 id="修改字段名-CHANGE"><a href="#修改字段名-CHANGE" class="headerlink" title="修改字段名 CHANGE"></a>修改字段名 CHANGE</h5><blockquote>
+<p>语法格式：alter table 表名 change 字段原名 字段新名 字段类型;</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ALTER TABLE student CHANGE s_sex sex VARCHAR(16);</span><br></pre></td></tr></table></figure>
+
+<h5 id="修改字段名-类型-CHANGE"><a href="#修改字段名-类型-CHANGE" class="headerlink" title="修改字段名+类型 CHANGE"></a>修改字段名+类型 CHANGE</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ALTER TABLE student CHANGE s_name name VARCHAR(32);</span><br></pre></td></tr></table></figure>
+
+<h5 id="查询字段信息-DESC"><a href="#查询字段信息-DESC" class="headerlink" title="查询字段信息 DESC"></a>查询字段信息 DESC</h5><blockquote>
+<p>field：字段</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DESC student;</span><br></pre></td></tr></table></figure>
+
+<h5 id="获取创建表信息"><a href="#获取创建表信息" class="headerlink" title="获取创建表信息"></a>获取创建表信息</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SHOW CREATE TABLE student;</span><br></pre></td></tr></table></figure>
+
+<p>– CREATE TABLE <code>student</code> (<br>–   <code>s_name</code> varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,<br>–   <code>sex</code> varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL,<br>–   <code>age</code> int DEFAULT NULL,<br>–   <code>salary</code> float(8,2) DEFAULT NULL,<br>–   <code>course</code> varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL<br>– ) ENGINE&#x3D;InnoDB DEFAULT CHARSET&#x3D;utf8mb4 COLLATE&#x3D;utf8mb4_general_ci</p>
+<blockquote>
+<h5 id="创建字段与关键字冲突了怎么办？"><a href="#创建字段与关键字冲突了怎么办？" class="headerlink" title="创建字段与关键字冲突了怎么办？"></a>创建字段与关键字冲突了怎么办？</h5><p>不会冲突，SQL命令发送给MySQL后，MySQL会自动优化SQL命令（比如：表名和字段名自动使用&#96;&#96;括起来，防止与MySQL的关键字冲突）</p>
+</blockquote>
+<h3 id="2-3-DML-重要"><a href="#2-3-DML-重要" class="headerlink" title="2.3 DML(重要)"></a>2.3 DML(重要)</h3><blockquote>
+<p>DML：针对数据的增删查改，由于查询的SQL语句较多，所以查询语句又分出来叫做DQL</p>
+<p>增删改查，CRUD</p>
+<p>添加数据（INSERT INTO）</p>
+<p>修改数据（UPDATE 表名 SET）</p>
+<p>删除数据（DELETE FROM）</p>
+</blockquote>
+<h5 id="新建表"><a href="#新建表" class="headerlink" title="新建表"></a>新建表</h5><blockquote>
+<p>前言：每张表必须有且只有一个主键</p>
+<p>主键：主键上的数据不能重复且不能为null，主键上的数据相当于该数据行的唯一标识</p>
+<p>PRIMARY KEY - 主键</p>
+<p>auto_increment - 自动增长</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE student(</span><br><span class="line">	id INT(3) PRIMARY KEY auto_increment,</span><br><span class="line">	name VARCHAR(32),</span><br><span class="line">	sex VARCHAR(32),</span><br><span class="line">	age INT(3),</span><br><span class="line">	salary FLOAT(8,2),</span><br><span class="line">	course VARCHAR(32)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-3-1-添加数据-INSERT-INTO"><a href="#2-3-1-添加数据-INSERT-INTO" class="headerlink" title="2.3.1 添加数据 INSERT INTO"></a>2.3.1 添加数据 INSERT INTO</h4><blockquote>
+<p>语法格式：</p>
+<p>insert into 表 values(值1,值2,值n);</p>
+<p>insert into 表(字段1,字段2,字段n) values(值1,值2,值n);</p>
+<p>两种语法的区别：</p>
+<p>基本语法1的插入语句，表中有多少个字段就必须要插入多少个值。一个不能多，一个也不能少。若有默认值，不想传，可以写上null。</p>
+<p>基本语法2中，除非有必填字段必须要写入值外。如果有默认值的不想写可以忽略不写。mysql会自动补主默认值</p>
+</blockquote>
+<blockquote>
+<p>方式一</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">INSERT INTO student VALUES(1,&#x27;龙俊&#x27;,&#x27;男&#x27;,23,10000,&#x27;Java&#x27;);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>方式二</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">INSERT INTO student VALUES(1,&#x27;龙俊&#x27;,&#x27;男&#x27;,23,10000,&#x27;Java&#x27;),(2,&#x27;喻平&#x27;,&#x27;男&#x27;,20,12000,&#x27;Java&#x27;);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>方式三</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">INSERT INTO student(name,sex,age,salary,course) VALUES(&#x27;龙俊&#x27;,&#x27;男&#x27;,23,10000,&#x27;Java&#x27;);</span><br><span class="line">INSERT INTO student(name,sex,age,salary,course) VALUES(&#x27;喻平&#x27;,&#x27;男&#x27;,20,12000,&#x27;Java&#x27;);</span><br><span class="line">INSERT INTO student(name,sex,age,salary,course) VALUES(&#x27;牛西燕&#x27;,&#x27;女&#x27;,19,17000,&#x27;Java&#x27;);</span><br><span class="line">INSERT INTO student(name,sex,age,salary,course) VALUES(&#x27;刘德华&#x27;,&#x27;男&#x27;,21,15000,&#x27;Java&#x27;);</span><br><span class="line">INSERT INTO student(name,sex,age,salary,course) VALUES(&#x27;马德华&#x27;,&#x27;男&#x27;,27,10000,&#x27;Java&#x27;);</span><br><span class="line">INSERT INTO student(name,sex,age,salary,course) VALUES(&#x27;霍建华&#x27;,&#x27;男&#x27;,19,12000,&#x27;Java&#x27;);</span><br><span class="line">INSERT INTO student(name,sex,age,salary,course) VALUES(&#x27;华晨宇&#x27;,&#x27;男&#x27;,32,5000,&#x27;Python&#x27;);</span><br><span class="line">INSERT INTO student(name,sex,age,salary,course) VALUES(&#x27;黄日华&#x27;,&#x27;男&#x27;,45,4000,&#x27;Python&#x27;);</span><br><span class="line">INSERT INTO student(name,sex,age,salary,course) VALUES(&#x27;任达华&#x27;,&#x27;男&#x27;,28,7000,&#x27;Python&#x27;);</span><br><span class="line">INSERT INTO student(name,sex,age,salary,course) VALUES(&#x27;周华健&#x27;,&#x27;男&#x27;,30,8000,&#x27;Python&#x27;);</span><br><span class="line">INSERT INTO student(name,sex,age,salary,course) VALUES(&#x27;欧阳震华&#x27;,&#x27;男&#x27;,23,12000,&#x27;Python&#x27;);</span><br><span class="line">INSERT INTO student(name,sex,age,salary,course) VALUES(&#x27;麻生希&#x27;,&#x27;女&#x27;,30,7000,&#x27;HTML&#x27;);</span><br><span class="line">INSERT INTO student(name,sex,age,salary,course) VALUES(&#x27;椎名空&#x27;,&#x27;女&#x27;,23,6000,&#x27;HTML&#x27;);</span><br><span class="line">INSERT INTO student(name,sex,age,salary,course) VALUES(&#x27;水野朝阳&#x27;,&#x27;女&#x27;,28,8000,&#x27;HTML&#x27;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-3-2-删除数据-DELETE-FROM"><a href="#2-3-2-删除数据-DELETE-FROM" class="headerlink" title="2.3.2 删除数据 DELETE FROM"></a>2.3.2 删除数据 DELETE FROM</h4><blockquote>
+<p>清空表数据 - 方式一：清空数据后，再次添加，id会从1开始</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">TRUNCATE student;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>清空表数据 - 方式二：清空数据后，再次添加，id会继续递增</p>
+</blockquote>
+<blockquote>
+<p>经验1：考虑到删除的数据有可能恢复，使用方式二删除数据，再恢复备份，主键不会冲突</p>
+<p>经验2：项目中的数据大概率不会删除，如果要做删除功能，可以在表上加一个字段来去表述该数据行是否可用（ps：0表示删除，1表示未删除）</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DELETE FROM student;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>区别：</p>
+<p>1.处理效率：drop&gt;trustcate&gt;delete<br>2.drop是完全删除表，包括表结构；delete是删除表数据，保留表的结构，而且可以加where,只删除一行或者多行；truncate 只能删除表数据，会保留表结构，而且不能加where</p>
+</blockquote>
+<blockquote>
+<p>单条件删除 where</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DELETE FROM student WHERE id=5;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DELETE FROM student WHERE salary&lt;=5000;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>多条件删除</p>
+</blockquote>
+<blockquote>
+<p>OR – 或</p>
+<p>AND – 与(并且)</p>
+<p>IN(值1,值2,值3,…) – 删除字段上包含的数据</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DELETE FROM student WHERE sex=&#x27;女&#x27; OR course=&#x27;Python&#x27;;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DELETE FROM student WHERE sex=&#x27;女&#x27; AND course=&#x27;Java&#x27;; #性别是女生并且还是学Java的</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DELETE FROM student WHERE course IN(&#x27;Python&#x27;,&#x27;HTML&#x27;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-3-3-修改数据-UPDATE-表名-SET"><a href="#2-3-3-修改数据-UPDATE-表名-SET" class="headerlink" title="2.3.3 修改数据 UPDATE 表名 SET"></a>2.3.3 修改数据 UPDATE 表名 SET</h4><blockquote>
+<p>修改所有数据</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">UPDATE student SET salary=10000;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>单条件修改</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">UPDATE student SET salary = 20000 WHERE id=3;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>多条件修改</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">UPDATE student SET salary=30000 WHERE sex=&#x27;女&#x27; OR course=&#x27;Python&#x27;;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">UPDATE student SET salary=40000 WHERE sex=&#x27;女&#x27; AND course=&#x27;Java&#x27;;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">UPDATE student SET salary=50000 WHERE age IN(18,21,23);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>修改多个数据 ，</p>
+<p>更新多列数据的间隔符号是逗号 ，</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">UPDATE student SET age=21,salary=50000 WHERE id=3;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-3-4-查询数据-DQL-SELECT"><a href="#2-3-4-查询数据-DQL-SELECT" class="headerlink" title="2.3.4 查询数据(DQL) SELECT"></a>2.3.4 查询数据(DQL) SELECT</h4><blockquote>
+<p>SELECT   字段</p>
+<p>FROM        表名</p>
+<p>WHERE     条件</p>
+<p>GROUP BY   分组字段</p>
+<p>HAVING      分组后的条件</p>
+<p>ORDER BY   排序字段</p>
+<p>LIMIT   分页参数</p>
+</blockquote>
+<blockquote>
+<p>书写命令顺序为：select, from, where, group by, having, order by, limit</p>
+</blockquote>
+<blockquote>
+<p>MySQL查询语句的执行顺序:<br>FROM(including JOIN) —&gt; WHERE —&gt; GROUP BY —&gt; HAVING —&gt; SELECT —&gt; DISTINCT —&gt; ORDER BY —&gt; LIMIT</p>
+</blockquote>
+<blockquote>
+<p>查询所有字段    *表示所有字段</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM student;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>查询指定字段</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT name,sex,age FROM student;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>查询指定字段 + 别名 AS</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT name AS &#x27;姓名&#x27;,sex AS &#x27;性别&#x27;,age AS &#x27;年龄&#x27; FROM student;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>去重查询 DISTINCT</p>
+<p>需求：查询学科</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT DISTINCT course FROM student;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>单条件查询</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM student WHERE id=3;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>多条件查询</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM student WHERE sex=&#x27;女&#x27; OR course=&#x27;Python&#x27;;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM student WHERE sex=&#x27;女&#x27; AND course=&#x27;Java&#x27;;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM student WHERE course IN(&#x27;Java&#x27;,&#x27;Python&#x27;);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>模糊查询 LIKE </p>
+<p>%表示没有或多个字符</p>
+<p>需求：查询出姓名中带’华’字的数据 %</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM student WHERE name LIKE &#x27;%华%&#x27;;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>需求：查询出姓名中第四个带’华’字的数据</p>
+<p>_ 表示一个任意字符</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM student WHERE name LIKE &#x27;___华&#x27;;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>单字段排序</p>
+<p>ORDER BY表示排序</p>
+<p>ASC表示升序</p>
+<p>DESC表示降序</p>
+<p>需求：按照年龄排序 - 升序</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM student ORDER BY age ASC;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>需求：按照工资排序 - 降序</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM student ORDER BY salary DESC;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>多字段排序</p>
+<p>需求：按照年龄排升序，年龄一致按照工资排降序</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM student ORDER BY age ASC,salary DESC;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>限制查询 LIMIT</p>
+<p>需求：查询出工资最高的学生信息</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM student ORDER BY salary DESC LIMIT 1;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>分页查询</p>
+<p>SELECT * FROM student LIMIT 偏移量,数据条数;</p>
+<p>分页公式：SELECT * FROM student LIMIT (当前页-1)*数据条数,数据条数;</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM student LIMIT 0,5;# 第1页</span><br><span class="line">SELECT * FROM student LIMIT 5,5;# 第2页</span><br><span class="line">SELECT * FROM student LIMIT 10,5;# 第3页</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>统计类函数查询&#x2F;聚合查询</p>
+<p>函数的理解：特定功能的代码块</p>
+<p>代替了 * 的位置</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>函数</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>count(主键)</td>
+<td>统计数量</td>
+</tr>
+<tr>
+<td>max(字段)</td>
+<td>最大值</td>
+</tr>
+<tr>
+<td>min(字段)</td>
+<td>最小值</td>
+</tr>
+<tr>
+<td>avg(字段)</td>
+<td>平均值</td>
+</tr>
+<tr>
+<td>sum(字段)</td>
+<td>求和</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>需求：获取学生的总工资</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT SUM(salary) FROM student;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>需求：获取学生的平均工资(保留2位小数)</p>
+<p>注意：ROUND(XXX,2)– 保留2位小数</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT ROUND(AVG(salary),2) FROM student;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>需求：获取学生的最高工资</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT MAX(salary) FROM student;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>需求：获取学生的最低工资</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT MIN(salary) FROM student;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>需求：获取学生个数</p>
+<p>注意：count()函数不统计字段数据为null的个数</p>
+<p>经验：统计数据条数，count()函数中的字段使用主键（因为主键不允许重复且不能为null）</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT COUNT(id) FROM student;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>子查询（嵌套查询）</p>
+<p>需求：查询出工资最高的学生信息</p>
+<p>经验：实际工作中极少使用子查询，因为效率太低</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM student WHERE salary = (SELECT MAX(salary) FROM student);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>分组查询 GROUP BY</p>
+<p>需求：查询出各个学科的平均工资</p>
+<p>注意：展示学科信息 select course，avg(),就不是select * 了</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT course,AVG(salary) FROM student GROUP BY course;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>分组查询 + 条件</p>
+<p>执行顺序: where &gt; 聚合函数 &gt; having</p>
+<p>需求：查询出平均工资大于10000的学科</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT course,AVG(salary) FROM student GROUP BY course HAVING AVG(salary)&gt;10000;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/java-notes/day51/8.png" alt="分组查询"></p>
+<blockquote>
+<h5 id="注意："><a href="#注意：" class="headerlink" title="注意："></a>注意：</h5><p>1.where在分组前过滤，having在分组后过滤</p>
+</blockquote>
+<blockquote>
+<h5 id="2-MySQL中where和having的区别"><a href="#2-MySQL中where和having的区别" class="headerlink" title="2.MySQL中where和having的区别"></a>2.MySQL中where和having的区别</h5><p>a.用的地方不一样：where可以用于select、update、delete和insert…into语句中；having只能用于select语句中<br>b.执行的顺序不一样：where的搜索条件是在执行语句进行分组之前用；having的搜索条件是在分组条件后执行的<br>c.子句有区别：where子句中的条件表达式having都可以跟，而having子句中的有些表达式where不可以跟；having子句可以用集合函数(sum、count、avg、max和min)，而where子句不可以</p>
+</blockquote>
+<blockquote>
+<p>3.INSERT INTO 语句用于向一张表中插入新的行</p>
+<p>SELECT INTO 语句从一张表中选取数据插入到另一张表中。常用于创建表的备份复件或者用于对记录进行存档</p>
+</blockquote>
+<blockquote>
+<p>4.case when的正确语法是: case when … then … when … then … else … end，case和end不能缺少！</p>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://pcb178.site">pcb</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://pcb178.site/post/day51-mysql-ddl-dml.html">https://pcb178.site/post/day51-mysql-ddl-dml.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://pcb178.site" target="_blank">java悍匪</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/MySQL/">MySQL</a><a class="post-meta__tags" href="/tags/DDL/">DDL</a><a class="post-meta__tags" href="/tags/DML/">DML</a></div><div class="post-share"><div class="social-share" data-image="/img/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="/pluginsSrc/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="/pluginsSrc/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/post/day52-mysql-advanced-topics.html" title="Day52 多表联合查询，DCL，数据类型，约束，索引，视图"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Day52 多表联合查询，DCL，数据类型，约束，索引，视图</div></div><div class="info-2"><div class="info-item-1">Day521.DML-多表联合查询(重要)1.1 一对一情况略 1.2 一对多情况 当需要查询多个表中的字段时，就可以使用表连接来实现。表联接分为内连接和外连接 内连接：将两个表中存在连接关系的字段符合连接关系的那些记录形成记录集 外连接：会选出其他不匹配的记录，分为左连接和右连接   创建场景     创建老师表，并插入数据  1234CREATE TABLE teacher(	id INT(3) PRIMARY KEY auto_increment,	name VARCHAR(32))  123INSERT INTO teacher(name) VALUES(&#x27;何老师&#x27;);INSERT INTO teacher(name) VALUES(&#x27;苍老师&#x27;);INSERT INTO teacher(name) VALUES(&#x27;波多老师&#x27;);   创建学生表，并插入数据  12345CREATE TABLE student(	id INT(3) PRIMARY KEY auto_increment,	name VARCHAR(...</div></div></div></a><a class="pagination-related" href="/post/day50-bom-javascript-objects.html" title="Day50 浏览器对象模型 (BOM) 与 JavaScript 对象"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Day50 浏览器对象模型 (BOM) 与 JavaScript 对象</div></div><div class="info-2"><div class="info-item-1">Day51 BOM 浏览器对象模型 (BOM) 使 JavaScript 有能力与浏览器“对话”  1.window 对象 所有浏览器都支持 window 对象。它表示浏览器窗口 所有 JavaScript 全局对象、函数以及变量均自动成为 window 对象的成员 全局变量是 window 对象的属性 全局函数是 window 对象的方法 甚至 HTML DOM 的 document 也是 window 对象的属性之一  1.1 window.location Location属性是一个用于存储当前载入页面URL信息的对象 实现当前页面的跳转 window.location.href &#x3D; “http://www.baidu.com“; window.location &#x3D; “http://www.baidu.com“; 重新加载页面(刷新) location.reload();  1234567891011121314151617181920&lt;body&gt;		&lt;button onclick=&quot;fun01()&quot;&gt;跳转百度...</div></div></div></a></nav><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">pcb</div><div class="author-info-description"><span style="background:linear-gradient(45deg,#f59,#fb0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:bold;">干饭！干饭！</span></div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">55</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">137</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fa-solid fa-bowl-rice"></i><span>冲呀干饭人</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content"><div style="text-align: center; font-size: 14px; line-height: 1.6;">
+<img src="/img/card1.gif" width="120" style="vertical-align: middle; margin: 6px 0; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.15);">
+<br>
+<strong style="background:linear-gradient(45deg,#ff9a9e,#fad0c4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:16px;">干饭时间到！</strong>
+<br>
+<span style="color: #ff6b6b; font-size: 12px;">今日份快乐：一碗热腾腾的猪脚饭~</span>
+</div>
+</div></div><div class="xpand" style="height:200px;"><canvas class="illo" width="800" height="800" style="max-width: 200px; max-height: 200px; touch-action: none; width: 640px; height: 640px;"></canvas></div><script src="https://fastly.jsdelivr.net/gh/xiaopengand/blogCdn@latest/xzxr/twopeople1.js"></script><script src="https://fastly.jsdelivr.net/gh/xiaopengand/blogCdn@latest/xzxr/zdog.dist.js"></script><script id="rendered-js" src="https://fastly.jsdelivr.net/gh/xiaopengand/blogCdn@latest/xzxr/twopeople.js"></script><style>.card-widget.card-announcement {
+  margin: 0;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+canvas {
+  display: block;
+  margin: 0 auto;
+  cursor: move;
+}</style><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Day51-MySQL"><span class="toc-number">1.</span> <span class="toc-text">Day51 MySQL</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-number">1.1.</span> <span class="toc-text">1.数据库</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E5%AD%A6%E4%B9%A0%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E4%BA%94%E4%B8%AA%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.1 学习数据库的五个基本概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E5%AE%89%E8%A3%85MySQL"><span class="toc-number">1.1.2.</span> <span class="toc-text">1.2 安装MySQL</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-SQL-%E7%BB%93%E6%9E%84%E5%8C%96%E6%9F%A5%E8%AF%A2%E8%AF%AD%E8%A8%80"><span class="toc-number">1.2.</span> <span class="toc-text">2.SQL 结构化查询语言</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-SQL%E5%88%86%E7%B1%BB"><span class="toc-number">1.2.1.</span> <span class="toc-text">2.1 SQL分类</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%87%8D%E8%A6%81"><span class="toc-number">1.2.1.0.1.</span> <span class="toc-text">重要</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-DDL"><span class="toc-number">1.2.2.</span> <span class="toc-text">2.2 DDL</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-1-%E6%93%8D%E4%BD%9C%E5%BA%93-DATABASE"><span class="toc-number">1.2.2.1.</span> <span class="toc-text">2.2.1 操作库 DATABASE</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-2-%E6%93%8D%E4%BD%9C%E8%A1%A8-ALTER-TABLE"><span class="toc-number">1.2.2.2.</span> <span class="toc-text">2.2.2 操作表 ALTER TABLE</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E8%A1%A8"><span class="toc-number">1.2.2.2.1.</span> <span class="toc-text">创建表</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9%E8%A1%A8%E5%90%8D"><span class="toc-number">1.2.2.2.2.</span> <span class="toc-text">修改表名</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%88%A0%E9%99%A4%E8%A1%A8"><span class="toc-number">1.2.2.2.3.</span> <span class="toc-text">删除表</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2%E6%89%80%E6%9C%89%E8%A1%A8"><span class="toc-number">1.2.2.2.4.</span> <span class="toc-text">查询所有表</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-3-%E6%93%8D%E4%BD%9C%E5%AD%97%E6%AE%B5-ALTER-TABLE"><span class="toc-number">1.2.2.3.</span> <span class="toc-text">2.2.3 操作字段 ALTER TABLE</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%B7%BB%E5%8A%A0%E5%AD%97%E6%AE%B5-ADD"><span class="toc-number">1.2.2.3.1.</span> <span class="toc-text">添加字段 ADD</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%88%A0%E9%99%A4%E5%AD%97%E6%AE%B5-DROP"><span class="toc-number">1.2.2.3.2.</span> <span class="toc-text">删除字段 DROP</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9%E5%AD%97%E6%AE%B5%E7%B1%BB%E5%9E%8B-MODIFY"><span class="toc-number">1.2.2.3.3.</span> <span class="toc-text">修改字段类型 MODIFY</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9%E5%AD%97%E6%AE%B5%E5%90%8D-CHANGE"><span class="toc-number">1.2.2.3.4.</span> <span class="toc-text">修改字段名 CHANGE</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9%E5%AD%97%E6%AE%B5%E5%90%8D-%E7%B1%BB%E5%9E%8B-CHANGE"><span class="toc-number">1.2.2.3.5.</span> <span class="toc-text">修改字段名+类型 CHANGE</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2%E5%AD%97%E6%AE%B5%E4%BF%A1%E6%81%AF-DESC"><span class="toc-number">1.2.2.3.6.</span> <span class="toc-text">查询字段信息 DESC</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96%E5%88%9B%E5%BB%BA%E8%A1%A8%E4%BF%A1%E6%81%AF"><span class="toc-number">1.2.2.3.7.</span> <span class="toc-text">获取创建表信息</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E5%AD%97%E6%AE%B5%E4%B8%8E%E5%85%B3%E9%94%AE%E5%AD%97%E5%86%B2%E7%AA%81%E4%BA%86%E6%80%8E%E4%B9%88%E5%8A%9E%EF%BC%9F"><span class="toc-number">1.2.2.3.8.</span> <span class="toc-text">创建字段与关键字冲突了怎么办？</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-DML-%E9%87%8D%E8%A6%81"><span class="toc-number">1.2.3.</span> <span class="toc-text">2.3 DML(重要)</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%96%B0%E5%BB%BA%E8%A1%A8"><span class="toc-number">1.2.3.0.1.</span> <span class="toc-text">新建表</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-1-%E6%B7%BB%E5%8A%A0%E6%95%B0%E6%8D%AE-INSERT-INTO"><span class="toc-number">1.2.3.1.</span> <span class="toc-text">2.3.1 添加数据 INSERT INTO</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-2-%E5%88%A0%E9%99%A4%E6%95%B0%E6%8D%AE-DELETE-FROM"><span class="toc-number">1.2.3.2.</span> <span class="toc-text">2.3.2 删除数据 DELETE FROM</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-3-%E4%BF%AE%E6%94%B9%E6%95%B0%E6%8D%AE-UPDATE-%E8%A1%A8%E5%90%8D-SET"><span class="toc-number">1.2.3.3.</span> <span class="toc-text">2.3.3 修改数据 UPDATE 表名 SET</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-4-%E6%9F%A5%E8%AF%A2%E6%95%B0%E6%8D%AE-DQL-SELECT"><span class="toc-number">1.2.3.4.</span> <span class="toc-text">2.3.4 查询数据(DQL) SELECT</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%B3%A8%E6%84%8F%EF%BC%9A"><span class="toc-number">1.2.3.4.1.</span> <span class="toc-text">注意：</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-MySQL%E4%B8%ADwhere%E5%92%8Chaving%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">1.2.3.4.2.</span> <span class="toc-text">2.MySQL中where和having的区别</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/0.html" title="无标题">无标题</a><time datetime="2025-09-28T06:51:13.642Z" title="发表于 2025-09-28 14:51:13">2025-09-28</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day55-jdbc-advanced-transaction-batch-pooling.html" title="Day55 事务，批处理">Day55 事务，批处理</a><time datetime="2025-09-23T02:00:56.000Z" title="发表于 2025-09-23 10:00:56">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day54-jdbc-fundamentals-to-advanced.html" title="Day54 JDBC">Day54 JDBC</a><time datetime="2025-09-23T02:00:55.000Z" title="发表于 2025-09-23 10:00:55">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day53-mysql-advanced-features.html" title="Day53 触发器，存储过程，预定义函数，自定义函数">Day53 触发器，存储过程，预定义函数，自定义函数</a><time datetime="2025-09-23T02:00:54.000Z" title="发表于 2025-09-23 10:00:54">2025-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/post/day52-mysql-advanced-topics.html" title="Day52 多表联合查询，DCL，数据类型，约束，索引，视图">Day52 多表联合查询，DCL，数据类型，约束，索引，视图</a><time datetime="2025-09-23T02:00:53.000Z" title="发表于 2025-09-23 10:00:53">2025-09-23</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 By pcb</span></div><div class="footer_custom_text">true</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const initValine = (el, path) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyValine = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const valineConfig = {
+      el: '#vcomment',
+      appId: '',
+      appKey: '',
+      avatar: 'retro',
+      serverURLs: '',
+      emojiMaps: "",
+      visitor: true,
+      ...option,
+      path: isShuoshuo ? path : (option && option.path) || window.location.pathname
+    }
+
+    new Valine(valineConfig)
+  }
+
+  const loadValine = async (el, path) => {
+    if (typeof Valine === 'function') {
+      initValine(el, path)
+    } else {
+      await btf.getScript('/pluginsSrc/valine/dist/Valine.min.js')
+      initValine(el, path)
+    }
+  }
+
+  if (isShuoshuo) {
+    'Valine' === 'Valine'
+      ? window.shuoshuoComment = { loadComment: loadValine }
+      : window.loadOtherComment = loadValine
+    return
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script></div><div class="aplayer no-destroy" data-id="5183531430" data-server="netease" data-type="playlist" data-fixed="true" data-mini="true" data-listFolded="false" data-order="random" data-preload="none" data-autoplay="false" muted></div><canvas id="universe"></canvas><script defer src="/js/universe.js"></script><script src="/js/daily-swap.js"></script><div class="sticky_layout">
+  <div id="clock"></div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.js';
+    document.body.appendChild(s);
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const clock = document.querySelector('#clock');
+    if (!clock) return;
+
+    // 1. 隐藏任何包含“undefined”的元素
+    clock.querySelectorAll('*').forEach(el => {
+      if (el.textContent.includes('undefined')) {
+        el.style.display = 'none';
+      }
+    });
+
+    // 2. 强制样式压缩
+    clock.style.cssText += `
+      max-width: 100% !important;
+      white-space: normal !important;
+      word-break: break-all !important;
+      font-size: 14px !important;
+      line-height: 1.5 !important;
+      padding: 10px 8px !important;
+      background: rgba(255,255,255,.75) !important;
+      border-radius: 12px !important;
+      backdrop-filter: blur(6px) !important;
+      box-sizing: border-box !important;
+    `;
+  });
+</script>
+<canvas class="fireworks" mobile="true"></canvas><script src="/pluginsSrc/butterfly-extsrc/dist/fireworks.min.js"></script><script defer="defer" id="fluttering_ribbon" mobile="true" src="/pluginsSrc/butterfly-extsrc/dist/canvas-fluttering-ribbon.min.js"></script><script src="/pluginsSrc/butterfly-extsrc/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><link rel="stylesheet" href="/pluginsSrc/aplayer/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="/pluginsSrc/aplayer/dist/APlayer.min.js"></script><script src="/pluginsSrc/butterfly-extsrc/metingjs/dist/Meting.min.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章..." type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></div><!-- hexo injector body_end start --><script data-pjax>
+  function butterfly_clock_anzhiyu_injector_config(){
+    var parent_div_git = document.getElementsByClassName('sticky_layout')[0];
+    var item_html = '<div class="card-widget card-clock"><div class="card-glass"><div class="card-background"><div class="card-content"><div id="hexo_electric_clock"><img class="entered loading" id="card-clock-loading" src="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/loading.gif" style="height: 120px; width: 100%;" data-ll-status="loading"/></div></div></div></div></div>';
+    console.log('已挂载butterfly_clock_anzhiyu')
+    if(parent_div_git) {
+      parent_div_git.insertAdjacentHTML("afterbegin",item_html)
+    }
+  }
+  var elist = 'undefined'.split(',');
+  var cpage = location.pathname;
+  var epage = 'all';
+  var qweather_key = 'b16a1fa0e63c46a4b8f28abfb06ae3fe';
+  var gaud_map_key = 'e2b04289e870b005374ee030148d64fd&s=rsv3';
+  var baidu_ak_key = 'undefined';
+  var flag = 0;
+  var clock_rectangle = '104.07,30.57';
+  var clock_default_rectangle_enable = 'true';
+
+  for (var i=0;i<elist.length;i++){
+    if (cpage.includes(elist[i])){
+      flag++;
+    }
+  }
+
+  if ((epage ==='all')&&(flag == 0)){
+    butterfly_clock_anzhiyu_injector_config();
+  }
+  else if (epage === cpage){
+    butterfly_clock_anzhiyu_injector_config();
+  }
+  </script><script src="https://widget.qweather.net/simple/static/js/he-simple-common.js?v=2.0"></script><script data-pjax src="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.js"></script><!-- hexo injector body_end end --><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body></html>
